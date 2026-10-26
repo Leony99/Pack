@@ -67,12 +67,12 @@ PACKAGES = {
     "exception": {"files": ["ApiError.java","BusinessException.java","ConflictException.java","UnauthorizedException.java","GlobalExceptionHandler.java"], "zone": "cross"},
     # AuthService vem primeiro: o AuthController é acrescentado automaticamente a partir dele
     "auth": {"files": ["AuthService.java","TokenService.java","AccessGuard.java","AuthDataSeeder.java","TipoUsuario.java",
-                       "LoginRequest.java","RegisterRequest.java","TokenResponse.java","UsuarioResponse.java"], "zone": "auth"},
+                       "LoginRequest.java","RegisterRequest.java","TokenResponse.java","UsuarioResponse.java"], "zone": "cross"},
     "enums": {"files": ["CouponTipo.java","MovimentoTipo.java","OrderStatus.java","PaymentMetodo.java","PaymentStatus.java","ShipmentStatus.java"], "zone": "cross"},
-    "staff": {"files": ["Staff.java","StaffRepository.java","StaffRequest.java","StaffResponse.java","StaffService.java"], "zone": "auth"},
-    "role": {"files": ["Role.java","RoleRepository.java","RoleRequest.java","RoleResponse.java","RoleService.java"], "zone": "auth"},
-    "permission": {"files": ["Permission.java","Permissao.java","PermissionRepository.java","PermissionRequest.java","PermissionResponse.java","PermissionController.java"], "zone": "auth"},
-    "role_permission": {"files": ["RolePermission.java","RolePermissionRepository.java","RolePermissionRequest.java"], "zone": "auth"},
+    "staff": {"files": ["Staff.java","StaffRepository.java","StaffRequest.java","StaffResponse.java","StaffService.java"], "zone": "staff"},
+    "role": {"files": ["Role.java","RoleRepository.java","RoleRequest.java","RoleResponse.java","RoleService.java"], "zone": "staff"},
+    "permission": {"files": ["Permission.java","Permissao.java","PermissionRepository.java","PermissionRequest.java","PermissionResponse.java","PermissionController.java"], "zone": "staff"},
+    "role_permission": {"files": ["RolePermission.java","RolePermissionRepository.java","RolePermissionRequest.java"], "zone": "staff"},
     "customer": {"files": ["Customer.java","CustomerRepository.java","CustomerRequest.java","CustomerResponse.java","CustomerService.java"], "zone": "customer"},
     "address": {"files": ["Address.java","AddressRepository.java","AddressRequest.java","AddressResponse.java","AddressService.java"], "zone": "customer"},
     "order": {"files": ["Order.java","OrderRepository.java","OrderRequest.java","OrderResponse.java","OrderService.java"], "zone": "order"},
@@ -98,14 +98,14 @@ for info in PACKAGES.values():
     if svc:
         info["files"].append(svc.replace("Service", "Controller"))
 
-ZONE_ORDER = ["cross", "auth", "customer", "cart", "order", "product"]
+ZONE_ORDER = ["cross", "staff", "customer", "cart", "order", "product"]
 
 # Caminho de cada pacote dentro de packapi/: todo domínio fica em <categoria>/<domínio>/
 PATH = {pkg: f"{info['zone']}/{pkg}" for pkg, info in PACKAGES.items() if info["zone"] != "cross"}
-ZONE_LABELS = {"cross":"CROSS-CUTTING","auth":"AUTH","customer":"CUSTOMER","order":"ORDER","cart":"CART","product":"PRODUCT"}
-ZONE_BG    = {"cross":Z_CROSS,"auth":Z_AUTH,"customer":Z_CUST,"order":Z_ORDER,"cart":Z_CART,"product":Z_PROD}
-ZONE_HDR   = {"cross":HDR_CROSS,"auth":HDR_AUTH,"customer":HDR_CUST,"order":HDR_ORDER,"cart":HDR_CART,"product":HDR_PROD}
-ZONE_TC    = {"cross":"#d2a8ff","auth":"#79c0ff","customer":"#3bca6d","order":"#ffa657","cart":"#d2a8ff","product":"#58a6ff"}
+ZONE_LABELS = {"cross":"CROSS-CUTTING","staff":"STAFF","customer":"CUSTOMER","order":"ORDER","cart":"CART","product":"PRODUCT"}
+ZONE_BG    = {"cross":Z_CROSS,"staff":Z_AUTH,"customer":Z_CUST,"order":Z_ORDER,"cart":Z_CART,"product":Z_PROD}
+ZONE_HDR   = {"cross":HDR_CROSS,"staff":HDR_AUTH,"customer":HDR_CUST,"order":HDR_ORDER,"cart":HDR_CART,"product":HDR_PROD}
+ZONE_TC    = {"cross":"#d2a8ff","staff":"#79c0ff","customer":"#3bca6d","order":"#ffa657","cart":"#d2a8ff","product":"#58a6ff"}
 
 def card_height(files):
     return HH + len(files) * RH + 6

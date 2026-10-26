@@ -39,14 +39,16 @@ def caixas():
         "inicia o Tomcat na porta [a|8080]",
     ]))
 
-    add(Box("props", "application.properties", [
-        "[a|spring.datasource.url]=jdbc:postgresql://localhost:5432/pack-db",
-        "[a|spring.datasource.username]=postgres",
-        "[a|spring.jpa.hibernate.ddl-auto]=update   [c|# cria/atualiza as tabelas]",
-        "[a|spring.jpa.show-sql]=true              [c|# mostra o SQL no log]",
-        "[a|server.port]=8080                      [c|# porta da API]",
-        "[a|jwt.secret]=${JWT_SECRET:...}          [c|# chave que assina os tokens]",
-        "[a|jwt.expiration-minutes]=60             [c|# validade do token]",
+    add(Box("props", "application.properties  +  .env", [
+        "[a|spring.config.import]=optional:file:.env[.properties]",
+        "[c|# os segredos vêm do .env (fora do git) ou de variáveis de ambiente]",
+        "",
+        "[a|spring.datasource.url]=${DB_URL:jdbc:postgresql://localhost:5432/pack-db}",
+        "[a|spring.datasource.password]=${DB_PASSWORD}   [c|# sem padrão: falta → não sobe]",
+        "[a|spring.jpa.hibernate.ddl-auto]=update        [c|# cria/atualiza as tabelas]",
+        "[a|server.port]=8080                           [c|# porta da API]",
+        "[a|jwt.secret]=${JWT_SECRET}                   [c|# chave que assina os tokens]",
+        "[a|jwt.expiration-minutes]=60                  [c|# validade do token]",
     ], style="pkg"))
 
     add(Box("beans", "Beans  ·  o Spring cria e conecta as classes", [

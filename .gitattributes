@@ -1,2 +1,6 @@
+# No repositório tudo fica com LF; o git converte para o padrão de cada sistema ao baixar
+* text=auto
 /mvnw text eol=lf
 *.cmd text eol=crlf
+*.svg text
+*.jar binary

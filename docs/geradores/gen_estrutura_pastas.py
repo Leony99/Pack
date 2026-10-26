@@ -31,12 +31,11 @@ LINES = [
     ("│   ├── ",       "main/",                                "dir",  ""),
     ("│   │   ├── ",   "java/com/leonycosta/packapi/",         "pkg",  ""),
     # categorias: cada domínio tem o próprio pacote, inclusive o principal (<categoria>/<categoria>/)
-    ("│   │   │   ├── ",     "auth/",                      "dir",  "Categoria AUTH"),
-    ("│   │   │   │   ├── ", "auth/",                      "dir",  "Login, cadastro, token JWT e regras de dono"),
+    ("│   │   │   ├── ",     "staff/",                     "dir",  "Categoria STAFF"),
     ("│   │   │   │   ├── ", "permission/",                "dir",  "Permissoes granulares"),
     ("│   │   │   │   ├── ", "role/",                      "dir",  "Papeis de acesso"),
     ("│   │   │   │   ├── ", "role_permission/",           "dir",  "Vinculo role-permission (N:M)"),
-    ("│   │   │   │   └── ", "staff/",                     "dir",  "Funcionarios (login de staff)"),
+    ("│   │   │   │   └── ", "staff/",                     "dir",  "Funcionarios"),
     ("│   │   │   ├── ",     "customer/",                  "dir",  "Categoria CUSTOMER"),
     ("│   │   │   │   ├── ", "customer/",                  "dir",  "Cliente (Customer*.java, senha em hash)"),
     ("│   │   │   │   └── ", "address/",                   "dir",  "Enderecos do cliente"),
@@ -59,12 +58,13 @@ LINES = [
     ("│   │   │   │   ├── ", "product_variant/",           "dir",  "Variantes: SKU, tamanho, cor, estoque"),
     ("│   │   │   │   └── ", "size/",                      "dir",  "Tamanhos (P, M, G, GG...)"),
     # transversais: usados por todas as categorias
+    ("│   │   │   ├── ",     "auth/",                      "dir",  "Login, cadastro, token JWT e regras de dono"),
     ("│   │   │   ├── ",     "config/",                    "dir",  "Regras de acesso (SecurityConfig) e JWT"),
     ("│   │   │   ├── ",     "enums/",                     "dir",  "Enums globais (OrderStatus, PaymentStatus...)"),
     ("│   │   │   ├── ",     "exception/",                 "dir",  "GlobalExceptionHandler + erros padrao"),
     ("│   │   │   └── ",     "PackApiApplication.java",    "java", "Entry point da aplicacao"),
     ("│   │   └── ",   "resources/",                           "dir",  ""),
-    ("│   │       └── ", "application.properties",             "prop", "Banco de dados, JPA, porta"),
+    ("│   │       └── ", "application.properties",             "prop", "Configuracao; segredos vem do .env"),
     ("│   └── ",       "test/",                                "dir",  ""),
     ("│       └── ",   "java/com/leonycosta/packapi/",         "pkg",  "Testes unitarios e de integracao (fase 10)"),
     ("├── ",           "docs/",                                "dir",  ""),
@@ -81,8 +81,11 @@ LINES = [
     ("│   ├── ",       "estrutura-pastas.svg",                 "file", "Este arquivo"),
     ("│   ├── ",       "fluxo.html",                           "file", "Fluxo em partes com menus"),
     ("│   └── ",       "projeto-status.html",                  "file", "Status e roadmap do projeto"),
+    ("├── ",           ".env",                                 "prop", "Senhas e chave JWT locais (fora do git)"),
+    ("├── ",           ".env.example",                         "file", "Modelo do .env, sem valores reais"),
+    ("├── ",           ".gitignore",                           "file", "O que o git ignora (.env, target/, IDE...)"),
     ("├── ",           "pom.xml",                              "file", "Maven: dependencias, plugins, Java 21"),
-    ("└── ",           ".gitignore",                           "file", "O que o git ignora (target/, IDE...)"),
+    ("└── ",           "README.md",                            "file", "Apresentacao do projeto e como rodar"),
 ]
 
 def nc(t):

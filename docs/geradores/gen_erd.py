@@ -23,10 +23,10 @@ REL_COLOR = "#2d5080"
 CANVAS_W = 2040
 CANVAS_H = 830
 
-# Zonas com as cores da estrutura de pacotes. AUTH, CUSTOMER e PRODUCT ocupam a altura toda;
+# Zonas com as cores da estrutura de pacotes. STAFF, CUSTOMER e PRODUCT ocupam a altura toda;
 # CART fica a nordeste do cliente e ORDER a sudeste, embaixo do CART.
 ZONES = [  # (rótulo, fundo, cor do rótulo/borda, altura toda?, entidades)
-    ("AUTH",     "#0d1a2e", "#79c0ff", True,  ["STAFF", "ROLE", "PERMISSION", "ROLE_PERMISSION"]),
+    ("STAFF",    "#0d1a2e", "#79c0ff", True,  ["STAFF", "ROLE", "PERMISSION", "ROLE_PERMISSION"]),
     ("CUSTOMER", "#0e1f1a", "#3bca6d", True,  ["CUSTOMER", "ADDRESS"]),
     ("CART",     "#1a0f1a", "#d2a8ff", False, ["CART", "CART_ITEM"]),
     ("ORDER",    "#1a1506", "#ffa657", False, ["COUPON", "ORDER", "PAYMENT", "SHIPMENT", "ORDER_ITEM"]),
@@ -63,7 +63,7 @@ TABLES = {
 }
 
 # Layout de posições (x, y)
-# AUTH        | CUSTOMER |  CART:  CART       CART_ITEM          | PRODUCT
+# STAFF       | CUSTOMER |  CART:  CART       CART_ITEM          | PRODUCT
 # STAFF       |          |                                       | PRODUCT   PRODUCT_IMAGE  PRODUCT_TAG
 # ROLE  PERM  | CUSTOMER |  ORDER: COUPON     PAYMENT            | VARIANT   INVENTORY      TAG_LINK
 #  ROLE_PERM  | ADDRESS  |         ORDER      SHIPMENT           | SIZE      COLOR

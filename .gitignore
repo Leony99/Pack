@@ -1,8 +1,27 @@
-HELP.md
+### Segredos e configuração local ###
+.env
+.env.*
+!.env.example
+
+### Build (Maven) ###
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+HELP.md
+
+### Logs ###
+*.log
+logs/
+
+### Python (geradores dos docs) ###
+__pycache__/
+*.pyc
+
+### Sistema operacional ###
+.DS_Store
+Thumbs.db
+desktop.ini
 
 ### STS ###
 .apt_generated
@@ -31,3 +50,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Claude Code (configurações locais) ###
+.claude/

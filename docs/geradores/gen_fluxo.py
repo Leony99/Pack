@@ -22,8 +22,8 @@ OUT = ROOT / "docs" / "fluxo.html"
 MAX_DEPTH = 6
 
 DOMAINS = [  # (pacote, nome na tela, categoria) — categorias na mesma ordem do ERD e das pastas do src
-    ("auth", "Login e cadastro", "Auth"), ("staff", "Funcionários", "Auth"),
-    ("role", "Papéis", "Auth"), ("permission", "Permissões", "Auth"),
+    ("auth", "Login e cadastro", "Auth"),  # auth/ fica na raiz: serve clientes e funcionários
+    ("staff", "Funcionários", "Staff"), ("role", "Papéis", "Staff"), ("permission", "Permissões", "Staff"),
     ("customer", "Clientes", "Customer"), ("address", "Endereços", "Customer"),
     ("cart", "Carrinho", "Cart"),
     ("order", "Pedidos", "Order"), ("payment", "Pagamentos", "Order"),
@@ -33,7 +33,7 @@ DOMAINS = [  # (pacote, nome na tela, categoria) — categorias na mesma ordem d
     ("size", "Tamanhos", "Product"), ("color", "Cores", "Product"), ("inventory", "Estoque", "Product"),
 ]
 CATEGORY_COLOR = {  # mesmas cores das zonas, em tom mais escuro para ler no fundo branco
-    "Auth": "#0550ae", "Customer": "#1a7f37", "Cart": "#8250df", "Order": "#bc4c00", "Product": "#0969da",
+    "Auth": "#6e7781", "Staff": "#0550ae", "Customer": "#1a7f37", "Cart": "#8250df", "Order": "#bc4c00", "Product": "#0969da",
 }
 
 SUMMARY = {

@@ -1,7 +1,7 @@
 package com.leonycosta.packapi.config;
 
-import com.leonycosta.packapi.auth.auth.AccessGuard;
-import com.leonycosta.packapi.auth.permission.Permissao;
+import com.leonycosta.packapi.auth.AccessGuard;
+import com.leonycosta.packapi.staff.permission.Permissao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
-import static com.leonycosta.packapi.auth.permission.Permissao.*;
+import static com.leonycosta.packapi.staff.permission.Permissao.*;
 
 // Todas as regras de acesso da API. São testadas de cima para baixo: vale a primeira que combinar.
 @Configuration
