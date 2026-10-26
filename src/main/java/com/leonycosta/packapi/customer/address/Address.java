@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.UUID;
 
-import com.leonycosta.packapi.customer.Customer;
+import com.leonycosta.packapi.customer.customer.Customer;
 
 @Entity
 @Table(name = "addresses")

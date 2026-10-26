@@ -39,10 +39,10 @@ def th(n):
     return HH + n * RH
 
 TABLES = {
-    "STAFF":              [("uuid","id","PK"),("string","nome",""),("string","email",""),("string","senha_hash",""),("uuid","role_id","FK")],
-    "CUSTOMER":           [("uuid","id","PK"),("string","nome",""),("string","email","UK"),("string","telefone",""),("datetime","criado_em","")],
+    "STAFF":              [("uuid","id","PK"),("string","nome",""),("string","email","UK"),("string","senha_hash",""),("uuid","role_id","FK")],
+    "CUSTOMER":           [("uuid","id","PK"),("string","nome",""),("string","email","UK"),("string","senha_hash",""),("string","telefone",""),("datetime","criado_em","")],
     "CART":               [("uuid","id","PK"),("uuid","customer_id","FK"),("datetime","atualizado_em","")],
-    "ROLE":               [("uuid","id","PK"),("string","nome","")],
+    "ROLE":               [("uuid","id","PK"),("string","nome","UK")],
     "PERMISSION":         [("uuid","id","PK"),("string","nome","UK")],
     "ROLE_PERMISSION":    [("uuid","id","PK"),("uuid","role_id","FK"),("uuid","permission_id","FK")],
     "ADDRESS":            [("uuid","id","PK"),("uuid","customer_id","FK"),("string","cep",""),("string","rua",""),("string","numero",""),("string","complemento",""),("string","cidade",""),("string","estado","")],
@@ -52,13 +52,13 @@ TABLES = {
     "SHIPMENT":           [("uuid","id","PK"),("uuid","order_id","FK"),("string","transportadora",""),("string","codigo_rastreio",""),("string","status","")],
     "COUPON":             [("uuid","id","PK"),("string","codigo","UK"),("decimal","desconto",""),("string","tipo",""),("datetime","validade","")],
     "CART_ITEM":          [("uuid","id","PK"),("uuid","cart_id","FK"),("uuid","variant_id","FK"),("int","quantidade","")],
-    "PRODUCT":            [("uuid","id","PK"),("string","nome",""),("text","descricao",""),("decimal","preco",""),("string","slug",""),("datetime","criado_em","")],
+    "PRODUCT":            [("uuid","id","PK"),("string","nome",""),("text","descricao",""),("decimal","preco",""),("string","slug","UK"),("datetime","criado_em","")],
     "PRODUCT_VARIANT":    [("uuid","id","PK"),("uuid","product_id","FK"),("uuid","size_id","FK"),("uuid","color_id","FK"),("string","sku","UK"),("decimal","preco",""),("int","quant","")],
     "PRODUCT_IMAGE":      [("uuid","id","PK"),("uuid","product_id","FK"),("string","url",""),("int","ordem","")],
-    "PRODUCT_TAG":        [("uuid","id","PK"),("string","tag","")],
+    "PRODUCT_TAG":        [("uuid","id","PK"),("string","tag","UK")],
     "PRODUCT_TAG_LINK":   [("uuid","id","PK"),("uuid","product_id","FK"),("uuid","tag_id","FK")],
-    "SIZE":               [("uuid","id","PK"),("string","label","")],
-    "COLOR":              [("uuid","id","PK"),("string","nome",""),("string","hex","")],
+    "SIZE":               [("uuid","id","PK"),("string","label","UK")],
+    "COLOR":              [("uuid","id","PK"),("string","nome","UK"),("string","hex","")],
     "INVENTORY_MOVEMENT": [("uuid","id","PK"),("uuid","variant_id","FK"),("string","variant_sku",""),("string","tipo_movimentacao",""),("int","quantidade",""),("string","motivo",""),("datetime","data","")],
 }
 
@@ -75,7 +75,7 @@ POS = {
     "PERMISSION":         (270,  314),
     "ROLE_PERMISSION":    (150,  440),
 
-    "CUSTOMER":           (540,  300),
+    "CUSTOMER":           (540,  280),
     "ADDRESS":            (540,  470),
 
     "CART":               (810,  124),

@@ -20,8 +20,8 @@
 <path d="M375,383 C367,383 367,519 360,519" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
 <circle cx="375" cy="383" r="2.5" fill="#2d5080" opacity="0.85"/>
 <circle cx="360" cy="519" r="2.5" fill="#2d5080" opacity="0.85"/>
-<line x1="645" y1="432" x2="645" y2="470" stroke="#2d5080" stroke-width="1.1" opacity="0.75"/>
-<circle cx="645" cy="432" r="2.5" fill="#2d5080" opacity="0.85"/>
+<line x1="645" y1="433" x2="645" y2="470" stroke="#2d5080" stroke-width="1.1" opacity="0.75"/>
+<circle cx="645" cy="433" r="2.5" fill="#2d5080" opacity="0.85"/>
 <circle cx="645" cy="470" r="2.5" fill="#2d5080" opacity="0.85"/>
 <line x1="1425" y1="277" x2="1425" y2="330" stroke="#2d5080" stroke-width="1.1" opacity="0.75"/>
 <circle cx="1425" cy="277" r="2.5" fill="#2d5080" opacity="0.85"/>
@@ -59,11 +59,11 @@
 <path d="M1020,576 C1035,576 1035,696 1050,696" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
 <circle cx="1020" cy="576" r="2.5" fill="#2d5080" opacity="0.85"/>
 <circle cx="1050" cy="696" r="2.5" fill="#2d5080" opacity="0.85"/>
-<path d="M750,337 L775,337 L775,182 L810,182" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
-<circle cx="750" cy="337" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M750,317 L775,317 L775,182 L810,182" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="750" cy="317" r="2.5" fill="#2d5080" opacity="0.85"/>
 <circle cx="810" cy="182" r="2.5" fill="#2d5080" opacity="0.85"/>
-<path d="M750,358 L788,358 L788,534 L810,534" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
-<circle cx="750" cy="358" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M750,338 L788,338 L788,534 L810,534" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="750" cy="338" r="2.5" fill="#2d5080" opacity="0.85"/>
 <circle cx="810" cy="534" r="2.5" fill="#2d5080" opacity="0.85"/>
 <path d="M1260,203 L1283,203 L1283,367 L1320,367" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
 <circle cx="1260" cy="203" r="2.5" fill="#2d5080" opacity="0.85"/>
@@ -90,6 +90,7 @@
   <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
   <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">email</text>
+  <text x="202" y="83" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#a5d6ff">UK</text>
   <rect y="90" width="210" height="21" fill="#111e2b"/>
   <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
@@ -115,6 +116,7 @@
   <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
   <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">nome</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#a5d6ff">UK</text>
 </g>
 <g transform="translate(270,314)">
   <rect x="3" y="3" width="210" height="69" rx="6" fill="rgba(0,0,0,0.3)"/>
@@ -155,9 +157,9 @@
   <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">permission_id</text>
   <text x="202" y="83" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
 </g>
-<g transform="translate(540,300)">
-  <rect x="3" y="3" width="210" height="132" rx="6" fill="rgba(0,0,0,0.3)"/>
-  <rect width="210" height="132" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+<g transform="translate(540,280)">
+  <rect x="3" y="3" width="210" height="153" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="153" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
   <rect width="210" height="27" rx="6" fill="#1a3358"/>
   <rect y="21" width="210" height="6" fill="#1a3358"/>
   <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">CUSTOMER</text>
@@ -178,11 +180,15 @@
   <rect y="90" width="210" height="21" fill="#111e2b"/>
   <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
-  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">telefone</text>
-  <path d="M0,111 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">senha_hash</text>
+  <rect y="111" width="210" height="21" fill="#0f1925"/>
   <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
-  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
-  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">criado_em</text>
+  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">telefone</text>
+  <path d="M0,132 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <line x1="1" y1="132" x2="209" y2="132" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
+  <text x="68" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">criado_em</text>
 </g>
 <g transform="translate(540,470)">
   <rect x="3" y="3" width="210" height="195" rx="6" fill="rgba(0,0,0,0.3)"/>
@@ -474,6 +480,7 @@
   <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
   <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">slug</text>
+  <text x="202" y="125" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#a5d6ff">UK</text>
   <path d="M0,132 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
   <line x1="1" y1="132" x2="209" y2="132" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
@@ -519,6 +526,7 @@
   <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
   <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">tag</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#a5d6ff">UK</text>
 </g>
 <g transform="translate(1800,249)">
   <rect x="3" y="3" width="210" height="90" rx="6" fill="rgba(0,0,0,0.3)"/>
@@ -634,6 +642,7 @@
   <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
   <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">label</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#a5d6ff">UK</text>
 </g>
 <g transform="translate(1570,560)">
   <rect x="3" y="3" width="210" height="90" rx="6" fill="rgba(0,0,0,0.3)"/>
@@ -650,6 +659,7 @@
   <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
   <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">nome</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#a5d6ff">UK</text>
   <path d="M0,69 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
   <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>

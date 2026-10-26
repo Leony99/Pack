@@ -67,7 +67,7 @@
 
 <section class="part">
   <h2>3. Uma requisição chega</h2>
-  <p class="sub">O caminho de uma requisição pelas camadas, com o código real de cada método.</p>
+  <p class="sub">O caminho de uma requisição: primeiro a segurança (token JWT e regra de acesso), depois as camadas, com o código real de cada método.</p>
   <div class="menu" id="menu-req-dominio"></div>
   <div class="menu" id="menu-requisicoes"></div>
   <p class="hint">Caixas longas sem chamadas aparecem resumidas: clique no título para ver tudo. "↗ n" indica um passo que já apareceu antes.</p>
@@ -83,7 +83,7 @@ const COL_GAP = 110, GAP_SEQ = 44, GAP_AL = 18;
 const MONO = "JetBrains Mono, Consolas, monospace", SANS = "Segoe UI, Helvetica, Arial, sans-serif";
 const TXT = "#1f2328", BORDER = "#3a3f5c", ARROW = "#3a3f5c", ARROW_ERR = "#c4122f", MUTED = "#6e7781";
 const COL = { a: "#1a7f37", m: "#0b3fd6", s: "#c4122f", k: "#8250df", e: "#b35400", c: "#6e7781" };
-const STYLE = { code: ["#ececfb", "#1f3fbf"], data: ["#e6f4ea", "#1a5d2a"], error: ["#fdecec", "#b42318"], pkg: ["#fff4dc", "#8a5a00"] };
+const STYLE = { code: ["#ececfb", "#1f3fbf"], data: ["#e6f4ea", "#1a5d2a"], error: ["#fdecec", "#b42318"], pkg: ["#fff4dc", "#8a5a00"], sec: ["#f3e8ff", "#6e2dbf"] };
 const KIND_STYLE = { Controller: "code", Service: "code", Repository: "data" };
 
 const ctx = document.createElement("canvas").getContext("2d");
@@ -274,15 +274,18 @@ function renderPart3(dom, ep) {
   });
 
   const req = new Box("req", "Requisição HTTP", ep.request, "code");
+  const sec = new Box("sec", ep.security.title, ep.security.lines, "sec");
+  const guards = ep.guards.map(g => new Box(g.id, g.title, g.code.split("\n"), "sec", { raw: true }));
   const resp = new Box("resp", `Resposta  ·  ${ep.status}`, ep.response, "data");
-  const err = new Box("err", "Erros possíveis  ·  GlobalExceptionHandler", ep.errors, "error");
+  const err = new Box("err", "Erros possíveis  ·  GlobalExceptionHandler e SecurityErrorHandler", ep.errors, "error");
   const maxDepth = Math.max(...nodes.map(n => n.depth));
-  const cols = [[req, boxes[0], resp, err]];
+  const cols = [[req, sec, boxes[0], resp, err], guards];
   for (let d = 1; d <= maxDepth; d++) cols.push(nodes.filter(n => n.depth === d).map(n => boxes[n.n - 1]));
+  if (cols.length > 2) cols[1] = [...guards, ...cols.splice(2, 1)[0]];  // guards e passos de nível 1 dividem a coluna
 
   const placed = place(cols.filter(c => c.length));
   document.getElementById("parte3").innerHTML = svgDoc(placed.W, placed.H,
-    [...placed.boxes.map(b => b.svg()), ...arrows(placed.boxes, [["req", "n1"], ["n1", "resp"]])]);
+    [...placed.boxes.map(b => b.svg()), ...arrows(placed.boxes, [["req", "sec"], ["sec", "n1"], ["n1", "resp"]])]);
 }
 
 // ─── menus ───

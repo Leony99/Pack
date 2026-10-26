@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import com.leonycosta.packapi.product.color.Color;
-import com.leonycosta.packapi.product.Product;
+import com.leonycosta.packapi.product.product.Product;
 import com.leonycosta.packapi.product.size.Size;
 
 @Entity

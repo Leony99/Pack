@@ -1,7 +1,7 @@
 package com.leonycosta.packapi.customer.address;
 
-import com.leonycosta.packapi.customer.Customer;
-import com.leonycosta.packapi.customer.CustomerService;
+import com.leonycosta.packapi.customer.customer.Customer;
+import com.leonycosta.packapi.customer.customer.CustomerService;
 import com.leonycosta.packapi.exception.BusinessException;
 import com.leonycosta.packapi.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;

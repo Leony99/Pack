@@ -100,16 +100,8 @@ for info in PACKAGES.values():
 
 ZONE_ORDER = ["cross", "auth", "customer", "cart", "order", "product"]
 
-# Caminho de cada pacote dentro de packapi/ (a pasta da categoria guarda o domínio principal)
-PATH = {
-    "staff": "auth/staff", "role": "auth/role", "permission": "auth/permission",
-    "role_permission": "auth/role_permission", "address": "customer/address", "cart_item": "cart/cart_item",
-    "order_item": "order/order_item", "payment": "order/payment", "shipment": "order/shipment",
-    "coupon": "order/coupon", "product_variant": "product/product_variant",
-    "product_image": "product/product_image", "product_tag": "product/product_tag",
-    "product_tag_link": "product/product_tag_link", "size": "product/size", "color": "product/color",
-    "inventory": "product/inventory",
-}
+# Caminho de cada pacote dentro de packapi/: todo domínio fica em <categoria>/<domínio>/
+PATH = {pkg: f"{info['zone']}/{pkg}" for pkg, info in PACKAGES.items() if info["zone"] != "cross"}
 ZONE_LABELS = {"cross":"CROSS-CUTTING","auth":"AUTH","customer":"CUSTOMER","order":"ORDER","cart":"CART","product":"PRODUCT"}
 ZONE_BG    = {"cross":Z_CROSS,"auth":Z_AUTH,"customer":Z_CUST,"order":Z_ORDER,"cart":Z_CART,"product":Z_PROD}
 ZONE_HDR   = {"cross":HDR_CROSS,"auth":HDR_AUTH,"customer":HDR_CUST,"order":HDR_ORDER,"cart":HDR_CART,"product":HDR_PROD}

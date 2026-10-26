@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.UUID;
 
-import com.leonycosta.packapi.cart.Cart;
+import com.leonycosta.packapi.cart.cart.Cart;
 import com.leonycosta.packapi.product.product_variant.ProductVariant;
 
 @Entity

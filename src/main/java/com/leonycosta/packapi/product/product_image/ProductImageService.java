@@ -1,8 +1,8 @@
 package com.leonycosta.packapi.product.product_image;
 
 import com.leonycosta.packapi.exception.ResourceNotFoundException;
-import com.leonycosta.packapi.product.Product;
-import com.leonycosta.packapi.product.ProductService;
+import com.leonycosta.packapi.product.product.Product;
+import com.leonycosta.packapi.product.product.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

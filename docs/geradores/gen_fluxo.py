@@ -56,7 +56,8 @@ SUMMARY_OVERRIDE = {
 }
 ROLE = {"Controller": "recebe o HTTP", "Service": "regras de negócio", "Repository": "conversa com o banco",
         "Request": "JSON que entra", "Response": "JSON que sai", "Entity": "entidade = tabela"}
-EXCEPTIONS = {"ResourceNotFoundException": 404, "ConflictException": 409, "BusinessException": 422}
+EXCEPTIONS = {"ResourceNotFoundException": 404, "ConflictException": 409, "BusinessException": 422,
+              "UnauthorizedException": 401}
 STATUS_TEXT = {200: "200 OK", 201: "201 Created", 204: "204 No Content"}
 REPO_INHERITED = {
     "save": "herdado do JpaRepository: INSERT se é novo, UPDATE se já existe",
@@ -456,13 +457,18 @@ def build_flow(ctrl, mname):
             if nums:
                 node["badges"].append([i, nums])
         code_lines = node["code"].split("\n")
-        for ex in re.finditer(r"new\s+(\w+Exception)\s*\(", masked):
-            name = ex.group(1)
+        # new XException("...") ou XException::fabrica (a mensagem fica no método estático da exceção)
+        for ex in re.finditer(r"new\s+(\w+Exception)\s*\(|\b(\w+Exception)::(\w+)", masked):
+            name = ex.group(1) or ex.group(2)
             line_no = masked.count("\n", 0, ex.start())
             status = EXCEPTIONS.get(name, 500)
             node["throws"].append([line_no, status])
-            offset = sum(len(l) + 1 for l in code_lines[:line_no])
-            msg = first_literal(node["code"], offset + code_lines[line_no].find("new"))
+            if ex.group(3):
+                factory = CLASSES[name].methods.get(ex.group(3)) if name in CLASSES else None
+                msg = first_literal(factory["code"], 0) if factory else None
+            else:
+                offset = sum(len(l) + 1 for l in code_lines[:line_no])
+                msg = first_literal(node["code"], offset + code_lines[line_no].find("new"))
             entry = errors.setdefault(name, {"steps": [], "messages": []})
             if node["n"] not in entry["steps"]:
                 entry["steps"].append(node["n"])
@@ -502,8 +508,18 @@ def build_flow(ctrl, mname):
     else:
         resp = [f"[c|// {ret}]"]
 
+    # caixa da segurança (o que roda antes do controller)
+    rule, pattern = security_rule(http, path)
+    security, guards = security_box(rule, pattern, path)
+
     # caixa dos erros
     err = []
+    if rule["kind"] == "permitAll":
+        err.append("[e|401 Unauthorized]  [c|// só se vier um token inválido: o filtro confere todo token enviado]")
+    else:
+        err.append("[e|401 Unauthorized]  [c|// sem token, token adulterado ou vencido (SecurityErrorHandler)]")
+    if rule["kind"] not in ("permitAll", "authenticated"):
+        err.append("[e|403 Forbidden]  [c|// logado, mas a regra do SecurityConfig negou (SecurityErrorHandler)]")
     if body and body["valid"]:
         err.append("[e|MethodArgumentNotValidException]  →  400  [c|// corpo inválido]")
     if body:
@@ -522,9 +538,124 @@ def build_flow(ctrl, mname):
         "id": mname, "name": mname, "method": http, "path": path,
         "summary": SUMMARY_OVERRIDE.get(f"{ctrl.pkg}.{mname}", SUMMARY.get(mname, mname)),
         "status": STATUS_TEXT.get(status, str(status)),
-        "request": req, "response": resp, "errors": err or ["[c|// nenhum erro previsto além de 500]"],
+        "request": req, "response": resp, "errors": err, "security": security, "guards": guards,
         "nodes": nodes,
     }
+
+
+# ─────────────────────────────── segurança: regras do SecurityConfig ───────────────────────────────
+
+SEC = CLASSES["SecurityConfig"]
+GUARD = CLASSES["AccessGuard"]
+CONSTS = {name: re.findall(r'"([^"]+)"', body)
+          for name, body in re.findall(r"String\[\]\s+(\w+)\s*=\s*\{([^}]*)\}", SEC.text)}
+ARGS = r"((?:[^()]|\([^()]*\))*)"  # argumentos com no máximo um nível de parênteses dentro
+RULE_RE = re.compile(r"\.requestMatchers\(" + ARGS + r"\)\s*\.(permitAll|hasAuthority|access)\(" + ARGS + r"\)", re.S)
+
+
+def parse_rules():
+    rules = []
+    for m in RULE_RE.finditer(SEC.text):
+        args, kind, arg = m.groups()
+        method = re.match(r"\s*HttpMethod\.(\w+)\s*,", args)
+        patterns = []
+        for token in re.findall(r'"[^"]+"|\b[A-Z][A-Z_]+\b', args):
+            patterns += [token.strip('"')] if token.startswith('"') else CONSTS.get(token, [])
+        rules.append({"method": method.group(1) if method else None, "patterns": patterns,
+                      "kind": kind, "arg": arg.replace(".name()", "")})
+    rules.append({"method": None, "patterns": ["/**"], "kind": "authenticated", "arg": ""})  # anyRequest()
+    return rules
+
+
+def pattern_regex(p):
+    """Padrão de caminho do Spring → regex: * e {var} valem um trecho, /** vale qualquer resto (até nada)."""
+    out = ""
+    for seg in p.strip("/").split("/"):
+        if seg == "**":
+            out += r"(?:/.*)?"
+        elif seg == "*" or re.fullmatch(r"\{\w+\}", seg):
+            out += r"/[^/]+"
+        else:
+            out += "/" + re.escape(seg)
+    return re.compile(out + "$")
+
+
+RULES = parse_rules()
+
+
+def security_rule(http, path):
+    for rule in RULES:  # vale a primeira regra que combinar, como no Spring
+        if rule["method"] in (None, http):
+            for p in rule["patterns"]:
+                if pattern_regex(p).match(path):
+                    return rule, p
+    raise ValueError(f"nenhuma regra para {http} {path}")
+
+
+def guard_box(fn):
+    """Caixa com o código do AuthorizationManager do SecurityConfig e dos métodos do AccessGuard que ele usa."""
+    code = [SEC.methods[fn]["code"]]
+    used = re.findall(r"guard\.(\w+)\(", SEC.methods[fn]["code"])
+    for name in list(dict.fromkeys(used)):
+        used += re.findall(r"\b(has)\(", GUARD.methods[name]["code"])
+    for name in dict.fromkeys(used):
+        code.append(GUARD.methods[name]["code"])
+    return {"id": f"g_{fn}", "title": f"SecurityConfig.{fn}()  →  AccessGuard", "code": "\n\n".join(code)}
+
+
+def security_box(rule, pattern, path):
+    kind, arg = rule["kind"], rule["arg"]
+    verb = f"[k|HttpMethod.{rule['method']}], " if rule["method"] else ""
+    more = ", [c|…]" if len(rule["patterns"]) > 1 else ""
+    matcher = f".[m|requestMatchers]({verb}[s|\"{pattern}\"]{more})"
+    title = "Segurança  ·  SecurityFilterChain, antes do controller"
+    if kind == "permitAll":
+        lines = ["[c|// SecurityConfig: a primeira regra que combina com a rota é pública]",
+                 matcher, "    .[m|permitAll]()", "",
+                 "[c|// ninguém precisa de token aqui; se vier um, o filtro JWT ainda confere]"]
+        if "/auth/" in path:
+            lines += ["", "[c|// esta requisição é a que GERA o token (passo do TokenService):]",
+                      "[c|// o cliente guarda o token e manda nas próximas requisições]"]
+        return {"title": title, "lines": lines}, []
+
+    if kind == "hasAuthority":
+        tipo, auths, quem = "STAFF", f'[[s|"{arg}"], …]', f"funcionário cujo papel tem {arg}"
+    elif kind == "access":
+        fn = re.match(r"(\w+)", arg).group(1)
+        perm = re.search(r"\((\w+)\)", arg)
+        tipo, auths = "CUSTOMER", '[[s|"CUSTOMER"]]'
+        quem = "o próprio cliente (sub do token = id da URL)" if "Cliente" in fn else "o cliente dono do pedido"
+        if perm:
+            quem += f", ou funcionário com {perm.group(1)}"
+    else:
+        tipo, auths, quem = "CUSTOMER", '[[s|"CUSTOMER"]]', "qualquer usuário logado (cliente ou funcionário)"
+
+    rule_call = {"hasAuthority": f"    .[m|hasAuthority]([a|{arg}])",
+                 "authenticated": "    .[m|authenticated]()   [c|// anyRequest(): nenhuma regra específica]"}
+    lines = [
+        "[c|// 1. BearerTokenAuthenticationFilter lê o cabeçalho]",
+        "[a|Authorization]: Bearer [s|eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOi….assinatura]",
+        "",
+        "[c|// 2. JwtDecoder (JwtConfig) confere a assinatura HS256 com o jwt.secret]",
+        "[c|//    e a validade (exp). Falhou → 401, o controller nem é chamado]",
+        "",
+        "[c|// 3. o payload (JSON em Base64) diz quem é; o JwtAuthenticationConverter]",
+        "[c|//    transforma a claim authorities nas permissões do usuário]",
+        f'{{ [s|"sub"]: [s|"3f9a…c21e"], [s|"tipo"]: [s|"{tipo}"], [s|"authorities"]: {auths} }}',
+        "",
+        "[c|// 4. SecurityConfig: vale a primeira regra que combina com a rota]",
+        matcher,
+    ]
+    guards = []
+    if kind == "access":
+        lines.append(f"    .[m|access]([m|{arg}])  @@g_{fn}")
+        guards.append(guard_box(fn))
+    else:
+        lines.append(rule_call[kind])
+    lines += ["", f"[c|// quem passa: {quem}]"]
+    if kind != "authenticated":
+        lines.append("[c|// não passou → 403 · passou → segue para o controller]")
+    return {"title": title, "lines": lines}, guards
 
 
 # ─────────────────────────────── parte 1 + saída ───────────────────────────────
@@ -533,7 +664,7 @@ def part1_svg():
     b = caixas()
     parts, secoes, w, h = layout([("", "", [[b["main"], b["run"], b["tomcat"]],
                                             [b["props"], b["beans"], b["hib"], b["sec"]],
-                                            [b["tables"]]])])
+                                            [b["tables"], b["jwt"]]])])
     parts += [x.svg() for x in secoes[0]]
     parts += auto_arrows(secoes[0], [("main", "run"), ("run", "tomcat")])
     return render(w, h, parts)

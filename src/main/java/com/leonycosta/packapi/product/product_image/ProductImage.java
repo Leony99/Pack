@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.UUID;
 
-import com.leonycosta.packapi.product.Product;
+import com.leonycosta.packapi.product.product.Product;
 
 @Entity
 @Table(name = "product_images")

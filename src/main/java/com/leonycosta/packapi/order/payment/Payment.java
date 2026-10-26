@@ -7,7 +7,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import com.leonycosta.packapi.order.Order;
+import com.leonycosta.packapi.order.order.Order;
 
 @Entity
 @Table(name = "payments")

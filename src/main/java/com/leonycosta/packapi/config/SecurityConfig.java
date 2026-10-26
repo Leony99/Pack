@@ -1,6 +1,6 @@
 package com.leonycosta.packapi.config;
 
-import com.leonycosta.packapi.auth.AccessGuard;
+import com.leonycosta.packapi.auth.auth.AccessGuard;
 import com.leonycosta.packapi.auth.permission.Permissao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.UUID;
 
-import com.leonycosta.packapi.order.Order;
+import com.leonycosta.packapi.order.order.Order;
 
 @Entity
 @Table(name = "shipments")

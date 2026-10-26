@@ -45,6 +45,8 @@ def caixas():
         "[a|spring.jpa.hibernate.ddl-auto]=update   [c|# cria/atualiza as tabelas]",
         "[a|spring.jpa.show-sql]=true              [c|# mostra o SQL no log]",
         "[a|server.port]=8080                      [c|# porta da API]",
+        "[a|jwt.secret]=${JWT_SECRET:...}          [c|# chave que assina os tokens]",
+        "[a|jwt.expiration-minutes]=60             [c|# validade do token]",
     ], style="pkg"))
 
     add(Box("beans", "Beans  ·  o Spring cria e conecta as classes", [
@@ -80,12 +82,26 @@ def caixas():
         "return [a|http]",
         "    .[m|csrf](csrf -> csrf.[m|disable]())",
         "    .[m|sessionManagement](s -> s.[m|sessionCreationPolicy]([a|STATELESS]))",
-        "    .[m|oauth2ResourceServer]([a|jwt])     [c|// confere o token de cada requisição]",
+        "    .[m|oauth2ResourceServer]([a|jwt])     [c|// confere o token de cada requisição]  @@jwt",
         "    .[m|authorizeHttpRequests](...)       [c|// regras por rota e permissão]",
         "    .[m|build]();",
         "[c|// catálogo público; carrinho e pedidos só do dono;]",
         "[c|// gestão exige permissão (CATALOG_WRITE, ORDER_MANAGE...)]",
         "[c|// AuthDataSeeder cria permissões, papéis e o admin inicial]",
+    ]))
+
+    add(Box("jwt", "JwtConfig  ·  as peças do token", [
+        "[c|// a mesma chave (jwt.secret) assina e confere: HMAC-SHA256]",
+        "[m|SecretKey]                 [c|← jwt.secret em bytes]",
+        "[m|JwtEncoder]                [c|← o TokenService usa para assinar no login]",
+        "[m|JwtDecoder]                [c|← o filtro usa para conferir a cada requisição]",
+        "[m|JwtAuthenticationConverter] [c|← claim authorities → permissões]",
+        "[m|PasswordEncoder] (BCrypt)  [c|← senha vira hash; nunca salva em texto]",
+        "",
+        "[c|// um token tem 3 partes em Base64, separadas por ponto:]",
+        "[s|cabeçalho].[s|payload].[s|assinatura]",
+        "[c|// payload: sub (id), nome, email, tipo, authorities, exp]",
+        "[c|// quem mudar o payload invalida a assinatura → 401]",
     ]))
 
     add(Box("tomcat", "Servidor no ar", [
