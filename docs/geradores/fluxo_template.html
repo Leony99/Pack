@@ -1,0 +1,330 @@
+<title>Fluxo em Partes</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Layout: mesmo visual dos diagramas SVG (fundo branco, caixas com cabeçalho); menus discretos acima das partes 2 e 3 */
+  :root {
+    --bg: #ffffff;
+    --fg: #1f2328;
+    --muted: #6e7781;
+    --border: #3a3f5c;
+    --soft: #d6d9e3;
+    --head: #ececfb;
+    --accent: #1f3fbf;
+    --get: #1a7f37; --post: #0b3fd6; --put: #b35400; --patch: #8250df; --delete: #c4122f;
+    --sans: "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: "JetBrains Mono", Consolas, monospace;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 var(--sans);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 24px 48px;
+  }
+  .part { margin-bottom: 44px; }
+  h2 { margin: 0; font-size: 17px; font-weight: 700; text-wrap: balance; }
+  .sub { margin: 2px 0 12px; color: var(--muted); font-size: 13px; }
+  .diagram { overflow-x: auto; }
+  .diagram svg { display: block; max-width: none; }
+  .diagram [data-toggle] { cursor: pointer; }
+
+  .menu { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0 0 14px; }
+  .menu-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+  .group { font-size: 12px; color: var(--muted); margin-left: 8px; }
+  .group:first-of-type { margin-left: 0; }
+  .pill {
+    font: 500 13px var(--sans); color: var(--fg); background: #fff; cursor: pointer;
+    border: 1px solid var(--soft); border-radius: 999px; padding: 4px 11px;
+  }
+  .pill:hover { border-color: var(--border); }
+  .pill[aria-pressed="true"] { background: var(--head); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .pill.req { border-radius: 6px; display: inline-flex; gap: 8px; align-items: baseline; font-family: var(--mono); font-size: 12px; }
+  .pill.req small { font-family: var(--sans); color: var(--muted); font-size: 12px; }
+  .verb { font-weight: 600; }
+  .verb.GET { color: var(--get); } .verb.POST { color: var(--post); } .verb.PUT { color: var(--put); }
+  .verb.PATCH { color: var(--patch); } .verb.DELETE { color: var(--delete); }
+  select { font: 13px var(--sans); padding: 3px 6px; border: 1px solid var(--soft); border-radius: 6px; background: #fff; color: var(--fg); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hint { font-size: 12.5px; color: var(--muted); margin: -6px 0 12px; }
+</style>
+
+<section class="part">
+  <h2>1. A aplicação inicia</h2>
+  <p class="sub">Do main() até o servidor no ar (ordem simplificada do que o Spring faz por baixo)</p>
+  <div class="diagram"><!--__PARTE1__--></div>
+</section>
+
+<section class="part">
+  <h2>2. As peças de um domínio</h2>
+  <p class="sub">Todo domínio segue o mesmo molde. Escolha um para ver os arquivos dele.</p>
+  <div class="menu" id="menu-dominios"></div>
+  <div class="diagram" id="parte2"></div>
+</section>
+
+<section class="part">
+  <h2>3. Uma requisição chega</h2>
+  <p class="sub">O caminho de uma requisição pelas camadas, com o código real de cada método.</p>
+  <div class="menu" id="menu-req-dominio"></div>
+  <div class="menu" id="menu-requisicoes"></div>
+  <p class="hint">Caixas longas sem chamadas aparecem resumidas: clique no título para ver tudo. "↗ n" indica um passo que já apareceu antes.</p>
+  <div class="diagram" id="parte3"></div>
+</section>
+
+<script>
+const DATA = /*__DATA__*/{};
+
+// ─── mesmas medidas e cores do diagrama.py ───
+const FS = 12, LH = 17, HH = 30, PADT = 10, PADB = 12, PADX = 14;
+const COL_GAP = 110, GAP_SEQ = 44, GAP_AL = 18;
+const MONO = "JetBrains Mono, Consolas, monospace", SANS = "Segoe UI, Helvetica, Arial, sans-serif";
+const TXT = "#1f2328", BORDER = "#3a3f5c", ARROW = "#3a3f5c", ARROW_ERR = "#c4122f", MUTED = "#6e7781";
+const COL = { a: "#1a7f37", m: "#0b3fd6", s: "#c4122f", k: "#8250df", e: "#b35400", c: "#6e7781" };
+const STYLE = { code: ["#ececfb", "#1f3fbf"], data: ["#e6f4ea", "#1a5d2a"], error: ["#fdecec", "#b42318"], pkg: ["#fff4dc", "#8a5a00"] };
+const KIND_STYLE = { Controller: "code", Service: "code", Repository: "data" };
+
+const ctx = document.createElement("canvas").getContext("2d");
+let CW = 7.3;
+function measure() {
+  ctx.font = `${FS}px "JetBrains Mono", Consolas, monospace`;
+  CW = ctx.measureText("M".repeat(40)).width / 40;
+}
+function titleWidth(t) { ctx.font = `600 14px "Segoe UI", Helvetica, Arial, sans-serif`; return ctx.measureText(t).width; }
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// ─── texto colorido: marcação [a|x] (gerada pelo Python) ou código Java ───
+const TOK = /\[([amskec])\|(.*?)\]/g;
+function markup(s, def = TXT) {
+  const out = []; let last = 0, m;
+  TOK.lastIndex = 0;
+  while ((m = TOK.exec(s))) {
+    if (m.index > last) out.push([s.slice(last, m.index), def]);
+    out.push([m[2], COL[m[1]]]);
+    last = m.index + m[0].length;
+  }
+  if (last < s.length) out.push([s.slice(last), def]);
+  return out;
+}
+const KW = new Set("public private protected return new if else for while throw throws void final static class switch case default break continue null true false this var try catch instanceof".split(" "));
+const JTOK = /(\/\/.*$)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)')|(@\w+)|(\b\w+Exception\b)|(\b[A-Za-z_]\w*(?=\s*\())|(\b[a-z_]\w*(?=\s*\.))/g;
+function java(line) {
+  const out = []; let last = 0, m;
+  JTOK.lastIndex = 0;
+  while ((m = JTOK.exec(line))) {
+    if (m.index > last) out.push([line.slice(last, m.index), TXT]);
+    const t = m[0];
+    let c = TXT;
+    if (m[1]) c = COL.c; else if (m[2] || m[3]) c = COL.s; else if (m[4]) c = COL.k; else if (m[5]) c = COL.e;
+    else if (m[6]) c = KW.has(t) || /^[A-Z]/.test(t) ? TXT : COL.m;
+    else if (m[7]) c = KW.has(t) ? TXT : COL.a;
+    out.push([t, c]);
+    last = m.index + t.length;
+  }
+  if (last < line.length) out.push([line.slice(last), TXT]);
+  return out;
+}
+const plainLen = segs => segs.reduce((n, [t]) => n + t.length, 0);
+
+// ─── caixa ───
+const TARGET = /\s+@@(!?)(\w+)$/;
+class Box {
+  constructor(id, title, lines, style = "code", { raw = false, toggle = null } = {}) {
+    this.id = id; this.style = style; this.toggle = toggle;
+    this.title = markup(title, STYLE[style][1]);
+    this.lines = []; this.targets = []; this.marks = {};
+    lines.forEach((l, i) => {
+      const t = raw ? null : l.match(TARGET);
+      if (t) { this.targets.push([i, t[2], t[1] === "!"]); l = l.slice(0, t.index); }
+      this.lines.push(raw ? java(l) : markup(l));
+    });
+  }
+  mark(i, text, color) { (this.marks[i] = this.marks[i] || []).push([text, color]); }
+  get needW() {
+    const tw = titleWidth(this.title.map(s => s[0]).join("")) + 40;
+    const lw = this.lines.map((l, i) => plainLen(l) * CW + 2 * PADX +
+      (this.marks[i] ? this.marks[i].reduce((n, [t]) => n + t.length * 7 + 12, 6) : 0));
+    return Math.max(tw, ...lw, 160);
+  }
+  get h() { return HH + PADT + this.lines.length * LH + PADB; }
+  get right() { return this.x + this.w; }
+  get bottom() { return this.y + this.h; }
+  get cx() { return this.x + this.w / 2; }
+  get headMid() { return this.y + HH / 2; }
+  lineMid(i) { return this.y + HH + PADT + i * LH + LH / 2 + 1; }
+  svg() {
+    const [hb, tc] = STYLE[this.style], { x, y, w, h } = this, r = this.right;
+    const tog = this.toggle ? ` data-toggle="${esc(this.toggle)}"` : "";
+    const p = [`<g>`,
+      `<rect x="${x + 2}" y="${y + 2}" width="${w}" height="${h}" rx="5" fill="#000" fill-opacity="0.06"/>`,
+      `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5" fill="#fff" stroke="${BORDER}" stroke-width="1.2"/>`,
+      `<g${tog}><path d="M${x + .6},${y + HH} V${y + 5} Q${x + .6},${y + .6} ${x + 5},${y + .6} H${r - 5} Q${r - .6},${y + .6} ${r - .6},${y + 5} V${y + HH} Z" fill="${hb}"/>`,
+      text(this.cx, y + 20, this.title, 14, SANS, "600", "middle") + `</g>`,
+      `<line x1="${x}" y1="${y + HH}" x2="${r}" y2="${y + HH}" stroke="${BORDER}" stroke-width="1"/>`];
+    this.lines.forEach((l, i) => {
+      const by = y + HH + PADT + i * LH + 12;
+      p.push(text(x + PADX, by, l));
+      if (this.marks[i]) {
+        let mx = x + PADX + plainLen(l) * CW + 12;
+        for (const [t, c] of this.marks[i]) {
+          p.push(`<text x="${mx.toFixed(1)}" y="${by}" font-family="${SANS}" font-size="11.5" font-weight="600" fill="${c}">${esc(t)}</text>`);
+          mx += t.length * 7 + 12;
+        }
+      }
+    });
+    p.push(`</g>`);
+    return p.join("\n");
+  }
+}
+function text(x, y, segs, size = FS, family = MONO, weight = "400", anchor = "start") {
+  const inner = segs.filter(s => s[0]).map(([t, c]) => `<tspan fill="${c}">${esc(t)}</tspan>`).join("");
+  return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-family="${family}" font-size="${size}" font-weight="${weight}" text-anchor="${anchor}" xml:space="preserve">${inner}</text>`;
+}
+
+// ─── layout em colunas e setas (mesma regra do diagrama.py) ───
+function place(cols) {
+  const widths = cols.map(col => Math.max(...col.map(b => b.needW)));
+  const xs = []; let x = 4;
+  widths.forEach(w => { xs.push(x); x += w + COL_GAP; });
+  const placed = [];
+  cols.forEach((col, k) => {
+    let prev = null;
+    for (const b of col) {
+      b.x = xs[k]; b.w = widths[k];
+      const srcs = placed.flatMap(s => s.targets.filter(t => t[1] === b.id).map(t => s.lineMid(t[0])));
+      b.y = srcs.length ? Math.max(prev ? prev.bottom + GAP_AL : 4, Math.min(...srcs) - HH / 2)
+                        : (prev ? prev.bottom + GAP_SEQ : 4);
+      placed.push(b); prev = b;
+    }
+  });
+  return { boxes: placed, W: Math.ceil(x - COL_GAP + 8), H: Math.ceil(Math.max(...placed.map(b => b.bottom)) + 10) };
+}
+function path(pts, err = false) {
+  const d = "M" + pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" L");
+  const color = err ? ARROW_ERR : ARROW, dash = err ? ` stroke-dasharray="6 4"` : "";
+  return `<path d="${d}" fill="none" stroke="${color}" stroke-width="1.3"${dash} marker-end="url(#${err ? "arr-err" : "arr"})"/>` +
+         `<circle cx="${pts[0][0].toFixed(1)}" cy="${pts[0][1].toFixed(1)}" r="2.6" fill="${color}"/>`;
+}
+function arrows(boxes, sequence = []) {
+  const byId = Object.fromEntries(boxes.map(b => [b.id, b]));
+  const links = boxes.flatMap(s => s.targets.filter(t => byId[t[1]]).map(([i, t, e]) => [s.lineMid(i), s, byId[t], e]));
+  const out = [], entries = {};
+  [...new Set(links.map(l => l[2].x))].forEach(tx => {
+    const group = links.filter(l => l[2].x === tx).sort((a, b) => a[0] - b[0]);
+    const step = Math.min(12, (COL_GAP - 30) / Math.max(1, group.length - 1));
+    group.forEach(([y1, s, t, e], n) => {
+      const k = entries[t.id] || 0; entries[t.id] = k + 1;
+      const y2 = k === 0 ? t.headMid : t.y + HH + PADT + (k + 0.5) * LH;
+      const lane = tx - 16 - n * step;
+      out.push(Math.abs(y1 - y2) < .5 ? path([[s.right, y1], [t.x, y2]], e)
+                                      : path([[s.right, y1], [lane, y1], [lane, y2], [t.x, y2]], e));
+    });
+  });
+  sequence.forEach(([a, b]) => out.push(path([[byId[a].cx, byId[a].bottom], [byId[b].cx, byId[b].y]])));
+  return out;
+}
+function svgDoc(W, H, parts) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${ARROW}"/></marker>
+<marker id="arr-err" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${ARROW_ERR}"/></marker>
+</defs>
+<rect width="${W}" height="${H}" fill="#fff"/>
+${parts.join("\n")}
+</svg>`;
+}
+
+// ─── parte 2 ───
+function renderPart2(dom) {
+  const pkg = new Box("pkg", dom.pkg.title, dom.pkg.lines, "pkg");
+  const pieces = dom.pieces.map(p => new Box(p.id, p.title, p.lines, p.style));
+  const { boxes, W, H } = place([[pkg], pieces]);
+  document.getElementById("parte2").innerHTML = svgDoc(W, H, [...boxes.map(b => b.svg()), ...arrows(boxes)]);
+}
+
+// ─── parte 3 ───
+const expanded = new Set();
+const MAX_LINES = 24, SHOW_LINES = 16;
+
+function renderPart3(dom, ep) {
+  const nodes = ep.nodes, byN = Object.fromEntries(nodes.map(n => [n.n, n]));
+  const firstRef = {};  // passo → [nó que chama, linha] da primeira chamada que vira seta
+  nodes.forEach(n => n.badges.forEach(([i, nums]) => nums.forEach(t => {
+    const tgt = byN[t];
+    if (!(t in firstRef) && tgt.parent === n.n && tgt.depth === n.depth + 1) firstRef[t] = [n.n, i];
+  })));
+
+  const boxes = nodes.map(n => {
+    const key = `${dom.id}.${ep.id}.${n.n}`;
+    let lines = n.code.split("\n");
+    const long = lines.length > MAX_LINES && n.badges.length === 0;
+    if (long && !expanded.has(key)) lines = [...lines.slice(0, SHOW_LINES), `// … mais ${lines.length - SHOW_LINES} linhas (clique no título)`];
+    const box = new Box(`n${n.n}`, `${n.n} · ${n.title}`, lines, KIND_STYLE[n.kind] || "code", { raw: true, toggle: long ? key : null });
+    n.badges.forEach(([i, nums]) => nums.forEach(t => {
+      if (i >= box.lines.length) return;
+      const ref = firstRef[t];
+      if (ref && ref[0] === n.n && ref[1] === i) box.targets.push([i, `n${t}`, false]);
+      else box.mark(i, `↗ ${t}`, MUTED);
+    }));
+    n.throws.forEach(([i, st]) => { if (i < box.lines.length) box.mark(i, `⚠ ${st}`, ARROW_ERR); });
+    return box;
+  });
+
+  const req = new Box("req", "Requisição HTTP", ep.request, "code");
+  const resp = new Box("resp", `Resposta  ·  ${ep.status}`, ep.response, "data");
+  const err = new Box("err", "Erros possíveis  ·  GlobalExceptionHandler", ep.errors, "error");
+  const maxDepth = Math.max(...nodes.map(n => n.depth));
+  const cols = [[req, boxes[0], resp, err]];
+  for (let d = 1; d <= maxDepth; d++) cols.push(nodes.filter(n => n.depth === d).map(n => boxes[n.n - 1]));
+
+  const placed = place(cols.filter(c => c.length));
+  document.getElementById("parte3").innerHTML = svgDoc(placed.W, placed.H,
+    [...placed.boxes.map(b => b.svg()), ...arrows(placed.boxes, [["req", "n1"], ["n1", "resp"]])]);
+}
+
+// ─── menus ───
+const state = { dom: DATA.domains.find(d => d.id === "address") || DATA.domains[0], ep: null };
+state.ep = state.dom.endpoints.find(e => e.id === "create") || state.dom.endpoints[0];
+
+function renderMenus() {
+  const groups = [...new Set(DATA.domains.map(d => d.group))];
+  document.getElementById("menu-dominios").innerHTML = `<span class="menu-label">Domínio</span>` +
+    groups.map(g => `<span class="group" style="color:${DATA.domains.find(d => d.group === g).color}">${esc(g)}:</span>` + DATA.domains.filter(d => d.group === g).map(d =>
+      `<button class="pill" data-dom="${d.id}" aria-pressed="${d === state.dom}">${esc(d.label)}</button>`).join("")).join("");
+
+  document.getElementById("menu-req-dominio").innerHTML = `<span class="menu-label">Domínio</span>
+    <select id="sel-dom" aria-label="Domínio">${DATA.domains.map(d =>
+      `<option value="${d.id}"${d === state.dom ? " selected" : ""}>${esc(d.label)}</option>`).join("")}</select>`;
+
+  document.getElementById("menu-requisicoes").innerHTML = `<span class="menu-label">Requisição</span>` +
+    state.dom.endpoints.map(e => `<button class="pill req" data-ep="${e.id}" aria-pressed="${e === state.ep}" title="${esc(e.path)}">
+      <span class="verb ${e.method}">${e.method}</span>${esc(e.path.replace("/api/v1", ""))}<small>${esc(e.summary)}</small></button>`).join("");
+}
+
+function renderAll() { renderMenus(); renderPart2(state.dom); renderPart3(state.dom, state.ep); }
+
+function selectDomain(id) {
+  state.dom = DATA.domains.find(d => d.id === id);
+  state.ep = state.dom.endpoints[0];
+  renderAll();
+}
+
+document.addEventListener("click", ev => {
+  const dom = ev.target.closest("[data-dom]"), ep = ev.target.closest("[data-ep]"), tog = ev.target.closest("[data-toggle]");
+  if (dom) selectDomain(dom.dataset.dom);
+  else if (ep) { state.ep = state.dom.endpoints.find(e => e.id === ep.dataset.ep); renderMenus(); renderPart3(state.dom, state.ep); }
+  else if (tog) {
+    const k = tog.getAttribute("data-toggle");
+    expanded.has(k) ? expanded.delete(k) : expanded.add(k);
+    renderPart3(state.dom, state.ep);
+  }
+});
+document.addEventListener("change", ev => { if (ev.target.id === "sel-dom") selectDomain(ev.target.value); });
+
+measure();
+renderAll();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { measure(); renderAll(); });
+</script>

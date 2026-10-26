@@ -1,0 +1,666 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2040" height="830" viewBox="0 0 2040 830">
+<defs><style>text{font-family:"JetBrains Mono","Fira Code",monospace;}</style></defs>
+<rect width="2040" height="830" fill="#0d1117"/>
+<rect x="20" y="90" width="470" height="715" rx="10" fill="#0d1a2e" stroke="#79c0ff" stroke-opacity="0.35" stroke-width="1"/>
+<text x="32" y="110" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#79c0ff" opacity="0.85" letter-spacing="2.5">AUTH</text>
+<rect x="530" y="90" width="230" height="715" rx="10" fill="#0e1f1a" stroke="#3bca6d" stroke-opacity="0.35" stroke-width="1"/>
+<text x="542" y="110" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#3bca6d" opacity="0.85" letter-spacing="2.5">CUSTOMER</text>
+<rect x="800" y="90" width="470" height="159" rx="10" fill="#1a0f1a" stroke="#d2a8ff" stroke-opacity="0.35" stroke-width="1"/>
+<text x="812" y="110" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#d2a8ff" opacity="0.85" letter-spacing="2.5">CART</text>
+<rect x="800" y="280" width="470" height="525" rx="10" fill="#1a1506" stroke="#ffa657" stroke-opacity="0.35" stroke-width="1"/>
+<text x="812" y="300" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#ffa657" opacity="0.85" letter-spacing="2.5">ORDER</text>
+<rect x="1310" y="90" width="710" height="715" rx="10" fill="#0d1a0d" stroke="#58a6ff" stroke-opacity="0.35" stroke-width="1"/>
+<text x="1322" y="110" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#58a6ff" opacity="0.85" letter-spacing="2.5">PRODUCT</text>
+<path d="M240,245 C135,245 135,348 30,348" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="240" cy="245" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="30" cy="348" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M135,383 C142,383 142,498 150,498" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="135" cy="383" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="150" cy="498" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M375,383 C367,383 367,519 360,519" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="375" cy="383" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="360" cy="519" r="2.5" fill="#2d5080" opacity="0.85"/>
+<line x1="645" y1="432" x2="645" y2="470" stroke="#2d5080" stroke-width="1.1" opacity="0.75"/>
+<circle cx="645" cy="432" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="645" cy="470" r="2.5" fill="#2d5080" opacity="0.85"/>
+<line x1="1425" y1="277" x2="1425" y2="330" stroke="#2d5080" stroke-width="1.1" opacity="0.75"/>
+<circle cx="1425" cy="277" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1425" cy="330" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M1530,200 C1545,200 1545,182 1560,182" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="1530" cy="200" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1560" cy="182" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M1530,200 C1665,200 1665,307 1800,307" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="1530" cy="200" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1800" cy="307" r="2.5" fill="#2d5080" opacity="0.85"/>
+<line x1="1905" y1="193" x2="1905" y2="249" stroke="#2d5080" stroke-width="1.1" opacity="0.75"/>
+<circle cx="1905" cy="193" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1905" cy="249" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M1530,388 C1550,388 1550,388 1570,388" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="1530" cy="388" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1570" cy="388" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M1395,504 C1410,504 1410,560 1425,560" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="1395" cy="504" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1425" cy="560" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M1455,504 C1565,504 1565,560 1675,560" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="1455" cy="504" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1675" cy="560" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M1020,161 C1035,161 1035,182 1050,182" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="1020" cy="161" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1050" cy="182" r="2.5" fill="#2d5080" opacity="0.85"/>
+<line x1="915" y1="446" x2="915" y2="476" stroke="#2d5080" stroke-width="1.1" opacity="0.75"/>
+<circle cx="915" cy="446" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="915" cy="476" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M1020,513 C1035,513 1035,372 1050,372" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="1020" cy="513" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1050" cy="372" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M1020,534 C1035,534 1035,534 1050,534" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="1020" cy="534" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1050" cy="534" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M1020,576 C1035,576 1035,696 1050,696" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="1020" cy="576" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1050" cy="696" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M750,337 L775,337 L775,182 L810,182" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="750" cy="337" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="810" cy="182" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M750,358 L788,358 L788,534 L810,534" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="750" cy="358" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="810" cy="534" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M1260,203 L1283,203 L1283,367 L1320,367" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="1260" cy="203" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1320" cy="367" r="2.5" fill="#2d5080" opacity="0.85"/>
+<path d="M1260,717 L1296,717 L1296,388 L1320,388" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
+<circle cx="1260" cy="717" r="2.5" fill="#2d5080" opacity="0.85"/>
+<circle cx="1320" cy="388" r="2.5" fill="#2d5080" opacity="0.85"/>
+<g transform="translate(30,124)">
+  <rect x="3" y="3" width="210" height="132" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="132" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">STAFF</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">nome</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">email</text>
+  <rect y="90" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">senha_hash</text>
+  <path d="M0,111 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">role_id</text>
+  <text x="202" y="125" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+</g>
+<g transform="translate(30,314)">
+  <rect x="3" y="3" width="210" height="69" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="69" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">ROLE</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <path d="M0,48 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">nome</text>
+</g>
+<g transform="translate(270,314)">
+  <rect x="3" y="3" width="210" height="69" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="69" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">PERMISSION</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <path d="M0,48 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">nome</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#a5d6ff">UK</text>
+</g>
+<g transform="translate(150,440)">
+  <rect x="3" y="3" width="210" height="90" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="90" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">ROLE_PERMISSION</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">role_id</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <path d="M0,69 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">permission_id</text>
+  <text x="202" y="83" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+</g>
+<g transform="translate(540,300)">
+  <rect x="3" y="3" width="210" height="132" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="132" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">CUSTOMER</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">nome</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">email</text>
+  <text x="202" y="83" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#a5d6ff">UK</text>
+  <rect y="90" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">telefone</text>
+  <path d="M0,111 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
+  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">criado_em</text>
+</g>
+<g transform="translate(540,470)">
+  <rect x="3" y="3" width="210" height="195" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="195" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">ADDRESS</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">customer_id</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">cep</text>
+  <rect y="90" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">rua</text>
+  <rect y="111" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">numero</text>
+  <rect y="132" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="132" x2="209" y2="132" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">complemento</text>
+  <rect y="153" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="153" x2="209" y2="153" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">cidade</text>
+  <path d="M0,174 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <line x1="1" y1="174" x2="209" y2="174" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="188" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="188" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">estado</text>
+</g>
+<g transform="translate(810,124)">
+  <rect x="3" y="3" width="210" height="90" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="90" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">CART</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">customer_id</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <path d="M0,69 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">atualizado_em</text>
+</g>
+<g transform="translate(1050,124)">
+  <rect x="3" y="3" width="210" height="111" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="111" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">CART_ITEM</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">cart_id</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">variant_id</text>
+  <text x="202" y="83" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <path d="M0,90 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">int</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">quantidade</text>
+</g>
+<g transform="translate(810,314)">
+  <rect x="3" y="3" width="210" height="132" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="132" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">COUPON</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">codigo</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#a5d6ff">UK</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">decimal</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">desconto</text>
+  <rect y="90" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">tipo</text>
+  <path d="M0,111 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
+  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">validade</text>
+</g>
+<g transform="translate(810,476)">
+  <rect x="3" y="3" width="210" height="258" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="258" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">ORDER</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">customer_id</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">coupon_id</text>
+  <text x="202" y="83" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="90" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">decimal</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">total</text>
+  <rect y="111" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">status</text>
+  <rect y="132" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="132" x2="209" y2="132" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_cep</text>
+  <rect y="153" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="153" x2="209" y2="153" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_rua</text>
+  <rect y="174" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="174" x2="209" y2="174" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="188" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="188" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_numero</text>
+  <rect y="195" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="195" x2="209" y2="195" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="209" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="209" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_cidade</text>
+  <rect y="216" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="216" x2="209" y2="216" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="230" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="230" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_estado</text>
+  <path d="M0,237 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="237" x2="209" y2="237" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="251" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
+  <text x="68" y="251" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">criado_em</text>
+</g>
+<g transform="translate(1050,314)">
+  <rect x="3" y="3" width="210" height="132" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="132" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">PAYMENT</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">order_id</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">metodo</text>
+  <rect y="90" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">status</text>
+  <path d="M0,111 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">decimal</text>
+  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">valor</text>
+</g>
+<g transform="translate(1050,476)">
+  <rect x="3" y="3" width="210" height="132" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="132" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">SHIPMENT</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">order_id</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">transportadora</text>
+  <rect y="90" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">codigo_rastreio</text>
+  <path d="M0,111 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">status</text>
+</g>
+<g transform="translate(1050,638)">
+  <rect x="3" y="3" width="210" height="153" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="153" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">ORDER_ITEM</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">order_id</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">variant_id</text>
+  <text x="202" y="83" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="90" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">variant_sku</text>
+  <rect y="111" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">int</text>
+  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">quantidade</text>
+  <path d="M0,132 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <line x1="1" y1="132" x2="209" y2="132" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">decimal</text>
+  <text x="68" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">preco_unit</text>
+</g>
+<g transform="translate(1320,124)">
+  <rect x="3" y="3" width="210" height="153" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="153" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">PRODUCT</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">nome</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">text</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">descricao</text>
+  <rect y="90" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">decimal</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">preco</text>
+  <rect y="111" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">slug</text>
+  <path d="M0,132 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <line x1="1" y1="132" x2="209" y2="132" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
+  <text x="68" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">criado_em</text>
+</g>
+<g transform="translate(1560,124)">
+  <rect x="3" y="3" width="210" height="111" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="111" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">PRODUCT_IMAGE</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">product_id</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">url</text>
+  <path d="M0,90 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">int</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">ordem</text>
+</g>
+<g transform="translate(1800,124)">
+  <rect x="3" y="3" width="210" height="69" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="69" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">PRODUCT_TAG</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <path d="M0,48 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">tag</text>
+</g>
+<g transform="translate(1800,249)">
+  <rect x="3" y="3" width="210" height="90" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="90" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">PRODUCT_TAG_LINK</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">product_id</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <path d="M0,69 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">tag_id</text>
+  <text x="202" y="83" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+</g>
+<g transform="translate(1320,330)">
+  <rect x="3" y="3" width="210" height="174" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="174" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">PRODUCT_VARIANT</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">product_id</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">size_id</text>
+  <text x="202" y="83" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="90" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">color_id</text>
+  <text x="202" y="104" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="111" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">sku</text>
+  <text x="202" y="125" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#a5d6ff">UK</text>
+  <rect y="132" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="132" x2="209" y2="132" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">decimal</text>
+  <text x="68" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">preco</text>
+  <path d="M0,153 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="153" x2="209" y2="153" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">int</text>
+  <text x="68" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">quant</text>
+</g>
+<g transform="translate(1570,330)">
+  <rect x="3" y="3" width="210" height="174" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="174" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">INVENTORY_MOVEMENT</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">variant_id</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">variant_sku</text>
+  <rect y="90" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">tipo_movimentacao</text>
+  <rect y="111" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="111" x2="209" y2="111" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">int</text>
+  <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">quantidade</text>
+  <rect y="132" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="132" x2="209" y2="132" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">motivo</text>
+  <path d="M0,153 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="153" x2="209" y2="153" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
+  <text x="68" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">data</text>
+</g>
+<g transform="translate(1320,560)">
+  <rect x="3" y="3" width="210" height="69" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="69" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">SIZE</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <path d="M0,48 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">label</text>
+</g>
+<g transform="translate(1570,560)">
+  <rect x="3" y="3" width="210" height="90" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="90" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">COLOR</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">nome</text>
+  <path d="M0,69 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">hex</text>
+</g>
+<rect x="1752" y="14" width="276" height="55" rx="5" fill="#0f1925" stroke="#1f3a5f" stroke-width="1"/>
+<text x="1764" y="34" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#ffa657">PK</text>
+<text x="1764" y="52" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#6e7681">Primary Key</text>
+<text x="1856" y="34" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#79c0ff">FK</text>
+<text x="1856" y="52" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#6e7681">Foreign Key</text>
+<text x="1948" y="34" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#a5d6ff">UK</text>
+<text x="1948" y="52" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#6e7681">Unique</text>
+<text x="1020" y="30" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9.5" fill="rgba(88,166,255,0.3)" letter-spacing="2">PACK API — ENTITY RELATIONSHIP DIAGRAM</text>
+</svg>

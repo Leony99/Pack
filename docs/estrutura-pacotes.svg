@@ -1,0 +1,452 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1456" height="1169" viewBox="0 0 1456 1169">
+<defs><style>text{font-family:JetBrains Mono, Fira Code, monospace;}</style></defs>
+<defs><style>@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;display=swap");</style></defs>
+<rect width="1456" height="1169" fill="#0d1117"/>
+<rect x="14" y="0" width="238" height="1169" fill="#17121a" rx="0"/>
+<rect x="252" y="0" width="238" height="1169" fill="#0d1a2e" rx="0"/>
+<rect x="490" y="0" width="238" height="1169" fill="#0e1f1a" rx="0"/>
+<rect x="728" y="0" width="238" height="1169" fill="#1a0f1a" rx="0"/>
+<rect x="966" y="0" width="238" height="1169" fill="#1a1506" rx="0"/>
+<rect x="1204" y="0" width="238" height="1169" fill="#0d1a0d" rx="0"/>
+<text x="133" y="18" text-anchor="middle" font-family="JetBrains Mono, Fira Code, monospace" font-size="8" font-weight="700" fill="#d2a8ff" letter-spacing="2" opacity="0.7">CROSS-CUTTING</text>
+<text x="371" y="18" text-anchor="middle" font-family="JetBrains Mono, Fira Code, monospace" font-size="8" font-weight="700" fill="#79c0ff" letter-spacing="2" opacity="0.7">AUTH</text>
+<text x="609" y="18" text-anchor="middle" font-family="JetBrains Mono, Fira Code, monospace" font-size="8" font-weight="700" fill="#3bca6d" letter-spacing="2" opacity="0.7">CUSTOMER</text>
+<text x="847" y="18" text-anchor="middle" font-family="JetBrains Mono, Fira Code, monospace" font-size="8" font-weight="700" fill="#d2a8ff" letter-spacing="2" opacity="0.7">CART</text>
+<text x="1085" y="18" text-anchor="middle" font-family="JetBrains Mono, Fira Code, monospace" font-size="8" font-weight="700" fill="#ffa657" letter-spacing="2" opacity="0.7">ORDER</text>
+<text x="1323" y="18" text-anchor="middle" font-family="JetBrains Mono, Fira Code, monospace" font-size="8" font-weight="700" fill="#58a6ff" letter-spacing="2" opacity="0.7">PRODUCT</text>
+<g transform="translate(28,30)">
+  <rect x="2" y="2" width="210" height="47" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="47" rx="5" fill="#0d1117" stroke="#2a1a3a" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#2a1a3a"/>
+  <rect y="19" width="210" height="5" fill="#2a1a3a"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#58a6ff">packapi/</text>
+  <circle cx="10" cy="37" r="2.5" fill="#58a6ff" opacity="0.9"/>
+  <text x="18" y="43" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#58a6ff">PackApiApplication</text>
+</g>
+<g transform="translate(28,89)">
+  <rect x="2" y="2" width="210" height="47" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="47" rx="5" fill="#0d1117" stroke="#2a1a3a" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#2a1a3a"/>
+  <rect y="19" width="210" height="5" fill="#2a1a3a"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#d2a8ff">config/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#e3b341" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#e3b341">SecurityConfig</text>
+</g>
+<g transform="translate(28,148)">
+  <rect x="2" y="2" width="210" height="98" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="98" rx="5" fill="#0d1117" stroke="#2a1a3a" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#2a1a3a"/>
+  <rect y="19" width="210" height="5" fill="#2a1a3a"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#d2a8ff">exception/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#f47067" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#f47067">ApiError</text>
+  <circle cx="10" cy="50" r="2.5" fill="#f47067" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#f47067">BusinessException</text>
+  <circle cx="10" cy="67" r="2.5" fill="#f47067" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#f47067">ConflictException</text>
+  <circle cx="10" cy="84" r="2.5" fill="#f47067" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#f47067">GlobalExceptionHandler</text>
+</g>
+<g transform="translate(28,258)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#2a1a3a" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#2a1a3a"/>
+  <rect y="19" width="210" height="5" fill="#2a1a3a"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#d2a8ff">enums/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#d2a8ff" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#d2a8ff">CouponTipo</text>
+  <circle cx="10" cy="50" r="2.5" fill="#d2a8ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#d2a8ff">MovimentoTipo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#d2a8ff" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#d2a8ff">OrderStatus</text>
+  <circle cx="10" cy="84" r="2.5" fill="#d2a8ff" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#d2a8ff">PaymentMetodo</text>
+  <circle cx="10" cy="101" r="2.5" fill="#d2a8ff" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#d2a8ff">PaymentStatus</text>
+  <circle cx="10" cy="118" r="2.5" fill="#d2a8ff" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#d2a8ff">ShipmentStatus</text>
+</g>
+<g transform="translate(266,30)">
+  <rect x="2" y="2" width="210" height="98" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="98" rx="5" fill="#0d1117" stroke="#1a3060" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#1a3060"/>
+  <rect y="19" width="210" height="5" fill="#1a3060"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#79c0ff">auth/staff/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Staff</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Staff ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Staff ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Staff ·res</text>
+</g>
+<g transform="translate(266,140)">
+  <rect x="2" y="2" width="210" height="98" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="98" rx="5" fill="#0d1117" stroke="#1a3060" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#1a3060"/>
+  <rect y="19" width="210" height="5" fill="#1a3060"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#79c0ff">auth/role/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Role</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Role ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Role ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Role ·res</text>
+</g>
+<g transform="translate(266,250)">
+  <rect x="2" y="2" width="210" height="98" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="98" rx="5" fill="#0d1117" stroke="#1a3060" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#1a3060"/>
+  <rect y="19" width="210" height="5" fill="#1a3060"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#79c0ff">auth/permission/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Permission</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Permission ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Permission ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Permission ·res</text>
+</g>
+<g transform="translate(266,360)">
+  <rect x="2" y="2" width="210" height="81" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="81" rx="5" fill="#0d1117" stroke="#1a3060" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#1a3060"/>
+  <rect y="19" width="210" height="5" fill="#1a3060"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#79c0ff">auth/role_permission/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">RolePermission</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">RolePermission ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">RolePermission ·req</text>
+</g>
+<g transform="translate(504,30)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#0e3a2a" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#0e3a2a"/>
+  <rect y="19" width="210" height="5" fill="#0e3a2a"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#3bca6d">customer/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Customer</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Customer ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Customer ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Customer ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">Customer ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">Customer ·ctrl</text>
+</g>
+<g transform="translate(504,174)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#0e3a2a" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#0e3a2a"/>
+  <rect y="19" width="210" height="5" fill="#0e3a2a"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#3bca6d">customer/address/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Address</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Address ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Address ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Address ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">Address ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">Address ·ctrl</text>
+</g>
+<g transform="translate(742,30)">
+  <rect x="2" y="2" width="210" height="115" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="115" rx="5" fill="#0d1117" stroke="#2a0e3a" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#2a0e3a"/>
+  <rect y="19" width="210" height="5" fill="#2a0e3a"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#d2a8ff">cart/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Cart</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Cart ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Cart ·res</text>
+  <circle cx="10" cy="84" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">Cart ·svc</text>
+  <circle cx="10" cy="101" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">Cart ·ctrl</text>
+</g>
+<g transform="translate(742,157)">
+  <rect x="2" y="2" width="210" height="98" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="98" rx="5" fill="#0d1117" stroke="#2a0e3a" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#2a0e3a"/>
+  <rect y="19" width="210" height="5" fill="#2a0e3a"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#d2a8ff">cart/cart_item/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">CartItem</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">CartItem ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">CartItem ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">CartItem ·res</text>
+</g>
+<g transform="translate(980,30)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#3a2a00" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#3a2a00"/>
+  <rect y="19" width="210" height="5" fill="#3a2a00"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#ffa657">order/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Order</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Order ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Order ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Order ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">Order ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">Order ·ctrl</text>
+</g>
+<g transform="translate(980,174)">
+  <rect x="2" y="2" width="210" height="81" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="81" rx="5" fill="#0d1117" stroke="#3a2a00" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#3a2a00"/>
+  <rect y="19" width="210" height="5" fill="#3a2a00"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#ffa657">order/order_item/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">OrderItem</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">OrderItem ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">OrderItem ·res</text>
+</g>
+<g transform="translate(980,267)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#3a2a00" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#3a2a00"/>
+  <rect y="19" width="210" height="5" fill="#3a2a00"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#ffa657">order/payment/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Payment</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Payment ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Payment ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Payment ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">Payment ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">Payment ·ctrl</text>
+</g>
+<g transform="translate(980,411)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#3a2a00" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#3a2a00"/>
+  <rect y="19" width="210" height="5" fill="#3a2a00"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#ffa657">order/shipment/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Shipment</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Shipment ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Shipment ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Shipment ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">Shipment ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">Shipment ·ctrl</text>
+</g>
+<g transform="translate(980,555)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#3a2a00" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#3a2a00"/>
+  <rect y="19" width="210" height="5" fill="#3a2a00"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#ffa657">order/coupon/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Coupon</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Coupon ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Coupon ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Coupon ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">Coupon ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">Coupon ·ctrl</text>
+</g>
+<g transform="translate(1218,30)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#0e3a0e" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#0e3a0e"/>
+  <rect y="19" width="210" height="5" fill="#0e3a0e"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#58a6ff">product/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Product</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Product ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Product ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Product ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">Product ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">Product ·ctrl</text>
+</g>
+<g transform="translate(1218,174)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#0e3a0e" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#0e3a0e"/>
+  <rect y="19" width="210" height="5" fill="#0e3a0e"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#58a6ff">product/product_variant/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">ProductVariant</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">ProductVariant ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">ProductVariant ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">ProductVariant ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">ProductVariant ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">ProductVariant ·ctrl</text>
+</g>
+<g transform="translate(1218,318)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#0e3a0e" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#0e3a0e"/>
+  <rect y="19" width="210" height="5" fill="#0e3a0e"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#58a6ff">product/product_image/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">ProductImage</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">ProductImage ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">ProductImage ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">ProductImage ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">ProductImage ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">ProductImage ·ctrl</text>
+</g>
+<g transform="translate(1218,462)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#0e3a0e" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#0e3a0e"/>
+  <rect y="19" width="210" height="5" fill="#0e3a0e"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#58a6ff">product/product_tag/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">ProductTag</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">ProductTag ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">ProductTag ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">ProductTag ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">ProductTag ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">ProductTag ·ctrl</text>
+</g>
+<g transform="translate(1218,606)">
+  <rect x="2" y="2" width="210" height="81" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="81" rx="5" fill="#0d1117" stroke="#0e3a0e" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#0e3a0e"/>
+  <rect y="19" width="210" height="5" fill="#0e3a0e"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#58a6ff">product/product_tag_link/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">ProductTagLink</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">ProductTagLink ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">ProductTagLink ·req</text>
+</g>
+<g transform="translate(1218,699)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#0e3a0e" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#0e3a0e"/>
+  <rect y="19" width="210" height="5" fill="#0e3a0e"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#58a6ff">product/size/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Size</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Size ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Size ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Size ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">Size ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">Size ·ctrl</text>
+</g>
+<g transform="translate(1218,843)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#0e3a0e" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#0e3a0e"/>
+  <rect y="19" width="210" height="5" fill="#0e3a0e"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#58a6ff">product/color/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">Color</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">Color ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Color ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">Color ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">Color ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">Color ·ctrl</text>
+</g>
+<g transform="translate(1218,987)">
+  <rect x="2" y="2" width="210" height="132" rx="5" fill="rgba(0,0,0,0.25)"/>
+  <rect width="210" height="132" rx="5" fill="#0d1117" stroke="#0e3a0e" stroke-width="1.2"/>
+  <rect width="210" height="24" rx="5" fill="#0e3a0e"/>
+  <rect y="19" width="210" height="5" fill="#0e3a0e"/>
+  <text x="8" y="18" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" font-weight="700" fill="#58a6ff">product/inventory/</text>
+  <circle cx="10" cy="33" r="2.5" fill="#ffa657" opacity="0.9"/>
+  <text x="18" y="37" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#ffa657">InventoryMovement</text>
+  <circle cx="10" cy="50" r="2.5" fill="#79c0ff" opacity="0.9"/>
+  <text x="18" y="54" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#79c0ff">InventoryMovement ·repo</text>
+  <circle cx="10" cy="67" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="71" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">InventoryMovement ·req</text>
+  <circle cx="10" cy="84" r="2.5" fill="#8b949e" opacity="0.9"/>
+  <text x="18" y="88" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#8b949e">InventoryMovement ·res</text>
+  <circle cx="10" cy="101" r="2.5" fill="#3bca6d" opacity="0.9"/>
+  <text x="18" y="105" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#3bca6d">InventoryMovement ·svc</text>
+  <circle cx="10" cy="118" r="2.5" fill="#56d4dd" opacity="0.9"/>
+  <text x="18" y="122" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="#56d4dd">InventoryMovement ·ctrl</text>
+</g>
+<rect x="10" y="1133" width="872" height="20" rx="4" fill="rgba(0,0,0,0.4)"/>
+<circle cx="19" cy="1143" r="3" fill="#ffa657"/>
+<text x="26" y="1147" font-family="JetBrains Mono, Fira Code, monospace" font-size="8.5" fill="#ffa657">Entity</text>
+<circle cx="115" cy="1143" r="3" fill="#79c0ff"/>
+<text x="122" y="1147" font-family="JetBrains Mono, Fira Code, monospace" font-size="8.5" fill="#79c0ff">Repository</text>
+<circle cx="211" cy="1143" r="3" fill="#3bca6d"/>
+<text x="218" y="1147" font-family="JetBrains Mono, Fira Code, monospace" font-size="8.5" fill="#3bca6d">Service</text>
+<circle cx="307" cy="1143" r="3" fill="#56d4dd"/>
+<text x="314" y="1147" font-family="JetBrains Mono, Fira Code, monospace" font-size="8.5" fill="#56d4dd">Controller</text>
+<circle cx="403" cy="1143" r="3" fill="#8b949e"/>
+<text x="410" y="1147" font-family="JetBrains Mono, Fira Code, monospace" font-size="8.5" fill="#8b949e">DTO (req/res)</text>
+<circle cx="499" cy="1143" r="3" fill="#d2a8ff"/>
+<text x="506" y="1147" font-family="JetBrains Mono, Fira Code, monospace" font-size="8.5" fill="#d2a8ff">Enum</text>
+<circle cx="595" cy="1143" r="3" fill="#f47067"/>
+<text x="602" y="1147" font-family="JetBrains Mono, Fira Code, monospace" font-size="8.5" fill="#f47067">Exception</text>
+<circle cx="691" cy="1143" r="3" fill="#e3b341"/>
+<text x="698" y="1147" font-family="JetBrains Mono, Fira Code, monospace" font-size="8.5" fill="#e3b341">Config</text>
+<circle cx="787" cy="1143" r="3" fill="#58a6ff"/>
+<text x="794" y="1147" font-family="JetBrains Mono, Fira Code, monospace" font-size="8.5" fill="#58a6ff">Main</text>
+<text x="728" y="1141" text-anchor="middle" font-family="JetBrains Mono, Fira Code, monospace" font-size="9" fill="rgba(255,255,255,0.15)" letter-spacing="1.5">PACK API — PACKAGE STRUCTURE</text>
+</svg>
