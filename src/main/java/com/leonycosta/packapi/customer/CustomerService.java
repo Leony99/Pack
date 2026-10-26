@@ -30,7 +30,8 @@ public class CustomerService {
     }
 
     @Transactional
-    public CustomerResponse create(CustomerRequest request) {
+    // Chamado pelo cadastro (AuthService.register), que já entrega a senha em hash
+    public CustomerResponse create(CustomerRequest request, String senhaHash) {
         String email = request.getEmail().toLowerCase();
         if (customerRepository.existsByEmail(email)) {
             throw new ConflictException("Email já cadastrado: " + email);
@@ -39,6 +40,7 @@ public class CustomerService {
         customer.setNome(request.getNome());
         customer.setEmail(email);
         customer.setTelefone(request.getTelefone());
+        customer.setSenhaHash(senhaHash);
         customer.setCriadoEm(LocalDateTime.now());
         customer = customerRepository.save(customer);
 

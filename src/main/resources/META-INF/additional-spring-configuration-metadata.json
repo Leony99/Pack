@@ -1,0 +1,24 @@
+{
+  "properties": [
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Chave que assina os tokens JWT (HS256). Mínimo de 32 caracteres. Em produção, definir pela variável de ambiente JWT_SECRET."
+    },
+    {
+      "name": "jwt.expiration-minutes",
+      "type": "java.lang.Long",
+      "description": "Por quantos minutos o token vale depois do login."
+    },
+    {
+      "name": "app.admin.email",
+      "type": "java.lang.String",
+      "description": "E-mail do admin criado na primeira vez que a aplicação sobe (variável ADMIN_EMAIL)."
+    },
+    {
+      "name": "app.admin.senha",
+      "type": "java.lang.String",
+      "description": "Senha do admin inicial (variável ADMIN_PASSWORD). Trocar fora do ambiente local."
+    }
+  ]
+}

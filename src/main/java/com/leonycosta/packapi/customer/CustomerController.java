@@ -25,12 +25,6 @@ public class CustomerController {
         return customerService.findById(id);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CustomerResponse create(@Valid @RequestBody CustomerRequest request) {
-        return customerService.create(request);
-    }
-
     @PutMapping("/{id}")
     public CustomerResponse update(@PathVariable UUID id, @Valid @RequestBody CustomerRequest request) {
         return customerService.update(id, request);

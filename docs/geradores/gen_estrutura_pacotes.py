@@ -41,7 +41,8 @@ def file_color(pkg, name):
     if pkg == "enums":   return C_ENUM
     if pkg == "exception": return C_EXCEP
     if name == "PackApiApplication.java": return C_MAIN
-    if pkg == "config": return C_CONF
+    if pkg == "config" or name in ("AccessGuard.java", "AuthDataSeeder.java"): return C_CONF
+    if name in ("TipoUsuario.java", "Permissao.java"): return C_ENUM
     if name.endswith("Controller.java"): return C_CTRL
     if name.endswith("Service.java"):    return C_SVC
     if name.endswith("Repository.java"): return C_REPO
@@ -62,12 +63,15 @@ def file_label(pkg, name):
 # Packages definition: (package_name, [files])
 PACKAGES = {
     "PackApiApplication": {"files": ["PackApiApplication.java"], "zone": "cross"},
-    "config": {"files": ["SecurityConfig.java"], "zone": "cross"},
-    "exception": {"files": ["ApiError.java","BusinessException.java","ConflictException.java","GlobalExceptionHandler.java"], "zone": "cross"},
+    "config": {"files": ["SecurityConfig.java","JwtConfig.java","SecurityErrorHandler.java"], "zone": "cross"},
+    "exception": {"files": ["ApiError.java","BusinessException.java","ConflictException.java","UnauthorizedException.java","GlobalExceptionHandler.java"], "zone": "cross"},
+    # AuthService vem primeiro: o AuthController é acrescentado automaticamente a partir dele
+    "auth": {"files": ["AuthService.java","TokenService.java","AccessGuard.java","AuthDataSeeder.java","TipoUsuario.java",
+                       "LoginRequest.java","RegisterRequest.java","TokenResponse.java","UsuarioResponse.java"], "zone": "auth"},
     "enums": {"files": ["CouponTipo.java","MovimentoTipo.java","OrderStatus.java","PaymentMetodo.java","PaymentStatus.java","ShipmentStatus.java"], "zone": "cross"},
-    "staff": {"files": ["Staff.java","StaffRepository.java","StaffRequest.java","StaffResponse.java"], "zone": "auth"},
-    "role": {"files": ["Role.java","RoleRepository.java","RoleRequest.java","RoleResponse.java"], "zone": "auth"},
-    "permission": {"files": ["Permission.java","PermissionRepository.java","PermissionRequest.java","PermissionResponse.java"], "zone": "auth"},
+    "staff": {"files": ["Staff.java","StaffRepository.java","StaffRequest.java","StaffResponse.java","StaffService.java"], "zone": "auth"},
+    "role": {"files": ["Role.java","RoleRepository.java","RoleRequest.java","RoleResponse.java","RoleService.java"], "zone": "auth"},
+    "permission": {"files": ["Permission.java","Permissao.java","PermissionRepository.java","PermissionRequest.java","PermissionResponse.java","PermissionController.java"], "zone": "auth"},
     "role_permission": {"files": ["RolePermission.java","RolePermissionRepository.java","RolePermissionRequest.java"], "zone": "auth"},
     "customer": {"files": ["Customer.java","CustomerRepository.java","CustomerRequest.java","CustomerResponse.java","CustomerService.java"], "zone": "customer"},
     "address": {"files": ["Address.java","AddressRepository.java","AddressRequest.java","AddressResponse.java","AddressService.java"], "zone": "customer"},

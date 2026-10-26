@@ -22,6 +22,8 @@ OUT = ROOT / "docs" / "fluxo.html"
 MAX_DEPTH = 6
 
 DOMAINS = [  # (pacote, nome na tela, categoria) — categorias na mesma ordem do ERD e das pastas do src
+    ("auth", "Login e cadastro", "Auth"), ("staff", "Funcionários", "Auth"),
+    ("role", "Papéis", "Auth"), ("permission", "Permissões", "Auth"),
     ("customer", "Clientes", "Customer"), ("address", "Endereços", "Customer"),
     ("cart", "Carrinho", "Cart"),
     ("order", "Pedidos", "Order"), ("payment", "Pagamentos", "Order"),
@@ -42,12 +44,15 @@ SUMMARY = {
     "register": "Registrar movimento", "findByCustomer": "Listar do cliente", "addItem": "Adicionar item",
     "removeItem": "Remover item", "clear": "Esvaziar o carrinho", "checkout": "Finalizar a compra",
     "updateStatus": "Mudar o status", "findByOrder": "Consultar pelo pedido",
-    "updateRastreio": "Atualizar o rastreio",
+    "updateRastreio": "Atualizar o rastreio", "login": "Login do cliente",
+    "loginStaff": "Login do funcionário", "me": "Quem está logado",
+    "addPermission": "Dar permissão ao papel", "removePermission": "Tirar permissão do papel",
 }
 SUMMARY_OVERRIDE = {
     "product.findAll": "Listar, buscar por nome ou por tag", "cart.findByCustomer": "Ver o carrinho",
     "order.findByCustomer": "Pedidos do cliente", "payment.create": "Registrar pagamento",
-    "shipment.create": "Registrar envio",
+    "shipment.create": "Registrar envio", "auth.register": "Cadastrar cliente",
+    "staff.create": "Criar funcionário", "role.create": "Criar papel",
 }
 ROLE = {"Controller": "recebe o HTTP", "Service": "regras de negócio", "Repository": "conversa com o banco",
         "Request": "JSON que entra", "Response": "JSON que sai", "Entity": "entidade = tabela"}

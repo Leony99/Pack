@@ -31,7 +31,7 @@ LINES = [
     ("│   ├── ",       "main/",                                "dir",  ""),
     ("│   │   ├── ",   "java/com/leonycosta/packapi/",         "pkg",  ""),
     # categorias: a pasta guarda o domínio principal; os domínios ligados ficam em subpastas
-    ("│   │   │   ├── ",     "auth/",                      "dir",  "Autenticacao e acesso (Fase 8)"),
+    ("│   │   │   ├── ",     "auth/",                      "dir",  "Login, cadastro, token JWT e regras de dono"),
     ("│   │   │   │   ├── ", "permission/",                "dir",  "Permissoes granulares"),
     ("│   │   │   │   ├── ", "role/",                      "dir",  "Papeis de acesso"),
     ("│   │   │   │   ├── ", "role_permission/",           "dir",  "Vinculo role-permission (N:M)"),
@@ -54,7 +54,7 @@ LINES = [
     ("│   │   │   │   ├── ", "product_variant/",           "dir",  "Variantes: SKU, tamanho, cor, estoque"),
     ("│   │   │   │   └── ", "size/",                      "dir",  "Tamanhos (P, M, G, GG...)"),
     # transversais: usados por todas as categorias
-    ("│   │   │   ├── ",     "config/",                    "dir",  "SecurityConfig (temporario ate a Fase 8)"),
+    ("│   │   │   ├── ",     "config/",                    "dir",  "Regras de acesso (SecurityConfig) e JWT"),
     ("│   │   │   ├── ",     "enums/",                     "dir",  "Enums globais (OrderStatus, PaymentStatus...)"),
     ("│   │   │   ├── ",     "exception/",                 "dir",  "GlobalExceptionHandler + erros padrao"),
     ("│   │   │   └── ",     "PackApiApplication.java",    "java", "Entry point da aplicacao"),
@@ -77,7 +77,7 @@ LINES = [
     ("│   ├── ",       "fluxo.html",                           "file", "Fluxo em partes com menus"),
     ("│   └── ",       "projeto-status.html",                  "file", "Status e roadmap do projeto"),
     ("├── ",           "pom.xml",                              "file", "Maven: dependencias, plugins, Java 21"),
-    ("└── ",           "docker-compose.yml",                   "file", "PostgreSQL pack-db na porta 5432"),
+    ("└── ",           ".gitignore",                           "file", "O que o git ignora (target/, IDE...)"),
 ]
 
 def nc(t):

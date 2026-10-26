@@ -15,7 +15,7 @@
 <text x="28" y="162" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   │   │   ├── </text>
 <text x="153.1" y="162" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">auth/</text>
 <text x="356.4" y="162" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="162" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Autenticacao e acesso (Fase 8)</text>
+<text x="372.1" y="162" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Login, cadastro, token JWT e regras de dono</text>
 <text x="28" y="184" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   │   │   │   ├── </text>
 <text x="184.4" y="184" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">permission/</text>
 <text x="356.4" y="184" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
@@ -103,7 +103,7 @@
 <text x="28" y="646" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   │   │   ├── </text>
 <text x="153.1" y="646" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">config/</text>
 <text x="356.4" y="646" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="646" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">SecurityConfig (temporario ate a Fase 8)</text>
+<text x="372.1" y="646" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Regras de acesso (SecurityConfig) e JWT</text>
 <text x="28" y="668" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   │   │   ├── </text>
 <text x="153.1" y="668" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">enums/</text>
 <text x="356.4" y="668" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
@@ -187,7 +187,7 @@
 <text x="356.4" y="1130" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
 <text x="372.1" y="1130" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Maven: dependencias, plugins, Java 21</text>
 <text x="28" y="1152" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">└── </text>
-<text x="59.3" y="1152" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">docker-compose.yml</text>
+<text x="59.3" y="1152" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">.gitignore</text>
 <text x="356.4" y="1152" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="1152" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">PostgreSQL pack-db na porta 5432</text>
+<text x="372.1" y="1152" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">O que o git ignora (target/, IDE...)</text>
 </svg>

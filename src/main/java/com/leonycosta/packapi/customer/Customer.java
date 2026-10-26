@@ -26,6 +26,10 @@ public class Customer {
     @Column(nullable = false)
     private String telefone;
 
+    // Pode ser nulo só porque clientes criados antes do login existir não têm senha
+    @Column(name = "senha_hash")
+    private String senhaHash;
+
     @Column(name = "criado_em", nullable = false)
     private LocalDateTime criadoEm;
 

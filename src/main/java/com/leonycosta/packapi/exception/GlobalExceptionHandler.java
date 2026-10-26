@@ -27,6 +27,12 @@ public class GlobalExceptionHandler {
         return build(404, "Not Found", ex.getMessage(), req.getRequestURI());
     }
 
+    // Login com e-mail ou senha errados → 401
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiError> handleUnauthorized(UnauthorizedException ex, HttpServletRequest req) {
+        return build(401, "Unauthorized", ex.getMessage(), req.getRequestURI());
+    }
+
     // Regra de negócio violada (estoque, cupom expirado etc.) → 422
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiError> handleBusiness(BusinessException ex, HttpServletRequest req) {

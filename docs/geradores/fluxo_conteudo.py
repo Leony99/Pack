@@ -80,9 +80,12 @@ def caixas():
         "return [a|http]",
         "    .[m|csrf](csrf -> csrf.[m|disable]())",
         "    .[m|sessionManagement](s -> s.[m|sessionCreationPolicy]([a|STATELESS]))",
-        "    .[m|authorizeHttpRequests](auth -> auth.[m|anyRequest]().[m|permitAll]())",
+        "    .[m|oauth2ResourceServer]([a|jwt])     [c|// confere o token de cada requisição]",
+        "    .[m|authorizeHttpRequests](...)       [c|// regras por rota e permissão]",
         "    .[m|build]();",
-        "[c|// temporário: libera todas as rotas até a Fase 8 (JWT)]",
+        "[c|// catálogo público; carrinho e pedidos só do dono;]",
+        "[c|// gestão exige permissão (CATALOG_WRITE, ORDER_MANAGE...)]",
+        "[c|// AuthDataSeeder cria permissões, papéis e o admin inicial]",
     ]))
 
     add(Box("tomcat", "Servidor no ar", [
