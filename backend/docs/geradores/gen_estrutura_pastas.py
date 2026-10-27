@@ -59,7 +59,7 @@ LINES = [
     ("│   │   │   │   └── ", "size/",                      "dir",  "Tamanhos (P, M, G, GG...)"),
     # transversais: usados por todas as categorias
     ("│   │   │   ├── ",     "auth/",                      "dir",  "Login, cadastro, token JWT e regras de dono"),
-    ("│   │   │   ├── ",     "config/",                    "dir",  "Regras de acesso (SecurityConfig) e JWT"),
+    ("│   │   │   ├── ",     "config/",                    "dir",  "Regras de acesso, JWT e Swagger (OpenApiConfig)"),
     ("│   │   │   ├── ",     "enums/",                     "dir",  "Enums globais (OrderStatus, PaymentStatus...)"),
     ("│   │   │   ├── ",     "exception/",                 "dir",  "GlobalExceptionHandler + erros padrao"),
     ("│   │   │   └── ",     "PackApiApplication.java",    "java", "Entry point da aplicacao"),

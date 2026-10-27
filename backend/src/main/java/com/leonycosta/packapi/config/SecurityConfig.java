@@ -44,6 +44,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login",
                                 "/api/v1/auth/staff/login").permitAll()
                         .requestMatchers("/error", "/actuator/health").permitAll()
+                        // documentação: a página do Swagger e o JSON que ela lê
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                         // ── estoque (antes da leitura pública de /variants) ──
                         .requestMatchers(HttpMethod.GET, "/api/v1/variants/estoque-baixo",

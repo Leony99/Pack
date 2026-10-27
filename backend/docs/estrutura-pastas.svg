@@ -125,7 +125,7 @@
 <text x="28" y="756" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   │   │   ├── </text>
 <text x="153.1" y="756" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">config/</text>
 <text x="356.4" y="756" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="756" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Regras de acesso (SecurityConfig) e JWT</text>
+<text x="372.1" y="756" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Regras de acesso, JWT e Swagger (OpenApiConfig)</text>
 <text x="28" y="778" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   │   │   ├── </text>
 <text x="153.1" y="778" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">enums/</text>
 <text x="356.4" y="778" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>

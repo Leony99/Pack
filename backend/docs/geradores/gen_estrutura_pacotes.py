@@ -63,7 +63,7 @@ def file_label(pkg, name):
 # Packages definition: (package_name, [files])
 PACKAGES = {
     "PackApiApplication": {"files": ["PackApiApplication.java"], "zone": "cross"},
-    "config": {"files": ["SecurityConfig.java","JwtConfig.java","SecurityErrorHandler.java"], "zone": "cross"},
+    "config": {"files": ["SecurityConfig.java","JwtConfig.java","SecurityErrorHandler.java","OpenApiConfig.java"], "zone": "cross"},
     "exception": {"files": ["ApiError.java","BusinessException.java","ConflictException.java","UnauthorizedException.java","GlobalExceptionHandler.java"], "zone": "cross"},
     # AuthService vem primeiro: o AuthController é acrescentado automaticamente a partir dele
     "auth": {"files": ["AuthService.java","TokenService.java","AccessGuard.java","AuthDataSeeder.java","TipoUsuario.java",

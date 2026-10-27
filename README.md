@@ -21,6 +21,7 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 | Framework | Spring Boot 4.1 (Web, Data JPA, Validation, Security) |
 | Autenticação | JWT (HS256) com o OAuth2 Resource Server do Spring; senhas em BCrypt |
 | Banco | PostgreSQL 16 (Docker) |
+| Documentação | OpenAPI 3 com springdoc (Swagger UI) |
 | Outros | Lombok, Maven Wrapper |
 
 ## O que a API faz
@@ -66,7 +67,7 @@ backend/src/main/java/com/leonycosta/packapi/
 ├── order/      order, order_item, payment, shipment, coupon
 ├── product/    product, product_variant, product_image, product_tag, size, color, inventory
 ├── auth/       login, cadastro, geração do token e regras de "dono"
-├── config/     SecurityConfig, JwtConfig
+├── config/     SecurityConfig, JwtConfig, OpenApiConfig
 ├── enums/
 └── exception/  GlobalExceptionHandler e erros padronizados
 ```
@@ -91,6 +92,17 @@ backend/src/main/java/com/leonycosta/packapi/
 
 A API sobe em `http://localhost:8080/api/v1`. As tabelas são criadas pelo Hibernate. As permissões, os papéis e o admin inicial (definido por `ADMIN_EMAIL` e `ADMIN_PASSWORD`) são criados na primeira execução.
 
+### Testando pelo navegador (Swagger)
+
+Com a aplicação rodando, abra `http://localhost:8080/swagger-ui.html`. A página lista todas as rotas, com os campos que cada uma recebe e devolve, e permite testá-las direto ali.
+
+Para as rotas protegidas:
+1. Faça login em `POST /api/v1/auth/staff/login` com o admin do `.env` (ou em `/auth/login`, como cliente).
+2. Copie o `token` da resposta.
+3. Clique em **Authorize** e cole o token.
+
+A especificação OpenAPI, em JSON, fica em `/v3/api-docs` e pode ser importada no Postman.
+
 ### Exemplo rápido
 
 ```bash
@@ -112,7 +124,7 @@ Os diagramas ficam em [`backend/docs/`](backend/docs/) e são gerados por script
 
 ## Próximos passos
 
-- [ ] Documentação OpenAPI / Swagger
+- [x] Documentação OpenAPI / Swagger
 - [ ] Testes automatizados (unitários e de integração)
 - [ ] Docker Compose (API + banco)
 - [ ] CI/CD com GitHub Actions
