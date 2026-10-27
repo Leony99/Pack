@@ -92,7 +92,7 @@ PACKAGES = {
     "inventory": {"files": ["InventoryMovement.java","InventoryMovementRepository.java","InventoryMovementRequest.java","InventoryMovementResponse.java","InventoryMovementService.java"], "zone": "product"},
 }
 
-# Todo pacote com Service ganhou um Controller correspondente (Fase 7)
+# Todo pacote com Service ganhou um Controller correspondente
 for info in PACKAGES.values():
     svc = next((f for f in info["files"] if f.endswith("Service.java")), None)
     if svc:

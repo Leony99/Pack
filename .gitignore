@@ -3,12 +3,22 @@
 .env.*
 !.env.example
 
-### Build (Maven) ###
+### Backend (Maven) ###
 target/
-.mvn/wrapper/maven-wrapper.jar
+**/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 HELP.md
+
+### Frontend (Node / Next.js) ###
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+.vercel/
 
 ### Logs ###
 *.log
@@ -39,11 +49,10 @@ desktop.ini
 *.ipr
 
 ### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
@@ -53,3 +62,6 @@ build/
 
 ### Claude Code (configurações locais) ###
 .claude/
+
+### Docs só de desenvolvimento ###
+backend/docs/projeto-status.html

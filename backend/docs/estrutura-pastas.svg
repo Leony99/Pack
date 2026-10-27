@@ -1,11 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="814" height="1364" viewBox="0 0 814 1364">
+<svg xmlns="http://www.w3.org/2000/svg" width="814" height="1320" viewBox="0 0 814 1320">
 <defs><style>text{font-family:JetBrains Mono, Fira Code, monospace;}</style></defs>
-<rect width="814" height="1364" fill="#0d1117"/>
+<rect width="814" height="1320" fill="#0d1117"/>
 <rect width="814" height="48" fill="rgba(255,255,255,0.02)"/>
 <line x1="0" y1="48" x2="814" y2="48" stroke="#1e2736" stroke-width="1"/>
 <text x="28" y="34" font-family="JetBrains Mono, Fira Code, monospace" font-size="11" font-weight="700" fill="#58a6ff" letter-spacing="1">PACK-API — ESTRUTURA DE PASTAS</text>
 <text x="28" y="48" font-family="JetBrains Mono, Fira Code, monospace" font-size="10" fill="#2e4a2e">Spring Boot 4.1 · Java 21 · package-by-feature</text>
-<text x="28.0" y="74" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#e6edf3">Pack-api/</text>
+<text x="28.0" y="74" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#e6edf3">Pack/backend/</text>
+<text x="356.4" y="74" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
+<text x="372.1" y="74" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">frontend/ fica ao lado, em Pack/frontend/</text>
 <text x="28" y="96" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">├── </text>
 <text x="59.3" y="96" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">src/</text>
 <text x="28" y="118" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   ├── </text>
@@ -147,7 +149,7 @@
 <text x="28" y="910" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│       └── </text>
 <text x="121.8" y="910" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#79c0ff">java/com/leonycosta/packapi/</text>
 <text x="356.4" y="910" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="910" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Testes unitarios e de integracao (fase 10)</text>
+<text x="372.1" y="910" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Testes unitarios e de integracao</text>
 <text x="28" y="932" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">├── </text>
 <text x="59.3" y="932" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">docs/</text>
 <text x="28" y="954" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   ├── </text>
@@ -194,32 +196,24 @@
 <text x="90.6" y="1174" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">estrutura-pastas.svg</text>
 <text x="356.4" y="1174" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
 <text x="372.1" y="1174" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Este arquivo</text>
-<text x="28" y="1196" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   ├── </text>
+<text x="28" y="1196" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   └── </text>
 <text x="90.6" y="1196" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">fluxo.html</text>
 <text x="356.4" y="1196" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
 <text x="372.1" y="1196" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Fluxo em partes com menus</text>
-<text x="28" y="1218" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   └── </text>
-<text x="90.6" y="1218" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">projeto-status.html</text>
+<text x="28" y="1218" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">├── </text>
+<text x="59.3" y="1218" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">.env</text>
 <text x="356.4" y="1218" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="1218" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Status e roadmap do projeto</text>
+<text x="372.1" y="1218" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Senhas e chave JWT locais (fora do git)</text>
 <text x="28" y="1240" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">├── </text>
-<text x="59.3" y="1240" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">.env</text>
+<text x="59.3" y="1240" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">.env.example</text>
 <text x="356.4" y="1240" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="1240" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Senhas e chave JWT locais (fora do git)</text>
+<text x="372.1" y="1240" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Modelo do .env, sem valores reais</text>
 <text x="28" y="1262" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">├── </text>
-<text x="59.3" y="1262" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">.env.example</text>
+<text x="59.3" y="1262" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">mvnw / mvnw.cmd</text>
 <text x="356.4" y="1262" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="1262" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Modelo do .env, sem valores reais</text>
-<text x="28" y="1284" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">├── </text>
-<text x="59.3" y="1284" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">.gitignore</text>
+<text x="372.1" y="1262" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Maven Wrapper (roda sem instalar o Maven)</text>
+<text x="28" y="1284" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">└── </text>
+<text x="59.3" y="1284" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">pom.xml</text>
 <text x="356.4" y="1284" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="1284" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">O que o git ignora (.env, target/, IDE...)</text>
-<text x="28" y="1306" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">├── </text>
-<text x="59.3" y="1306" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">pom.xml</text>
-<text x="356.4" y="1306" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="1306" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Maven: dependencias, plugins, Java 21</text>
-<text x="28" y="1328" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">└── </text>
-<text x="59.3" y="1328" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">README.md</text>
-<text x="356.4" y="1328" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="1328" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Apresentacao do projeto e como rodar</text>
+<text x="372.1" y="1284" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Maven: dependencias, plugins, Java 21</text>
 </svg>

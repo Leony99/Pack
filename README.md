@@ -1,4 +1,13 @@
-# Pack API
+# Pack
+
+E-commerce de roupas dividido em duas partes:
+
+| Pasta | O que tem |
+|---|---|
+| [`backend/`](backend/) | API REST em Spring Boot (descrita abaixo) |
+| `frontend/` | Loja em React / Next.js (em desenvolvimento) |
+
+## Backend: Pack API
 
 API REST de um e-commerce de roupas, feita com **Spring Boot 4** e **Java 21**. Cobre o fluxo completo de uma loja: catálogo com variantes (tamanho e cor), estoque, carrinho, cupons, checkout, pagamento e envio. Tem login com JWT e controle de acesso por permissão.
 
@@ -43,14 +52,14 @@ Clientes e funcionários fazem login e recebem um token JWT, que vai no cabeçal
 | ATENDENTE | pedidos e consulta de clientes |
 | SUPERVISOR | estoquista + atendente |
 
-Todas as regras de acesso ficam em um só lugar: [`SecurityConfig`](src/main/java/com/leonycosta/packapi/config/SecurityConfig.java).
+Todas as regras de acesso ficam em um só lugar: [`SecurityConfig`](backend/src/main/java/com/leonycosta/packapi/config/SecurityConfig.java).
 
 ## Organização do código
 
 Os pacotes seguem o modelo *package-by-feature*, agrupados por categoria. Cada domínio tem a própria pasta, com entidade, repository, service, controller e DTOs:
 
 ```
-com/leonycosta/packapi/
+backend/src/main/java/com/leonycosta/packapi/
 ├── staff/      staff, role, permission, role_permission
 ├── customer/   customer, address
 ├── cart/       cart, cart_item
@@ -70,8 +79,9 @@ com/leonycosta/packapi/
    ```bash
    docker run --name pack -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=pack-db -p 5432:5432 -d postgres:16
    ```
-2. Crie o arquivo de configuração local a partir do modelo e preencha os valores. O `JWT_SECRET` precisa ter pelo menos 32 caracteres.
+2. Entre na pasta do backend e crie o arquivo de configuração local a partir do modelo. Depois preencha os valores; o `JWT_SECRET` precisa ter pelo menos 32 caracteres.
    ```bash
+   cd backend
    cp .env.example .env
    ```
 3. Rode a aplicação:
@@ -94,10 +104,10 @@ curl localhost:8080/api/v1/auth/me -H "Authorization: Bearer <token>"
 
 ## Documentação
 
-Os diagramas ficam em [`docs/`](docs/) e são gerados por scripts Python em [`docs/geradores/`](docs/geradores/), a partir do próprio código.
+Os diagramas ficam em [`backend/docs/`](backend/docs/) e são gerados por scripts Python em [`backend/docs/geradores/`](backend/docs/geradores/), a partir do próprio código.
 
-- [`erd.svg`](docs/erd.svg): diagrama entidade-relacionamento.
-- [`estrutura-pacotes.svg`](docs/estrutura-pacotes.svg) e [`estrutura-pastas.svg`](docs/estrutura-pastas.svg): organização do código.
+- [`erd.svg`](backend/docs/erd.svg): diagrama entidade-relacionamento.
+- [`estrutura-pacotes.svg`](backend/docs/estrutura-pacotes.svg) e [`estrutura-pastas.svg`](backend/docs/estrutura-pastas.svg): organização do código.
 - `fluxo.html`: página interativa com o caminho de cada requisição, passando pela segurança, pelo controller, pelo service e pelo repository, com o código real. Baixe o arquivo e abra no navegador.
 
 ## Próximos passos

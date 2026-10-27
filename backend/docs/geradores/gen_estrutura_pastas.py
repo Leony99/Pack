@@ -26,7 +26,7 @@ CW   = 7.82    # char width approx (JetBrains Mono 13px)
 # (tree_prefix, name, type, comment)
 # type: root | dir | pkg | file | java | prop
 LINES = [
-    ("",               "Pack-api/",                            "root", ""),
+    ("",               "Pack/backend/",                        "root", "frontend/ fica ao lado, em Pack/frontend/"),
     ("├── ",           "src/",                                 "dir",  ""),
     ("│   ├── ",       "main/",                                "dir",  ""),
     ("│   │   ├── ",   "java/com/leonycosta/packapi/",         "pkg",  ""),
@@ -66,7 +66,7 @@ LINES = [
     ("│   │   └── ",   "resources/",                           "dir",  ""),
     ("│   │       └── ", "application.properties",             "prop", "Configuracao; segredos vem do .env"),
     ("│   └── ",       "test/",                                "dir",  ""),
-    ("│       └── ",   "java/com/leonycosta/packapi/",         "pkg",  "Testes unitarios e de integracao (fase 10)"),
+    ("│       └── ",   "java/com/leonycosta/packapi/",         "pkg",  "Testes unitarios e de integracao"),
     ("├── ",           "docs/",                                "dir",  ""),
     ("│   ├── ",       "geradores/",                           "dir",  "Scripts Python que geram os SVGs"),
     ("│   │   ├── ",   "diagrama.py",                          "file", "Pecas de desenho dos fluxos"),
@@ -79,13 +79,11 @@ LINES = [
     ("│   ├── ",       "erd.svg",                              "file", "Diagrama entidade-relacionamento"),
     ("│   ├── ",       "estrutura-pacotes.svg",                "file", "Estrutura de pacotes por dominio"),
     ("│   ├── ",       "estrutura-pastas.svg",                 "file", "Este arquivo"),
-    ("│   ├── ",       "fluxo.html",                           "file", "Fluxo em partes com menus"),
-    ("│   └── ",       "projeto-status.html",                  "file", "Status e roadmap do projeto"),
+    ("│   └── ",       "fluxo.html",                           "file", "Fluxo em partes com menus"),
     ("├── ",           ".env",                                 "prop", "Senhas e chave JWT locais (fora do git)"),
     ("├── ",           ".env.example",                         "file", "Modelo do .env, sem valores reais"),
-    ("├── ",           ".gitignore",                           "file", "O que o git ignora (.env, target/, IDE...)"),
-    ("├── ",           "pom.xml",                              "file", "Maven: dependencias, plugins, Java 21"),
-    ("└── ",           "README.md",                            "file", "Apresentacao do projeto e como rodar"),
+    ("├── ",           "mvnw / mvnw.cmd",                      "file", "Maven Wrapper (roda sem instalar o Maven)"),
+    ("└── ",           "pom.xml",                              "file", "Maven: dependencias, plugins, Java 21"),
 ]
 
 def nc(t):
