@@ -1,0 +1,43 @@
+# Sobe a Pack inteira com um comando:   docker compose up --build
+# Desliga tudo:                         docker compose down
+# Só o banco (para rodar a API pelo ./mvnw):  docker compose up -d db
+#
+# Os valores ${...} vêm do .env aqui da raiz (copie o .env.example).
+
+services:
+
+  # Banco PostgreSQL. Os dados ficam no volume "pack-db-data" e sobrevivem ao "down"
+  # (só somem com "docker compose down -v").
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: pack-db
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"   # aberto no seu PC para o ./mvnw e para ferramentas como DBeaver
+    volumes:
+      - pack-db-data:/var/lib/postgresql/data
+    # "Está pronto?" — a API só sobe depois que o banco responde aqui
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # A API, montada pelo backend/Dockerfile
+  api:
+    build: ./backend
+    env_file: .env
+    environment:
+      # Dentro do Compose cada serviço é encontrado pelo nome: o banco é "db", não "localhost"
+      DB_URL: jdbc:postgresql://db:5432/pack-db
+      SPRING_JPA_SHOW_SQL: "false"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pack-db-data:

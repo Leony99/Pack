@@ -20,9 +20,10 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 | Linguagem | Java 21 |
 | Framework | Spring Boot 4.1 (Web, Data JPA, Validation, Security) |
 | Autenticação | JWT (HS256) com o OAuth2 Resource Server do Spring; senhas em BCrypt |
-| Banco | PostgreSQL 16 (Docker) |
+| Banco | PostgreSQL 16 |
 | Documentação | OpenAPI 3 com springdoc (Swagger UI) |
 | Testes | JUnit 6, AssertJ, Mockito, MockMvc e Testcontainers |
+| Infra | Docker (imagem em duas etapas) e Docker Compose |
 | Outros | Lombok, Maven Wrapper |
 
 ## O que a API faz
@@ -76,23 +77,34 @@ backend/src/main/java/com/leonycosta/packapi/
 
 ## Como rodar
 
-**Requisitos:** Java 21 ou mais recente e Docker.
+Primeiro, crie o arquivo de configuração local a partir do modelo, na raiz do repositório, e preencha os valores (o `JWT_SECRET` precisa ter pelo menos 32 caracteres):
 
-1. Suba o PostgreSQL:
-   ```bash
-   docker run --name pack -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=pack-db -p 5432:5432 -d postgres:16
-   ```
-2. Entre na pasta do backend e crie o arquivo de configuração local a partir do modelo. Depois preencha os valores; o `JWT_SECRET` precisa ter pelo menos 32 caracteres.
-   ```bash
-   cd backend
-   cp .env.example .env
-   ```
-3. Rode a aplicação:
-   ```bash
-   ./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run
-   ```
+```bash
+cp .env.example .env
+```
 
-A API sobe em `http://localhost:8080/api/v1`. As tabelas são criadas pelo Hibernate. As permissões, os papéis e o admin inicial (definido por `ADMIN_EMAIL` e `ADMIN_PASSWORD`) são criados na primeira execução.
+### Com Docker Compose (recomendado)
+
+**Requisito:** só o Docker. Não precisa instalar Java nem Maven.
+
+```bash
+docker compose up --build     # sobe o banco e a API
+docker compose down           # desliga (os dados ficam guardados no volume)
+```
+
+O Compose sobe dois serviços: `db` (PostgreSQL 16, com os dados num volume) e `api` (a imagem montada pelo [`backend/Dockerfile`](backend/Dockerfile)). A API só inicia depois que o banco responde.
+
+### Pelo Maven (para desenvolver)
+
+**Requisitos:** Java 21 ou mais recente e Docker. O banco roda pelo Compose e a API roda na sua máquina, o que deixa o reinício mais rápido enquanto você mexe no código:
+
+```bash
+docker compose up -d db
+cd backend
+./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run
+```
+
+Nas duas formas, a API sobe em `http://localhost:8080/api/v1`. As tabelas são criadas pelo Hibernate. As permissões, os papéis e o admin inicial (definido por `ADMIN_EMAIL` e `ADMIN_PASSWORD`) são criados na primeira execução.
 
 ### Testando pelo navegador (Swagger)
 
@@ -145,7 +157,7 @@ Os diagramas ficam em [`backend/docs/`](backend/docs/) e são gerados por script
 
 - [x] Documentação OpenAPI / Swagger
 - [x] Testes automatizados (unidade, integração e concorrência)
-- [ ] Docker Compose (API + banco)
+- [x] Docker Compose (API + banco)
 - [ ] CI/CD com GitHub Actions
 - [ ] Deploy na AWS
 

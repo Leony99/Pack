@@ -143,7 +143,7 @@
 <text x="28" y="866" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   │       └── </text>
 <text x="153.1" y="866" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">application.properties</text>
 <text x="356.4" y="866" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="866" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Configuracao; segredos vem do .env</text>
+<text x="372.1" y="866" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Configuracao; segredos vem do .env da raiz</text>
 <text x="28" y="888" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   └── </text>
 <text x="90.6" y="888" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">test/</text>
 <text x="28" y="910" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│       └── </text>
@@ -249,13 +249,13 @@
 <text x="356.4" y="1460" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
 <text x="372.1" y="1460" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Fluxo em partes com menus</text>
 <text x="28" y="1482" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">├── </text>
-<text x="59.3" y="1482" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">.env</text>
+<text x="59.3" y="1482" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">.dockerignore</text>
 <text x="356.4" y="1482" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="1482" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Senhas e chave JWT locais (fora do git)</text>
+<text x="372.1" y="1482" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">O que fica fora da imagem Docker</text>
 <text x="28" y="1504" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">├── </text>
-<text x="59.3" y="1504" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">.env.example</text>
+<text x="59.3" y="1504" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">Dockerfile</text>
 <text x="356.4" y="1504" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="1504" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Modelo do .env, sem valores reais</text>
+<text x="372.1" y="1504" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Imagem da API: compila e roda o .jar</text>
 <text x="28" y="1526" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">├── </text>
 <text x="59.3" y="1526" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">mvnw / mvnw.cmd</text>
 <text x="356.4" y="1526" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>

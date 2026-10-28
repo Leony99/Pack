@@ -1,0 +1,12 @@
+# O que NÃO é enviado para o Docker ao montar a imagem.
+# Deixa o build mais rápido e evita que segredos (.env) entrem na imagem.
+target/
+docs/
+.env
+.env.*
+.mvn/
+mvnw
+mvnw.cmd
+.vscode/
+.idea/
+*.iml
