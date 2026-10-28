@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -111,8 +112,13 @@ public class OrderService {
         order.setItens(new ArrayList<>());
         order = orderRepository.save(order);
 
-        // 8. Cria OrderItems com snapshot de SKU e preço, decrementa estoque
-        for (CartItem cartItem : cart.getItens()) {
+        // 8. Cria OrderItems com snapshot de SKU e preço, decrementa estoque.
+        // Em ordem de id da variante: cada baixa trava a linha da variante, e se dois checkouts travassem
+        // as mesmas variantes em ordens diferentes, um ficaria esperando o outro para sempre (deadlock).
+        List<CartItem> itensEmOrdem = cart.getItens().stream()
+                .sorted(Comparator.comparing(item -> item.getVariant().getId()))
+                .toList();
+        for (CartItem cartItem : itensEmOrdem) {
             ProductVariant variant = cartItem.getVariant();
             BigDecimal precoUnit = variant.getPreco() != null
                     ? variant.getPreco()
@@ -146,7 +152,11 @@ public class OrderService {
                     "Não é possível mudar o pedido de " + order.getStatus() + " para " + status);
         }
         if (status == OrderStatus.CANCELADO) {
-            for (OrderItem item : order.getItens()) {
+            // mesma ordem do checkout, para as travas de estoque não se cruzarem
+            List<OrderItem> itensEmOrdem = order.getItens().stream()
+                    .sorted(Comparator.comparing(item -> item.getVariant().getId()))
+                    .toList();
+            for (OrderItem item : itensEmOrdem) {
                 inventoryService.registerDevolucao(item.getVariant(), item.getQuantidade(),
                         "Cancelamento do pedido " + order.getId());
             }
