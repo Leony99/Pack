@@ -22,6 +22,7 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 | Autenticação | JWT (HS256) com o OAuth2 Resource Server do Spring; senhas em BCrypt |
 | Banco | PostgreSQL 16 (Docker) |
 | Documentação | OpenAPI 3 com springdoc (Swagger UI) |
+| Testes | JUnit 6, AssertJ, Mockito, MockMvc e Testcontainers |
 | Outros | Lombok, Maven Wrapper |
 
 ## O que a API faz
@@ -31,7 +32,8 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 - **Carrinho e checkout:**
   - o pedido guarda o preço e o endereço do momento da compra, como um *snapshot*;
   - cupons podem ser fixos ou percentuais;
-  - se o estoque acabar no meio do checkout, nada é gravado (rollback).
+  - se o estoque acabar no meio do checkout, nada é gravado (rollback);
+  - compras simultâneas não vendem a mesma unidade duas vezes: o estoque de cada variante é travado no banco (`SELECT ... FOR UPDATE`) enquanto o pedido é gravado.
 - **Pedido:**
   - o status só avança na ordem: aguardando pagamento → pago → em separação → enviado → entregue;
   - o pedido pode ser cancelado antes do envio, e o cancelamento devolve o estoque;
@@ -114,6 +116,23 @@ curl -X POST localhost:8080/api/v1/auth/register -H "Content-Type: application/j
 curl localhost:8080/api/v1/auth/me -H "Authorization: Bearer <token>"
 ```
 
+## Testes
+
+São 177 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
+
+```bash
+cd backend
+./mvnw test        # Windows: mvnw.cmd test
+```
+
+| Tipo | O que faz | Exemplos |
+|---|---|---|
+| Unidade | Testa uma classe sozinha, sem Spring nem banco; roda em milissegundos | Regras de status do pedido; `CouponService` com o repositório substituído por um mock (Mockito) |
+| Integração | Sobe a aplicação inteira com um PostgreSQL descartável (Testcontainers) e faz requisições pelo MockMvc, passando pela segurança, pelos controllers, pelos services e pelo banco | Cadastro e login, tokens adulterados ou vencidos, permissões de cada papel, checkout com cupom e rollback, pagamento e envio |
+| Concorrência | Dispara compras e movimentos de estoque ao mesmo tempo, em threads separadas | Dois clientes comprando a última unidade; cinco clientes disputando três unidades |
+
+Os testes ficam em [`backend/src/test/`](backend/src/test/java/com/leonycosta/packapi), nos mesmos pacotes do código que testam. A base comum, com a configuração do banco descartável e atalhos para montar os dados, fica em `support/`.
+
 ## Documentação
 
 Os diagramas ficam em [`backend/docs/`](backend/docs/) e são gerados por scripts Python em [`backend/docs/geradores/`](backend/docs/geradores/), a partir do próprio código.
@@ -125,7 +144,7 @@ Os diagramas ficam em [`backend/docs/`](backend/docs/) e são gerados por script
 ## Próximos passos
 
 - [x] Documentação OpenAPI / Swagger
-- [ ] Testes automatizados (unitários e de integração)
+- [x] Testes automatizados (unidade, integração e concorrência)
 - [ ] Docker Compose (API + banco)
 - [ ] CI/CD com GitHub Actions
 - [ ] Deploy na AWS
