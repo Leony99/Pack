@@ -1,5 +1,7 @@
 # Pack
 
+[![CI](https://github.com/Leony99/Pack/actions/workflows/ci.yml/badge.svg)](https://github.com/Leony99/Pack/actions/workflows/ci.yml)
+
 E-commerce de roupas dividido em duas partes:
 
 | Pasta | O que tem |
@@ -23,7 +25,7 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 | Banco | PostgreSQL 16 |
 | Documentação | OpenAPI 3 com springdoc (Swagger UI) |
 | Testes | JUnit 6, AssertJ, Mockito, MockMvc e Testcontainers |
-| Infra | Docker (imagem em duas etapas) e Docker Compose |
+| Infra | Docker (imagem em duas etapas), Docker Compose e GitHub Actions (CI) |
 | Outros | Lombok, Maven Wrapper |
 
 ## O que a API faz
@@ -145,6 +147,16 @@ cd backend
 
 Os testes ficam em [`backend/src/test/`](backend/src/test/java/com/leonycosta/packapi), nos mesmos pacotes do código que testam. A base comum, com a configuração do banco descartável e atalhos para montar os dados, fica em `support/`.
 
+### Integração contínua (CI)
+
+A cada envio para a `main` (e a cada pull request), o [GitHub Actions](.github/workflows/ci.yml) roda numa máquina Linux temporária:
+
+1. instala o Java 21;
+2. roda os testes com `./mvnw test` (o banco descartável sobe no Docker da própria máquina do GitHub);
+3. monta a imagem Docker da API, para garantir que o `Dockerfile` continua funcionando.
+
+O selo no topo deste README mostra o resultado da última execução. O histórico fica na aba [Actions](https://github.com/Leony99/Pack/actions). Se algum teste falhar, os relatórios ficam disponíveis para download na página da execução.
+
 ## Documentação
 
 Os diagramas ficam em [`backend/docs/`](backend/docs/) e são gerados por scripts Python em [`backend/docs/geradores/`](backend/docs/geradores/), a partir do próprio código.
@@ -158,8 +170,9 @@ Os diagramas ficam em [`backend/docs/`](backend/docs/) e são gerados por script
 - [x] Documentação OpenAPI / Swagger
 - [x] Testes automatizados (unidade, integração e concorrência)
 - [x] Docker Compose (API + banco)
-- [ ] CI/CD com GitHub Actions
+- [x] CI com GitHub Actions (testes + imagem Docker)
 - [ ] Deploy na AWS
+- [ ] CD: publicar automaticamente quando o CI passar
 
 ## Autor
 
