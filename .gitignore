@@ -24,7 +24,7 @@ next-env.d.ts
 *.log
 logs/
 
-### Python (geradores dos docs) ###
+### Python ###
 __pycache__/
 *.pyc
 
@@ -63,5 +63,6 @@ build/
 ### Claude Code (configurações locais) ###
 .claude/
 
-### Docs só de desenvolvimento ###
-backend/docs/projeto-status.html
+### Só de desenvolvimento (local) ###
+# scripts que geram os diagramas de backend/docs
+backend/docs/geradores/
