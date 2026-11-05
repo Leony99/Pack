@@ -14,7 +14,7 @@ public class TestcontainersConfig {
     @Bean
     @ServiceConnection
     PostgreSQLContainer postgres() {
-        // mesma imagem do banco de desenvolvimento, que já está baixada
-        return new PostgreSQLContainer("postgres:16");
+        // mesma versão do banco de produção (Neon) e do docker-compose.yml
+        return new PostgreSQLContainer("postgres:18");
     }
 }

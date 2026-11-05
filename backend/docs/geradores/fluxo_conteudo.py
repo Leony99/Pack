@@ -23,7 +23,7 @@ def caixas():
 
     add(Box("run", "SpringApplication.run()  ·  o que acontece ao iniciar", [
         "[c|// 1. lê as configurações]",
-        "carrega o [a|application.properties]  @@props",
+        "carrega o [a|application.properties] (+ [a|application-prod] em produção)  @@props",
         "",
         "[c|// 2. procura classes anotadas em com.leonycosta.packapi]",
         "cria um objeto (bean) de cada [k|@RestController], [k|@Service],",
@@ -36,19 +36,23 @@ def caixas():
         "monta a [a|SecurityFilterChain] do [a|SecurityConfig]  @@sec",
         "",
         "[c|// 5. sobe o servidor web embutido]",
-        "inicia o Tomcat na porta [a|8080]",
+        "inicia o Tomcat na porta [a|8080] (no Cloud Run, a da variável [a|PORT])",
     ]))
 
-    add(Box("props", "application.properties  +  .env", [
-        "[a|spring.config.import]=optional:file:.env[.properties]",
-        "[c|# os segredos vêm do .env (fora do git) ou de variáveis de ambiente]",
+    add(Box("props", "application.properties  +  .env  (+ application-prod.properties)", [
+        "[a|spring.config.import]=optional:file:.env[.properties],optional:file:../.env[.properties]",
+        "[c|# local: segredos no .env da raiz; Cloud Run: variáveis vindas do Secret Manager]",
         "",
         "[a|spring.datasource.url]=${DB_URL:jdbc:postgresql://localhost:5432/pack-db}",
         "[a|spring.datasource.password]=${DB_PASSWORD}   [c|# sem padrão: falta → não sobe]",
         "[a|spring.jpa.hibernate.ddl-auto]=update        [c|# cria/atualiza as tabelas]",
-        "[a|server.port]=8080                           [c|# porta da API]",
+        "[a|server.port]=${PORT:8080}                   [c|# o Cloud Run informa a porta]",
         "[a|jwt.secret]=${JWT_SECRET}                   [c|# chave que assina os tokens]",
         "[a|jwt.expiration-minutes]=60                  [c|# validade do token]",
+        "",
+        "[c|# perfil prod (SPRING_PROFILES_ACTIVE=prod, no Cloud Run):]",
+        "[a|spring.datasource.hikari.maximum-pool-size]=5  [c|# limite do Neon grátis]",
+        "[a|server.forward-headers-strategy]=framework     [c|# links https atrás do proxy]",
     ], style="pkg"))
 
     add(Box("beans", "Beans  ·  o Spring cria e conecta as classes", [

@@ -6,10 +6,10 @@
 
 services:
 
-  # Banco PostgreSQL. Os dados ficam no volume "pack-db-data" e sobrevivem ao "down"
-  # (só somem com "docker compose down -v").
+  # Banco PostgreSQL, na mesma versão do banco de produção (Neon).
+  # Os dados ficam no volume "pack-db-data" e sobrevivem ao "down" (só somem com "docker compose down -v").
   db:
-    image: postgres:16
+    image: postgres:18
     environment:
       POSTGRES_DB: pack-db
       POSTGRES_USER: ${DB_USERNAME}
@@ -17,7 +17,7 @@ services:
     ports:
       - "5432:5432"   # aberto no seu PC para o ./mvnw e para ferramentas como DBeaver
     volumes:
-      - pack-db-data:/var/lib/postgresql/data
+      - pack-db-data:/var/lib/postgresql   # a partir do 18 a imagem usa esta pasta (antes era .../data)
     # "Está pronto?" — a API só sobe depois que o banco responde aqui
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]

@@ -17,14 +17,18 @@ COPY src ./src
 RUN mvn -q package -DskipTests
 
 # --- Etapa 2: rodar ---
-FROM eclipse-temurin:21-jre
+# Variante Alpine (Linux mínimo): a imagem fica bem menor, o que importa no registro de imagens
+# do Google Cloud, que tem só 0,5 GB grátis.
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Não roda como root: se alguém invadir a aplicação, não tem poder sobre o container.
-RUN useradd --system --no-create-home pack
+RUN addgroup -S pack && adduser -S -G pack pack
 USER pack
 
 COPY --from=build /build/target/*.jar app.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# MaxRAMPercentage: a JVM usa até 75% da memória do container (o resto fica para o próprio Java e o sistema).
+# Sem isso, num container de 1 GB o Java pode passar do limite e ser encerrado.
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "app.jar"]

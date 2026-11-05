@@ -1,8 +1,9 @@
-# CI da Pack: a cada envio para o GitHub (ou pull request para a main),
-# uma máquina Linux temporária roda os testes da API e confere se a imagem Docker monta.
+# CI/CD da Pack.
+#   CI (todo push e pull request para a main): roda os testes da API e confere se a imagem Docker monta.
+#   CD (só push na main, e só se o CI passar): envia a imagem ao Google Cloud e publica no Cloud Run.
 # Resultado na aba "Actions" do repositório e no selo do README.
 
-name: CI
+name: CI/CD
 
 on:
   push:
@@ -44,3 +45,45 @@ jobs:
 
       - name: Montar a imagem Docker
         run: docker build -t pack-api .
+
+  deploy:
+    name: Deploy no Cloud Run
+    needs: backend                      # só roda se os testes e a imagem passaram
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # um deploy por vez: se dois pushes chegarem juntos, o segundo espera o primeiro
+    concurrency: deploy-producao
+    permissions:
+      contents: read
+      id-token: write                   # permite pedir o token OIDC que o Google aceita no lugar de uma senha
+    env:
+      IMAGEM: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/pack/pack-api:${{ github.sha }}
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+
+      # Entra no Google Cloud sem chave guardada (Workload Identity Federation, ver infra/gcp/setup.sh)
+      - name: Entrar no Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - name: Instalar o gcloud
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Montar e enviar a imagem
+        run: |
+          gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev --quiet
+          docker build -t "$IMAGEM" backend
+          docker push "$IMAGEM"
+
+      # Só troca a imagem: memória, variáveis, segredos e acesso público continuam como estão.
+      # Por isso um deploy nunca religa a API se o disjuntor de custos a tiver tirado do ar.
+      - name: Publicar no Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          service: pack-api
+          region: ${{ vars.GCP_REGION }}
+          image: ${{ env.IMAGEM }}
