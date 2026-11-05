@@ -17,20 +17,32 @@ Registro das ferramentas usadas para colocar a Pack API no ar, e de como cada um
 
    | Etapa | O que criou |
    |---|---|
-   | `apis` | Ativou Cloud Run, Artifact Registry, Secret Manager, Pub/Sub, Cloud Functions, Cloud Build, Eventarc, Billing Budgets e IAM |
+   | `apis` | Ativou Cloud Run, Artifact Registry, Secret Manager, Pub/Sub, Cloud Functions, Cloud Build, Eventarc, Billing Budgets, IAM, Cloud Scheduler e Cloud Monitoring |
    | `imagens` | Repositório `pack` no Artifact Registry (São Paulo), com limpeza automática que guarda só as 2 imagens mais recentes |
    | `segredos` | `pack-db-password`, `pack-admin-password` e `pack-jwt-secret` no Secret Manager (a chave do JWT foi gerada aleatoriamente) |
    | `contas` | Contas de serviço `pack-api-run` (a API) e `github-deploy` (o GitHub Actions), cada uma só com as permissões necessárias |
    | `github` | Workload Identity Federation: pool e provedor `github`, aceitando só tokens do repositório `Leony99/Pack` |
    | `api` | Primeiro deploy do serviço `pack-api` no Cloud Run (0 a 1 instância, 1 GB, perfil `prod`, segredos do Secret Manager) |
-   | `disjuntor` | Tópico `budget-alerts`, conta `budget-guard` e a função `pack-budget-guard` (só tráfego interno) |
-   | `orcamento` | Orçamento `pack` de R$ 5, com avisos em 50%, 90% e 100% enviados ao tópico |
+   | `disjuntor` | Tópico `budget-alerts`, conta `budget-guard` (com leitura de métricas) e a função `pack-budget-guard` (só tráfego interno) |
+   | `agendador` | Tarefa `pack-verificar-cota` no Cloud Scheduler, de hora em hora, que pede à função a medição da cota grátis |
+   | `orcamento` | Orçamento `pack` de R$ 1 (criado com R$ 5 e depois reduzido), com avisos em 50%, 90% e 100% enviados ao tópico |
 
 5. **Testes feitos com o gcloud:**
    - um aviso falso de gasto baixo, publicado no tópico: a função não fez nada;
    - um aviso falso de gasto acima do limite: a função tirou o acesso público e a API passou a responder 403;
    - o [`gcp/religar-api.sh`](gcp/religar-api.sh) devolveu o acesso público (200 de novo).
 6. **Remoção:** no fim, o login foi revogado (`gcloud auth revoke`) e a pasta temporária foi apagada inteira: programa, configurações e credenciais.
+7. **Segundo uso (medidor de cota):** o gcloud foi baixado e usado de novo, do mesmo jeito temporário, para:
+   - ativar o Cloud Scheduler e o Cloud Monitoring;
+   - republicar a função com a medição da cota grátis;
+   - criar o agendador e reduzir o orçamento para R$ 1.
+
+   Testes:
+   - uma verificação disparada à mão (`gcloud scheduler jobs run`) mediu o uso do mês;
+   - com a variável `LIMITE` baixada por um instante (`gcloud run services update`), a função tirou a API do ar (403);
+   - depois, a variável foi removida e a API, religada.
+
+   No fim, a mesma remoção do passo 6.
 
 **Para usar de novo** (por exemplo, para rodar o `religar-api.sh`), não é preciso instalar nada: o **Cloud Shell** (botão `>_` no topo do console do Google Cloud) já tem o gcloud instalado e logado. Também dá para baixar o `.zip` de novo e repetir os passos 1 a 3.
 

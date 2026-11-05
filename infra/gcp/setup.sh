@@ -3,7 +3,7 @@
 # É o registro de tudo o que foi criado no projeto, e serve para refazer do zero num projeto novo.
 #
 # Uso (da raiz do repositório, com o gcloud logado):  bash infra/gcp/setup.sh <etapa>
-# Etapas, nesta ordem: apis imagens segredos contas github api disjuntor orcamento
+# Etapas, nesta ordem: apis imagens segredos contas github api disjuntor agendador orcamento
 #
 # Precisa do .env.prod na raiz (fora do git) com NEON_URL, ADMIN_EMAIL e ADMIN_PASSWORD.
 
@@ -14,8 +14,8 @@ REGIAO=southamerica-east1          # São Paulo, a mesma região do banco no Neo
 REPO_GITHUB=Leony99/Pack
 SERVICO=pack-api                   # serviço do Cloud Run
 REPO_IMAGENS=pack                  # repositório do Artifact Registry
-TOPICO=budget-alerts               # tópico do Pub/Sub que recebe os avisos do orçamento
-ORCAMENTO=5                        # na moeda da conta de faturamento (BRL)
+TOPICO=budget-alerts               # tópico do Pub/Sub que aciona o disjuntor (agendador e orçamento)
+ORCAMENTO=1                        # segunda camada, na moeda da conta de faturamento (BRL): qualquer cobrança real
 
 CONTA_API=pack-api-run             # identidade da API rodando
 CONTA_DEPLOY=github-deploy         # identidade do GitHub Actions
@@ -56,7 +56,8 @@ etapa_apis() {
         run.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com \
         pubsub.googleapis.com cloudfunctions.googleapis.com cloudbuild.googleapis.com \
         eventarc.googleapis.com billingbudgets.googleapis.com cloudbilling.googleapis.com \
-        iam.googleapis.com iamcredentials.googleapis.com sts.googleapis.com
+        iam.googleapis.com iamcredentials.googleapis.com sts.googleapis.com \
+        cloudscheduler.googleapis.com monitoring.googleapis.com
 }
 
 etapa_imagens() {
@@ -144,6 +145,9 @@ etapa_disjuntor() {
     # o disjuntor só pode mexer no serviço da API (para tirar o acesso público)
     gc run services add-iam-policy-binding "$SERVICO" --region="$REGIAO" \
         --member="serviceAccount:$(sa $CONTA_DISJUNTOR)" --role=roles/run.admin >/dev/null
+    # e ler as métricas de uso (para medir quanto da cota grátis já foi usada)
+    gc projects add-iam-policy-binding "$PROJETO" --condition=None \
+        --member="serviceAccount:$(sa $CONTA_DISJUNTOR)" --role=roles/monitoring.viewer >/dev/null
 
     gc functions deploy pack-budget-guard --gen2 --region="$REGIAO" \
         --runtime=python312 --source=infra/budget-guard --entry-point=disjuntor \
@@ -152,7 +156,7 @@ etapa_disjuntor() {
         --trigger-service-account="$(sa $CONTA_DISJUNTOR)" \
         --memory=256Mi --max-instances=1 \
         --ingress-settings=internal-only \
-        --set-env-vars="SERVICO=projects/$PROJETO/locations/$REGIAO/services/$SERVICO"
+        --set-env-vars="PROJETO=$PROJETO,SERVICO=projects/$PROJETO/locations/$REGIAO/services/$SERVICO"
 
     # o Google guarda a imagem de cada versão da função num repositório próprio: mesma limpeza das imagens da API
     gc artifacts repositories set-cleanup-policies gcf-artifacts --location="$REGIAO" \
@@ -163,6 +167,14 @@ etapa_disjuntor() {
         --member="serviceAccount:$(sa $CONTA_DISJUNTOR)" >/dev/null
 }
 
+etapa_agendador() {
+    # De hora em hora pede ao disjuntor para medir a cota grátis usada no mês (3 tarefas grátis por conta)
+    gc scheduler jobs create pubsub pack-verificar-cota --location="$REGIAO" \
+        --schedule="0 * * * *" --time-zone="America/Sao_Paulo" \
+        --topic="$TOPICO" --message-body='{"verificar": "cota"}' \
+        --description="Mede a cota grátis do Cloud Run e desliga a API em 85%"
+}
+
 etapa_orcamento() {
     local conta
     conta=$(gc billing projects describe "$PROJETO" --format='value(billingAccountName)')
@@ -170,16 +182,24 @@ etapa_orcamento() {
     local moeda
     moeda=$(gc billing accounts describe "$conta" --format='value(currencyCode)')
 
-    # avisos por e-mail em 50%, 90% e 100%; o Pub/Sub recebe todos, e o disjuntor age em 100%
-    gc billing budgets create --billing-account="$conta" --billing-project="$PROJETO" \
-        --display-name="pack" --budget-amount="$ORCAMENTO$moeda" \
-        --filter-projects="projects/$PROJETO" \
-        --threshold-rule=percent=0.5 --threshold-rule=percent=0.9 --threshold-rule=percent=1.0 \
-        --notifications-rule-pubsub-topic="projects/$PROJETO/topics/$TOPICO"
+    # Segunda camada: o orçamento mede dinheiro cobrado (o uso dentro da cota grátis custa zero).
+    # Avisos por e-mail em 50%, 90% e 100%; o Pub/Sub recebe todos, e o disjuntor age em 100%.
+    local existente
+    existente=$(gc billing budgets list --billing-account="$conta" --billing-project="$PROJETO" \
+        --filter='displayName="pack"' --format='value(name)')
+    if [ -n "$existente" ]; then
+        gc billing budgets update "$existente" --billing-project="$PROJETO" --budget-amount="$ORCAMENTO$moeda"
+    else
+        gc billing budgets create --billing-account="$conta" --billing-project="$PROJETO" \
+            --display-name="pack" --budget-amount="$ORCAMENTO$moeda" \
+            --filter-projects="projects/$PROJETO" \
+            --threshold-rule=percent=0.5 --threshold-rule=percent=0.9 --threshold-rule=percent=1.0 \
+            --notifications-rule-pubsub-topic="projects/$PROJETO/topics/$TOPICO"
+    fi
 }
 
 etapa=${1:-}
 case "$etapa" in
-    apis|imagens|segredos|contas|github|api|disjuntor|orcamento) "etapa_$etapa" ;;
-    *) echo "Uso: bash infra/gcp/setup.sh <apis|imagens|segredos|contas|github|api|disjuntor|orcamento>"; exit 1 ;;
+    apis|imagens|segredos|contas|github|api|disjuntor|agendador|orcamento) "etapa_$etapa" ;;
+    *) echo "Uso: bash infra/gcp/setup.sh <apis|imagens|segredos|contas|github|api|disjuntor|agendador|orcamento>"; exit 1 ;;
 esac

@@ -44,7 +44,7 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
               testa cada mudança (CI) e publica as aprovadas (CD)
 ```
 
-Os dois serviços ficam em São Paulo e dentro da cota gratuita. Limitadores de uso e um "disjuntor" automático tiram a API do ar se o gasto passar de R$ 5 no mês.
+Os dois serviços ficam em São Paulo e dentro da cota gratuita. Limitadores de uso e um "disjuntor" automático tiram a API do ar quando 85% da cota grátis do mês é usada, antes de qualquer cobrança.
 
 Como o Docker, o CI/CD, a hospedagem, os limitadores e o disjuntor funcionam está em **[`infra/README.md`](infra/README.md)**.
 
