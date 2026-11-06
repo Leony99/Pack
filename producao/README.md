@@ -1,108 +1,59 @@
-# Infraestrutura da Pack
+# Produção
 
-Por onde a Pack API passa até rodar: no **desenvolvimento**, no seu computador, e em **produção**, do `git push` até a API no ar no Google Cloud. No fim estão os limitadores de custo e o disjuntor, que mantêm a hospedagem gratuita.
+Como a Pack API roda em produção:
+- **onde ela fica:** Google Cloud Run, com o banco no Neon;
+- **como uma versão nova chega lá:** CD pelo GitHub Actions;
+- **como o custo fica em zero:** limitadores e disjuntor.
+
+O desenvolvimento local, o Docker, os testes e o CI estão no [README principal](../README.md).
+
+**API no ar:** https://pack-api-872578691493.southamerica-east1.run.app/swagger-ui.html
 
 ## Sumário
 
-- [Desenvolvimento: rodando no seu computador](#desenvolvimento-rodando-no-seu-computador)
-- [Produção: do git push até a API no ar](#produção-do-git-push-até-a-api-no-ar)
+- [Visão geral](#visão-geral)
+- [Do git push até a API no ar](#do-git-push-até-a-api-no-ar)
 - [Limitadores](#limitadores)
 - [Disjuntor de custos](#disjuntor-de-custos)
 - [Arquivos desta pasta](#arquivos-desta-pasta)
 
----
-
-## Desenvolvimento: rodando no seu computador
+## Visão geral
 
 ```
- código (backend/)  +  .env (raiz)
-        │
-        ├──► A) docker compose up --build ──► Docker monta a imagem ──► containers db + api
-        │
-        ├──► B) docker compose up -d db  +  ./mvnw spring-boot:run ──► API direto no Java
-        │
-        └──► ./mvnw test ──► Testcontainers sobe um PostgreSQL descartável ──► 177 testes
-                                                                                  │
-                                                       passou? git push ──► Produção
+                        ┌──────────────── GitHub ─────────────────┐
+  git push ───────────► │ repositório Leony99/Pack                │
+                        │   │                                     │
+                        │   ▼  GitHub Actions (.github/workflows) │
+                        │  CI: testes + imagem Docker             │
+                        │   │ passou e é a main?                  │
+                        │   ▼                                     │
+                        │  CD: envia a imagem e publica           │
+                        └───┬─────────────────────────────────────┘
+                            │ token OIDC (sem senha guardada)
+┌─────────────────── Google Cloud · São Paulo (southamerica-east1) ──────────────────┐
+│                           ▼                                                        │
+│  Artifact Registry ──► Cloud Run: pack-api ◄──── Secret Manager                    │
+│  (imagens, guarda 2)   (container Spring Boot,    (senha do banco, chave JWT,      │
+│                         0 a 1 instância, 1 GB)     senha do admin)                 │
+│                           ▲          │                                             │
+│                           │          │                                             │
+│  Agendador (1 h) + Orçamento ─► Pub/Sub ─► disjuntor ── (85% da cota) ─► tira a    │
+│                                          (pack-budget-guard)      API do ar (403)  │
+└───────────────────────────┼──────────┼─────────────────────────────────────────────┘
+                            │          │ SSL
+  usuário / Swagger ─https──┘          ▼
+                            Neon · PostgreSQL 18 (AWS São Paulo)
 ```
 
-### 1. Configuração
+| Peça | Onde roda | Função |
+|---|---|---|
+| **API Spring Boot** | Google **Cloud Run** | A aplicação, em container. O Cloud Run liga o container quando chega uma requisição e o desliga quando fica parado |
+| **Banco** | **Neon** | PostgreSQL 18 gerenciado (serverless): o processamento também desliga quando ninguém usa. Fica na mesma região da API |
+| **Imagens** | **Artifact Registry** | Guarda as imagens Docker publicadas pelo CD |
+| **Segredos** | **Secret Manager** | A senha do banco, a chave do JWT e a senha do admin, entregues à API como variáveis de ambiente |
+| **Disjuntor** | **Cloud Scheduler + orçamento + Pub/Sub + Cloud Run functions** | Tira a API do ar antes de a cota grátis acabar |
 
-Copie o [`.env.example`](../.env.example) para `.env`, na raiz, e preencha:
-- as senhas do banco local;
-- a chave do JWT;
-- o admin inicial.
-
-O `.env` não vai para o git. As duas formas de rodar leem esse mesmo arquivo.
-
-### 2A. Rodando com Docker (sem instalar Java)
-
-```bash
-docker compose up --build
-```
-
-O que acontece:
-
-1. **O Compose lê o [`docker-compose.yml`](../docker-compose.yml)** e o `.env`.
-2. **Monta a imagem da API** seguindo o [`backend/Dockerfile`](../backend/Dockerfile), em duas etapas:
-
-   ```
-   ┌─ etapa "build" ─────────────────┐      ┌─ imagem final ──────────────────────┐
-   │ Maven + JDK 21                  │      │ só o Java (JRE 21, base Alpine)     │
-   │ 1. copia o pom.xml e baixa as   │ ───► │ app.jar                             │
-   │    dependências (fica em cache) │ .jar │ usuário "pack", sem root            │
-   │ 2. copia o código e compila     │      │ java -XX:MaxRAMPercentage=75 -jar   │
-   └─────────────────────────────────┘      └─────────────────────────────────────┘
-          descartada no fim                        ~127 MB, é o que roda
-   ```
-
-   - O Maven e o código-fonte ficam na etapa descartada. A imagem final leva só o `.jar` e o Java.
-   - O `pom.xml` é copiado antes do código: quando só o código muda, as dependências já baixadas são reaproveitadas.
-   - A JVM usa no máximo 75% da memória do container, para não ser encerrada por passar do limite.
-   - O [`.dockerignore`](../backend/.dockerignore) deixa de fora o `target/`, os docs e os `.env`. Senhas nunca entram na imagem.
-3. **Sobe o container `db`:**
-   - usa a imagem `postgres:18`, a mesma versão de produção;
-   - os dados ficam no volume `pack-db-data`;
-   - o Compose testa a cada 5 s se o banco já aceita conexões (`pg_isready`).
-4. **Sobe o container `api`** só depois que o banco responde. Dentro da rede do Compose, a API encontra o banco pelo nome: `jdbc:postgresql://db:5432/pack-db`.
-5. **A API fica em `http://localhost:8080`:**
-   - o Hibernate cria as tabelas;
-   - o seeder cria as permissões, os papéis e o admin.
-
-| Comando | O que faz |
-|---|---|
-| `docker compose up --build` | Monta a imagem e sobe tudo |
-| `docker compose down` | Desliga; os dados ficam no volume |
-| `docker compose down -v` | Desliga e apaga os dados |
-| `docker compose logs -f api` | Mostra o log da API ao vivo |
-
-### 2B. Rodando pelo Maven (para programar)
-
-```bash
-docker compose up -d db
-cd backend
-./mvnw spring-boot:run
-```
-
-O banco roda no Docker, e a API roda direto no Java da sua máquina, o que deixa o reinício mais rápido enquanto você programa. A API lê o `../.env` e conecta em `localhost:5432`, a porta que o container do banco abre no seu PC.
-
-### 3. Testes
-
-```bash
-cd backend
-./mvnw test
-```
-
-1. O Maven compila o código e os testes.
-2. O **Testcontainers** sobe um PostgreSQL 18 **novo e descartável** no Docker. Ele não usa o seu banco nem o `.env`.
-3. O Spring conecta nesse banco e roda os 177 testes: unidade, integração e concorrência.
-4. No fim, o container é apagado.
-
-Testes passando, o próximo passo é `git push`, e daí em diante o caminho é o de produção.
-
----
-
-## Produção: do git push até a API no ar
+## Do git push até a API no ar
 
 Você não monta nem envia nenhuma imagem: **só envia o código**. O resto acontece sozinho.
 
@@ -115,7 +66,7 @@ Você não monta nem envia nenhuma imagem: **só envia o código**. O resto acon
    ▼
  GitHub Actions ── liga uma máquina Linux temporária
    │
-   ├─ 1. CI ─────── baixa o código → Java 21 → ./mvnw test → docker build
+   ├─ 1. CI ─────── testes + docker build (ver README principal)
    │                    └─ falhou? ✗ para aqui, nada é publicado
    │
    ├─ 2. Login ──── entra no Google Cloud com um token temporário (sem senha)
@@ -129,26 +80,13 @@ Você não monta nem envia nenhuma imagem: **só envia o código**. O resto acon
                                          Secret Manager (senhas e chave JWT)
 ```
 
-### Passo 1: o código chega ao GitHub
+### Passo 1: o CI aprova
 
-`git push` para a branch `main`. O GitHub encontra o workflow [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) e começa uma execução. Ela aparece na aba [Actions](https://github.com/Leony99/Pack/actions), e o commit ganha um ✓ ou ✗.
+Um `git push` para a `main` dispara o workflow [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). O job `backend` (CI) roda os 177 testes e monta a imagem. **Se algo falha, nada é publicado**, e a versão no ar continua a anterior. O CI está explicado no [README principal](../README.md#cicd).
 
-### Passo 2: CI, testar antes de publicar
+### Passo 2: login no Google Cloud, sem senha
 
-O GitHub Actions liga uma **máquina Linux temporária**, que é criada para a execução e apagada no fim, e roda o job `backend`:
-
-1. **Baixa o código** do repositório.
-2. **Instala o Java 21**, com cache das dependências do Maven entre execuções.
-3. **Roda os 177 testes** (`./mvnw test`). O PostgreSQL descartável sobe no Docker da própria máquina do GitHub, sem nenhum segredo envolvido.
-4. **Monta a imagem Docker**, só para conferir que o `Dockerfile` funciona.
-
-**Se algo falha, a execução para aqui**, e a versão no ar continua a anterior. Os relatórios dos testes ficam disponíveis para download na página da execução.
-
-Pull requests também passam por esse passo, mas nunca seguem para os passos seguintes.
-
-### Passo 3: login no Google Cloud, sem senha
-
-Com o CI aprovado, começa o job `deploy`, que só roda em push na `main`. Para publicar, ele precisa entrar no Google Cloud, e faz isso com **Workload Identity Federation**:
+Com o CI aprovado, começa o job `deploy`, que só roda em push na `main`. Ele entra no Google Cloud com **Workload Identity Federation**:
 
 1. O GitHub gera um **token temporário assinado** (OIDC), dizendo "esta execução é do repositório `Leony99/Pack`".
 2. O Google confere a assinatura e **só aceita esse repositório**.
@@ -163,23 +101,23 @@ Nenhuma senha ou chave fica guardada no GitHub. Lá ficam só 4 **variáveis**, 
 | `GCP_WIF_PROVIDER` | O provedor que aceita os tokens do GitHub |
 | `GCP_DEPLOY_SA` | A conta de serviço que o deploy assume |
 
-### Passo 4: a imagem vai para o Artifact Registry
+### Passo 3: a imagem vai para o Artifact Registry
 
 Na mesma máquina do GitHub:
-- `docker build` monta a imagem com o mesmo `Dockerfile` do desenvolvimento;
+- `docker build` monta a imagem com o mesmo [`Dockerfile`](../backend/Dockerfile) do desenvolvimento;
 - `docker push` a envia ao **Artifact Registry**, o "depósito de imagens" do Google em São Paulo;
 - a tag da imagem é o código do commit (`pack-api:<sha>`), então cada versão publicada aponta para o commit exato que a gerou.
 
-### Passo 5: o Cloud Run publica a versão nova
+### Passo 4: o Cloud Run publica a versão nova
 
 A ação `deploy-cloudrun` manda o serviço `pack-api` usar a imagem nova:
 1. O Cloud Run cria uma **revisão** nova do serviço.
 2. Assim que ela fica pronta, recebe 100% do tráfego.
 3. A revisão anterior continua guardada, e dá para voltar a ela pelo console.
 
-O deploy **só troca a imagem**. Memória, limites, variáveis, segredos e acesso público continuam como estavam. A conta de deploy nem tem permissão para mexer em acessos.
+O deploy **só troca a imagem**. Memória, limites, variáveis, segredos e acesso público continuam como estavam. A conta de deploy nem tem permissão para mexer em acessos. Só roda um deploy por vez (`concurrency`).
 
-### Passo 6: a API roda
+### Passo 5: a API roda
 
 Quando uma requisição chega em `https://pack-api-….run.app`:
 
@@ -189,20 +127,19 @@ Quando uma requisição chega em `https://pack-api-….run.app`:
    - pool de conexões pequeno, para o limite do Neon grátis;
    - logs enxutos;
    - leitura dos cabeçalhos do proxy do Google, para gerar links `https://`. O "Try it out" do Swagger depende disso.
+
+   A porta vem da variável `PORT`, que o Cloud Run informa (`server.port=${PORT:8080}`).
 4. **Os segredos chegam como variáveis de ambiente.** O Cloud Run busca no **Secret Manager** a senha do banco, a chave do JWT e a senha do admin. Eles não estão no código, na imagem nem no GitHub.
 5. **A API conecta no Neon** por SSL. O banco também desliga quando fica parado e religa no primeiro acesso, em menos de um segundo.
 6. **A resposta volta** ao usuário.
 7. **Uns 15 minutos sem requisições, o container desliga** e para de cobrar. A próxima requisição volta ao item 2.
 
-### Passo 7: vigilância de custo (o tempo todo)
+### Passo 6: vigilância de custo (o tempo todo)
 
-Enquanto a API roda:
-- **de hora em hora,** o disjuntor mede quanto da cota grátis do mês já foi usado e tira a API do ar sozinho se algum recurso passar de **85%**;
-- o **orçamento** de R$ 1 é a segunda camada, para qualquer cobrança real.
+- **De hora em hora,** o disjuntor mede quanto da cota grátis do mês já foi usado e tira a API do ar sozinho se algum recurso passar de **85%**.
+- O **orçamento** de R$ 1 é a segunda camada, para qualquer cobrança real.
 
 Os detalhes estão em [Disjuntor de custos](#disjuntor-de-custos).
-
----
 
 ## Limitadores
 
@@ -289,7 +226,7 @@ O limite pode ser trocado pela variável de ambiente `LIMITE` da função, sem m
 ## Arquivos desta pasta
 
 ```
-infra/
+producao/
 ├── README.md                 este arquivo
 ├── FERRAMENTAS.md            ferramentas usadas na configuração e como foram usadas
 ├── budget-guard/
@@ -316,5 +253,5 @@ O [`gcp/setup.sh`](gcp/setup.sh) é o registro de tudo o que existe no Google Cl
 | `orcamento` | Orçamento de R$ 1 ligado ao tópico (cria ou atualiza) |
 
 ```bash
-bash infra/gcp/setup.sh <etapa>     # da raiz do repositório, com o gcloud logado
+bash producao/gcp/setup.sh <etapa>     # da raiz do repositório, com o gcloud logado
 ```

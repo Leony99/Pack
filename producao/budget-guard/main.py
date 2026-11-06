@@ -8,7 +8,7 @@
 #   2. Orçamento estourado (segunda camada): o orçamento do Google Cloud publica avisos no mesmo
 #      tópico, e a função desliga a API se o gasto real (o que passou da cota) chegar ao limite.
 #
-# Para liberar de novo: infra/gcp/religar-api.sh
+# Para liberar de novo: producao/gcp/religar-api.sh
 
 import base64
 import json

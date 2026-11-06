@@ -1,4 +1,4 @@
-# Ferramentas externas usadas na infraestrutura
+# Ferramentas externas usadas na configuração de produção
 
 Registro das ferramentas usadas para colocar a Pack API no ar, e de como cada uma foi usada. Nenhuma ficou instalada na máquina de desenvolvimento.
 

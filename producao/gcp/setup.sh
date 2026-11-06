@@ -2,7 +2,7 @@
 # Configura o Google Cloud para a Pack: API no Cloud Run + disjuntor de custos.
 # É o registro de tudo o que foi criado no projeto, e serve para refazer do zero num projeto novo.
 #
-# Uso (da raiz do repositório, com o gcloud logado):  bash infra/gcp/setup.sh <etapa>
+# Uso (da raiz do repositório, com o gcloud logado):  bash producao/gcp/setup.sh <etapa>
 # Etapas, nesta ordem: apis imagens segredos contas github api disjuntor agendador orcamento
 #
 # Precisa do .env.prod na raiz (fora do git) com NEON_URL, ADMIN_EMAIL e ADMIN_PASSWORD.
@@ -65,7 +65,7 @@ etapa_imagens() {
     gc artifacts repositories create "$REPO_IMAGENS" --repository-format=docker \
         --location="$REGIAO" --description="Imagens da Pack API" || true
     gc artifacts repositories set-cleanup-policies "$REPO_IMAGENS" --location="$REGIAO" \
-        --policy=infra/gcp/limpeza-imagens.json --no-dry-run
+        --policy=producao/gcp/limpeza-imagens.json --no-dry-run
 }
 
 etapa_segredos() {
@@ -150,7 +150,7 @@ etapa_disjuntor() {
         --member="serviceAccount:$(sa $CONTA_DISJUNTOR)" --role=roles/monitoring.viewer >/dev/null
 
     gc functions deploy pack-budget-guard --gen2 --region="$REGIAO" \
-        --runtime=python312 --source=infra/budget-guard --entry-point=disjuntor \
+        --runtime=python312 --source=producao/budget-guard --entry-point=disjuntor \
         --trigger-topic="$TOPICO" \
         --service-account="$(sa $CONTA_DISJUNTOR)" \
         --trigger-service-account="$(sa $CONTA_DISJUNTOR)" \
@@ -160,7 +160,7 @@ etapa_disjuntor() {
 
     # o Google guarda a imagem de cada versão da função num repositório próprio: mesma limpeza das imagens da API
     gc artifacts repositories set-cleanup-policies gcf-artifacts --location="$REGIAO" \
-        --policy=infra/gcp/limpeza-imagens.json --no-dry-run >/dev/null
+        --policy=producao/gcp/limpeza-imagens.json --no-dry-run >/dev/null
 
     # o gatilho do Pub/Sub chama a função com a identidade do disjuntor
     gc functions add-invoker-policy-binding pack-budget-guard --region="$REGIAO" \
@@ -201,5 +201,5 @@ etapa_orcamento() {
 etapa=${1:-}
 case "$etapa" in
     apis|imagens|segredos|contas|github|api|disjuntor|agendador|orcamento) "etapa_$etapa" ;;
-    *) echo "Uso: bash infra/gcp/setup.sh <apis|imagens|segredos|contas|github|api|disjuntor|agendador|orcamento>"; exit 1 ;;
+    *) echo "Uso: bash producao/gcp/setup.sh <apis|imagens|segredos|contas|github|api|disjuntor|agendador|orcamento>"; exit 1 ;;
 esac

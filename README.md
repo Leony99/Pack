@@ -8,7 +8,8 @@ E-commerce de roupas. O repositório é um monorepo:
 |---|---|
 | [`backend/`](backend/) | API REST em Spring Boot (descrita abaixo) |
 | `frontend/` | Loja em React / Next.js (em desenvolvimento) |
-| [`infra/`](infra/) | Docker, CI/CD, deploy e controle de custos ([explicação](infra/README.md)) |
+| [`producao/`](producao/) | Como a API roda em produção: deploy no Google Cloud, banco no Neon, limitadores e disjuntor de custos ([explicação](producao/README.md)) |
+| [`.github/workflows/`](.github/workflows/) | Pipeline de CI/CD (GitHub Actions) |
 
 ## Backend: Pack API
 
@@ -30,23 +31,8 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 | Testes | JUnit 6, AssertJ, Mockito, MockMvc e Testcontainers |
 | Containers | Docker e Docker Compose |
 | CI/CD | GitHub Actions |
-| Hospedagem | Google Cloud Run (API) e Neon (banco) |
+| Produção | Google Cloud Run (API) e Neon (banco) |
 | Outros | Lombok, Maven Wrapper |
-
-## Arquitetura
-
-```
- navegador / frontend ──HTTPS──► Google Cloud Run ──SSL──► Neon
-                                 API Spring Boot           PostgreSQL 18
-                                 (container Docker)        (São Paulo)
-                                        ▲
- git push ──► GitHub Actions ───────────┘
-              testa cada mudança (CI) e publica as aprovadas (CD)
-```
-
-Os dois serviços ficam em São Paulo e dentro da cota gratuita. Limitadores de uso e um "disjuntor" automático tiram a API do ar quando 85% da cota grátis do mês é usada, antes de qualquer cobrança.
-
-Como o Docker, o CI/CD, a hospedagem, os limitadores e o disjuntor funcionam está em **[`infra/README.md`](infra/README.md)**.
 
 ## O que a API faz
 
@@ -99,28 +85,64 @@ backend/src/main/java/com/leonycosta/packapi/
 
 ## Como rodar
 
-Crie o arquivo de configuração local a partir do modelo, na raiz do repositório, e preencha os valores. O `JWT_SECRET` precisa ter pelo menos 32 caracteres.
+### 1. Configuração
+
+Crie o arquivo de configuração local a partir do modelo, na raiz do repositório, e preencha os valores:
+- as senhas do banco local;
+- a chave do JWT, com pelo menos 32 caracteres;
+- o admin inicial.
+
+O `.env` não vai para o git, e as duas formas de rodar abaixo leem esse mesmo arquivo.
 
 ```bash
 cp .env.example .env
 ```
 
-**Com Docker** (só precisa do Docker instalado):
+### 2A. Com Docker (só precisa do Docker)
 
 ```bash
 docker compose up --build     # sobe o banco e a API
-docker compose down           # desliga (os dados ficam guardados)
+docker compose down           # desliga (os dados ficam guardados no volume)
+docker compose down -v        # desliga e apaga os dados
+docker compose logs -f api    # log da API ao vivo
 ```
 
-**Pelo Maven** (para desenvolver; precisa de Java 21 e Docker):
+O que acontece:
+
+1. **O Compose lê o [`docker-compose.yml`](docker-compose.yml)** e o `.env`.
+2. **Monta a imagem da API** seguindo o [`backend/Dockerfile`](backend/Dockerfile), em duas etapas:
+
+   ```
+   ┌─ etapa "build" ─────────────────┐      ┌─ imagem final ──────────────────────┐
+   │ Maven + JDK 21                  │      │ só o Java (JRE 21, base Alpine)     │
+   │ 1. copia o pom.xml e baixa as   │ ───► │ app.jar                             │
+   │    dependências (fica em cache) │ .jar │ usuário "pack", sem root            │
+   │ 2. copia o código e compila     │      │ java -XX:MaxRAMPercentage=75 -jar   │
+   └─────────────────────────────────┘      └─────────────────────────────────────┘
+          descartada no fim                        ~127 MB, é o que roda
+   ```
+
+   - O Maven e o código-fonte ficam na etapa descartada. A imagem final leva só o `.jar` e o Java.
+   - O `pom.xml` é copiado antes do código: quando só o código muda, as dependências já baixadas são reaproveitadas.
+   - A API roda com um usuário comum, sem root. A JVM usa no máximo 75% da memória do container, para não ser encerrada por passar do limite.
+   - O [`.dockerignore`](backend/.dockerignore) deixa de fora o `target/`, os docs e os `.env`. Senhas nunca entram na imagem.
+3. **Sobe o container `db`:**
+   - usa a imagem `postgres:18`, a mesma versão de produção;
+   - os dados ficam no volume `pack-db-data`;
+   - o Compose testa a cada 5 s se o banco já aceita conexões.
+4. **Sobe o container `api`** só quando o banco responde. Dentro da rede do Compose, a API encontra o banco pelo nome: `jdbc:postgresql://db:5432/pack-db`.
+
+### 2B. Pelo Maven (para programar; precisa de Java 21 e Docker)
 
 ```bash
-docker compose up -d db       # só o banco
+docker compose up -d db       # só o banco, no Docker
 cd backend
 ./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run
 ```
 
-A API sobe em `http://localhost:8080/api/v1`. As tabelas são criadas pelo Hibernate. As permissões, os papéis e o admin inicial (definido por `ADMIN_EMAIL` e `ADMIN_PASSWORD`) são criados na primeira execução.
+A API roda direto no Java da sua máquina, o que deixa o reinício mais rápido enquanto você programa. Ela lê o `../.env` e conecta em `localhost:5432`.
+
+Nas duas formas, a API sobe em `http://localhost:8080/api/v1`. As tabelas são criadas pelo Hibernate. As permissões, os papéis e o admin inicial (definido por `ADMIN_EMAIL` e `ADMIN_PASSWORD`) são criados na primeira execução.
 
 ### Testando pelo navegador (Swagger)
 
@@ -153,15 +175,50 @@ cd backend
 ./mvnw test        # Windows: mvnw.cmd test
 ```
 
+Os passos:
+1. O Maven compila o código e os testes.
+2. O **Testcontainers** sobe um PostgreSQL 18 novo e descartável no Docker.
+3. Os testes rodam contra esse banco.
+4. No fim, o container é apagado.
+
 | Tipo | O que faz | Exemplos |
 |---|---|---|
 | Unidade | Testa uma classe sozinha, sem Spring nem banco; roda em milissegundos | Regras de status do pedido; `CouponService` com o repositório substituído por um mock (Mockito) |
-| Integração | Sobe a aplicação inteira com um PostgreSQL descartável (Testcontainers) e faz requisições pelo MockMvc, passando pela segurança, pelos controllers, pelos services e pelo banco | Cadastro e login, tokens adulterados ou vencidos, permissões de cada papel, checkout com cupom e rollback, pagamento e envio |
+| Integração | Sobe a aplicação inteira com o PostgreSQL descartável e faz requisições pelo MockMvc, passando pela segurança, pelos controllers, pelos services e pelo banco | Cadastro e login, tokens adulterados ou vencidos, permissões de cada papel, checkout com cupom e rollback, pagamento e envio |
 | Concorrência | Dispara compras e movimentos de estoque ao mesmo tempo, em threads separadas | Dois clientes comprando a última unidade; cinco clientes disputando três unidades |
 
 Os testes ficam em [`backend/src/test/`](backend/src/test/java/com/leonycosta/packapi), nos mesmos pacotes do código que testam. A base comum, com a configuração do banco descartável e atalhos para montar os dados, fica em `support/`.
 
-Eles também rodam automaticamente a cada envio ao GitHub (ver [CI/CD](infra/README.md#cicd-com-github-actions)).
+## CI/CD
+
+O [GitHub Actions](.github/workflows/ci.yml) roda a cada envio ao GitHub, numa máquina Linux temporária, criada para a execução e apagada no fim:
+
+```
+push / pull request
+        │
+        ▼
+┌─ CI (job "backend") ───────────────┐   falhou → ✗ para aqui, nada é publicado
+│ 1. baixa o código                  │            (relatórios dos testes ficam
+│ 2. instala o Java 21 (com cache)   │             para download)
+│ 3. ./mvnw test   (177 testes)      │
+│ 4. docker build  (confere imagem)  │
+└────────────────┬───────────────────┘
+                 │ passou, e é push na main?
+                 ▼
+┌─ CD (job "deploy") ────────────────┐
+│ publica a versão nova em produção  │──► Google Cloud Run
+└────────────────────────────────────┘
+```
+
+- **CI:**
+  - roda a cada envio para a `main` e a cada pull request;
+  - os testes sobem o PostgreSQL descartável no Docker da própria máquina do GitHub, sem nenhum segredo envolvido;
+  - se algo falha, o commit fica marcado com ✗ e nada segue adiante;
+  - o selo no topo deste README mostra o resultado da última execução, e o histórico fica na aba [Actions](https://github.com/Leony99/Pack/actions).
+- **CD:**
+  - só roda num envio para a `main` e depois que o CI passou;
+  - ele entra no Google Cloud sem senha guardada, envia a imagem e publica a versão nova;
+  - os detalhes estão em [`producao/README.md`](producao/README.md#do-git-push-até-a-api-no-ar).
 
 ## Documentação
 
@@ -177,7 +234,7 @@ Diagramas em [`backend/docs/`](backend/docs/), gerados a partir do próprio cód
 - [x] Testes automatizados (unidade, integração e concorrência)
 - [x] Docker e Docker Compose
 - [x] CI/CD com GitHub Actions
-- [x] Deploy no Google Cloud Run + Neon, com limitadores de custo e disjuntor
+- [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
 - [ ] Frontend (React / Next.js)
 
 ## Autor
