@@ -72,6 +72,11 @@ public class OrderService {
         // 4. Valida estoque de todos os itens antes de alterar qualquer coisa
         for (CartItem cartItem : cart.getItens()) {
             ProductVariant variant = cartItem.getVariant();
+            // Defesa extra: o carrinho já recusa, mas um item com quantidade zero ou negativa
+            // "devolveria" estoque e baixaria o total do pedido
+            if (cartItem.getQuantidade() <= 0) {
+                throw new BusinessException("Quantidade inválida no carrinho para o SKU " + variant.getSku());
+            }
             if (variant.getQuant() < cartItem.getQuantidade()) {
                 throw new BusinessException(
                         "Estoque insuficiente para o SKU " + variant.getSku()

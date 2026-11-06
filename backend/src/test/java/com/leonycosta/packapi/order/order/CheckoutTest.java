@@ -1,5 +1,6 @@
 package com.leonycosta.packapi.order.order;
 
+import com.leonycosta.packapi.cart.cart_item.CartItemRepository;
 import com.leonycosta.packapi.exception.BusinessException;
 import com.leonycosta.packapi.support.AoMesmoTempo;
 import com.leonycosta.packapi.support.IntegrationTest;
@@ -20,6 +21,9 @@ class CheckoutTest extends IntegrationTest {
 
     @Autowired
     OrderService orderService;
+
+    @Autowired
+    CartItemRepository cartItemRepository;
 
     // ------------------------------------------------------------------ o caminho feliz
 
@@ -96,6 +100,23 @@ class CheckoutTest extends IntegrationTest {
         Cliente ana = novoCliente();
 
         checkout(ana, novoEndereco(ana)).esperar(422);
+    }
+
+    @Test
+    void itemComQuantidadeNegativaNoCarrinhoNaoPassa() {
+        // a API já não deixa isso acontecer; aqui o banco é alterado direto, para testar a defesa do checkout
+        Cliente ana = novoCliente();
+        Variante v = novaVariante(100, 10);
+        colocarNoCarrinho(ana, v, 1);
+        var item = cartItemRepository.findById(UUID.fromString(get(ana.carrinho(), ana.token()).str("$.itens[0].id")))
+                .orElseThrow();
+        item.setQuantidade(-5);
+        cartItemRepository.save(item);
+
+        checkout(ana, novoEndereco(ana)).esperar(422);
+
+        assertThat(estoque(v)).isEqualTo(10);
+        assertThat(get("/customers/" + ana.id() + "/orders", ana.token()).tamanho("$.itens")).isZero();
     }
 
     @Test

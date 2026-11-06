@@ -6,6 +6,7 @@ import com.leonycosta.packapi.cart.cart_item.CartItemRequest;
 import com.leonycosta.packapi.cart.cart_item.CartItemResponse;
 import com.leonycosta.packapi.product.color.ColorResponse;
 import com.leonycosta.packapi.customer.customer.CustomerService;
+import com.leonycosta.packapi.exception.BusinessException;
 import com.leonycosta.packapi.exception.ResourceNotFoundException;
 import com.leonycosta.packapi.product.product_variant.ProductVariant;
 import com.leonycosta.packapi.product.product_variant.ProductVariantResponse;
@@ -43,7 +44,12 @@ public class CartService {
                 .findByCartIdAndVariantId(cart.getId(), variant.getId())
                 .orElse(null);
 
+        // As duas parcelas vão no máximo até 99, então a soma nunca estoura o int (que vai até 2.147.483.647)
         int novaQuantidade = request.getQuantidade() + (item != null ? item.getQuantidade() : 0);
+        if (novaQuantidade > CartItemRequest.MAXIMO_POR_ITEM) {
+            throw new BusinessException("O carrinho aceita no máximo " + CartItemRequest.MAXIMO_POR_ITEM
+                    + " unidades de cada item. Já no carrinho: " + (novaQuantidade - request.getQuantidade()));
+        }
         variantService.validarEstoque(variant, novaQuantidade);
 
         if (item == null) {

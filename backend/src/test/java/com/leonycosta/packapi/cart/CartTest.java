@@ -32,6 +32,31 @@ class CartTest extends IntegrationTest {
     }
 
     @Test
+    void quantidadeAcimaDoTeto() {
+        Cliente ana = novoCliente();
+        Variante v = novaVariante(50, 1000);
+
+        post(ana.carrinho() + "/items", corpo("variantId", v.id(), "quantidade", 100), ana.token()).esperar(400);
+        post(ana.carrinho() + "/items", corpo("variantId", v.id(), "quantidade", Integer.MAX_VALUE), ana.token())
+                .esperar(400);
+    }
+
+    @Test
+    void somaNaoPassaDoTetoNemEstouraOInt() {
+        // antes: 1 + 2147483647 "dava a volta" no int e virava -2147483648, o que corrompia o estoque no checkout
+        Cliente ana = novoCliente();
+        Variante v = novaVariante(50, 1000);
+        colocarNoCarrinho(ana, v, 60);
+
+        post(ana.carrinho() + "/items", corpo("variantId", v.id(), "quantidade", 40), ana.token()).esperar(422);
+        post(ana.carrinho() + "/items", corpo("variantId", v.id(), "quantidade", Integer.MAX_VALUE), ana.token())
+                .esperar(400);
+
+        colocarNoCarrinho(ana, v, 39);  // 60 + 39 = 99, exatamente o teto
+        assertThat(get(ana.carrinho(), ana.token()).inteiro("$.itens[0].quantidade")).isEqualTo(99);
+    }
+
+    @Test
     void varianteInexistente() {
         Cliente ana = novoCliente();
 
