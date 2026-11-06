@@ -2,6 +2,7 @@ package com.leonycosta.packapi.auth;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,20 +25,20 @@ public class AuthController {
     @Operation(summary = "Cadastra um cliente e já devolve o token")
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public TokenResponse register(@Valid @RequestBody RegisterRequest request) {
-        return authService.register(request);
+    public TokenResponse register(@Valid @RequestBody RegisterRequest request, HttpServletRequest http) {
+        return authService.register(request, http.getRemoteAddr());
     }
 
     @Operation(summary = "Login de cliente")
     @PostMapping("/login")
-    public TokenResponse login(@Valid @RequestBody LoginRequest request) {
-        return authService.loginCustomer(request);
+    public TokenResponse login(@Valid @RequestBody LoginRequest request, HttpServletRequest http) {
+        return authService.loginCustomer(request, http.getRemoteAddr());
     }
 
     @Operation(summary = "Login de funcionário")
     @PostMapping("/staff/login")
-    public TokenResponse loginStaff(@Valid @RequestBody LoginRequest request) {
-        return authService.loginStaff(request);
+    public TokenResponse loginStaff(@Valid @RequestBody LoginRequest request, HttpServletRequest http) {
+        return authService.loginStaff(request, http.getRemoteAddr());
     }
 
     // Quem sou eu: os dados vêm do token; as permissões, do usuário logado

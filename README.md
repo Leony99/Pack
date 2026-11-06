@@ -69,6 +69,12 @@ Clientes e funcionários fazem login e recebem um token JWT, que vai no cabeçal
 | ATENDENTE | pedidos e consulta de clientes |
 | SUPERVISOR | estoquista + atendente |
 
+**Limite de tentativas** no login e no cadastro, contra quem tenta adivinhar senhas:
+- 5 senhas erradas do mesmo e-mail, vindas do mesmo IP, bloqueiam esse par por 15 min;
+- 20 falhas ou cadastros vindos do mesmo IP bloqueiam o IP por 15 min.
+
+Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos que faltam), sem nem conferir a senha. Isso também protege a cota grátis: cada conferência de senha (BCrypt) gasta CPU de propósito.
+
 Todas as regras de acesso ficam em um só lugar: [`SecurityConfig`](backend/src/main/java/com/leonycosta/packapi/config/SecurityConfig.java).
 
 ## Organização do código
@@ -173,7 +179,7 @@ curl localhost:8080/api/v1/auth/me -H "Authorization: Bearer <token>"
 
 ## Testes
 
-São 186 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
+São 196 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
 
 ```bash
 cd backend

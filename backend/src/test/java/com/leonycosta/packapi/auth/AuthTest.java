@@ -5,6 +5,9 @@ import com.leonycosta.packapi.support.IntegrationTest;
 import com.leonycosta.packapi.support.Resposta;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -204,5 +207,61 @@ class AuthTest extends IntegrationTest {
         Resposta r = get("/customers/" + ana.id(), ana.token()).esperar(200);
 
         assertThat(r.corpo()).doesNotContainIgnoringCase("senha");
+    }
+    // ------------------------------------------------------------------ limite de tentativas
+
+    // login vindo de um IP escolhido pelo teste (o MockMvc usa 127.0.0.1 por padrão)
+    private MockHttpServletResponse loginDoIp(String rota, String ip, String email, String senha) throws Exception {
+        return mvc.perform(MockMvcRequestBuilders.post("/api/v1" + rota)
+                        .with(req -> {
+                            req.setRemoteAddr(ip);
+                            return req;
+                        })
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(corpo("email", email, "senha", senha))))
+                .andReturn().getResponse();
+    }
+
+    @Test
+    void cincoSenhasErradasBloqueiamOLoginPor15Minutos() throws Exception {
+        Cliente ana = novoCliente();
+        String ip = "203.0.113." + (int) (Math.random() * 250);
+        for (int i = 0; i < 5; i++) {
+            assertThat(loginDoIp("/auth/login", ip, ana.email(), "errada-" + i).getStatus()).isEqualTo(401);
+        }
+
+        // bloqueado: nem a senha certa entra, e a resposta diz quanto falta
+        MockHttpServletResponse r = loginDoIp("/auth/login", ip, ana.email(), ana.senha());
+        assertThat(r.getStatus()).isEqualTo(429);
+        assertThat(Long.parseLong(r.getHeader("Retry-After"))).isBetween(1L, 15L * 60);
+
+        // outro IP com o mesmo e-mail continua entrando (o bloqueio é do par e-mail + IP)
+        assertThat(loginDoIp("/auth/login", "198.51.100.7", ana.email(), ana.senha()).getStatus()).isEqualTo(200);
+    }
+
+    @Test
+    void loginCertoZeraAsSenhasErradasDoPar() throws Exception {
+        Cliente ana = novoCliente();
+        String ip = "192.0.2." + (int) (Math.random() * 250);
+        for (int i = 0; i < 4; i++) {
+            loginDoIp("/auth/login", ip, ana.email(), "errada");
+        }
+        assertThat(loginDoIp("/auth/login", ip, ana.email(), ana.senha()).getStatus()).isEqualTo(200);
+
+        // começou do zero: mais 4 erros ainda não bloqueiam
+        for (int i = 0; i < 4; i++) {
+            loginDoIp("/auth/login", ip, ana.email(), "errada");
+        }
+        assertThat(loginDoIp("/auth/login", ip, ana.email(), ana.senha()).getStatus()).isEqualTo(200);
+    }
+
+    @Test
+    void loginDeFuncionarioTambemTemLimite() throws Exception {
+        String ip = "203.0.114." + (int) (Math.random() * 250);
+        for (int i = 0; i < 5; i++) {
+            loginDoIp("/auth/staff/login", ip, ADMIN_EMAIL, "errada-" + i);
+        }
+
+        assertThat(loginDoIp("/auth/staff/login", ip, ADMIN_EMAIL, ADMIN_SENHA).getStatus()).isEqualTo(429);
     }
 }
