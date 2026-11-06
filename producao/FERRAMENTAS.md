@@ -43,6 +43,11 @@ Registro das ferramentas usadas para colocar a Pack API no ar, e de como cada um
    - depois, a variável foi removida e a API, religada.
 
    No fim, a mesma remoção do passo 6.
+8. **Terceiro uso (deploy só da `main`):** depois da revisão de segurança, o gcloud foi baixado de novo (versão do dia, mesmo pacote), do mesmo jeito temporário, para um único comando:
+   - `gcloud iam workload-identity-pools providers update-oidc github`, que mudou a condição do provedor para `assertion.repository == 'Leony99/Pack' && assertion.ref == 'refs/heads/main'`. Antes, qualquer branch do repositório conseguia entrar no Google Cloud; agora, só execuções na `main`.
+   - Conferência: `providers describe` mostrou a condição nova e o provedor ativo.
+
+   No fim, a mesma remoção do passo 6.
 
 **Para usar de novo** (por exemplo, para rodar o `religar-api.sh`), não é preciso instalar nada: o **Cloud Shell** (botão `>_` no topo do console do Google Cloud) já tem o gcloud instalado e logado. Também dá para baixar o `.zip` de novo e repetir os passos 1 a 3.
 
