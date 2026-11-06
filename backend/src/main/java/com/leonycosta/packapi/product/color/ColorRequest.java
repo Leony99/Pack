@@ -7,6 +7,7 @@ import lombok.*;
 public class ColorRequest {
 
     @NotBlank(message = "Nome é obrigatório")
+    @Size(max = 50, message = "Nome deve ter no máximo 50 caracteres")
     private String nome;
 
     @NotBlank(message = "Hex é obrigatório")

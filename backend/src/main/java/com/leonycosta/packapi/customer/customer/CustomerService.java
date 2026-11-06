@@ -1,5 +1,7 @@
 package com.leonycosta.packapi.customer.customer;
 
+import org.springframework.data.domain.Sort;
+import com.leonycosta.packapi.config.Pagina;
 import com.leonycosta.packapi.cart.cart.Cart;
 import com.leonycosta.packapi.cart.cart.CartRepository;
 import com.leonycosta.packapi.exception.ConflictException;
@@ -9,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -19,10 +20,9 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final CartRepository cartRepository;
 
-    public List<CustomerResponse> findAll() {
-        return customerRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+    public Pagina<CustomerResponse> findAll(int pagina, int tamanho) {
+        Sort ordem = Sort.by("nome", "id");
+        return Pagina.de(customerRepository.findAll(Pagina.pedido(pagina, tamanho, ordem)).map(this::toResponse));
     }
 
     public CustomerResponse findById(UUID id) {

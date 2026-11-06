@@ -1,5 +1,6 @@
 package com.leonycosta.packapi.product.inventory;
 
+import com.leonycosta.packapi.config.Pagina;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -7,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Estoque", description = "Entradas, saídas e ajustes de estoque, todos registrados. Exige INVENTORY_MANAGE.")
@@ -18,10 +18,12 @@ public class InventoryMovementController {
 
     private final InventoryMovementService inventoryService;
 
-    @Operation(summary = "Histórico de movimentos de uma variante")
+    @Operation(summary = "Histórico de movimentos de uma variante, em páginas, do mais novo ao mais antigo")
     @GetMapping("/variants/{variantId}/movements")
-    public List<InventoryMovementResponse> findByVariant(@PathVariable UUID variantId) {
-        return inventoryService.findByVariant(variantId);
+    public Pagina<InventoryMovementResponse> findByVariant(@PathVariable UUID variantId,
+                                                           @RequestParam(defaultValue = "0") int pagina,
+                                                           @RequestParam(defaultValue = Pagina.TAMANHO_PADRAO) int tamanho) {
+        return inventoryService.findByVariant(variantId, pagina, tamanho);
     }
 
     @Operation(summary = "Registra uma entrada, saída ou ajuste")

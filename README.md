@@ -47,6 +47,11 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
   - o status só avança na ordem: aguardando pagamento → pago → em separação → enviado → entregue;
   - o pedido pode ser cancelado antes do envio, e o cancelamento devolve o estoque;
   - o pagamento precisa ter o valor exato do pedido, e o envio só é aceito depois do pagamento aprovado.
+- **Listagens paginadas:** produtos, clientes, funcionários, cupons, pedidos e movimentos de estoque vêm em páginas (`?pagina=0&tamanho=20`, no máximo 100 por página), com os totais para montar a navegação:
+
+  ```json
+  { "itens": [ ... ], "pagina": 0, "tamanho": 20, "totalItens": 347, "totalPaginas": 18 }
+  ```
 - **Erros padronizados:** 400, 401, 403, 404, 409 e 422 vêm sempre no mesmo formato JSON.
 
 ## Segurança
@@ -55,7 +60,7 @@ Clientes e funcionários fazem login e recebem um token JWT, que vai no cabeçal
 
 - **Sem login:** só é possível ver o catálogo.
 - **Cliente:** acessa apenas o próprio cadastro, endereços, carrinho e pedidos.
-- **Funcionário:** o que pode fazer depende das permissões do papel dele.
+- **Funcionário:** o que pode fazer depende das permissões do papel dele. Elas são lidas do banco a cada requisição: excluir um funcionário, trocar o papel dele ou tirar uma permissão do papel vale na hora, mesmo para um token já emitido.
 
 | Papel | Permissões |
 |---|---|
@@ -63,6 +68,12 @@ Clientes e funcionários fazem login e recebem um token JWT, que vai no cabeçal
 | ESTOQUISTA | catálogo e estoque |
 | ATENDENTE | pedidos e consulta de clientes |
 | SUPERVISOR | estoquista + atendente |
+
+**Limite de tentativas** no login e no cadastro, contra quem tenta adivinhar senhas:
+- 5 senhas erradas do mesmo e-mail, vindas do mesmo IP, bloqueiam esse par por 15 min;
+- 20 falhas ou cadastros vindos do mesmo IP bloqueiam o IP por 15 min.
+
+Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos que faltam), sem nem conferir a senha. Isso também protege a cota grátis: cada conferência de senha (BCrypt) gasta CPU de propósito.
 
 Todas as regras de acesso ficam em um só lugar: [`SecurityConfig`](backend/src/main/java/com/leonycosta/packapi/config/SecurityConfig.java).
 
@@ -78,7 +89,7 @@ backend/src/main/java/com/leonycosta/packapi/
 ├── order/      order, order_item, payment, shipment, coupon
 ├── product/    product, product_variant, product_image, product_tag, size, color, inventory
 ├── auth/       login, cadastro, geração do token e regras de "dono"
-├── config/     SecurityConfig, JwtConfig, OpenApiConfig
+├── config/     SecurityConfig, JwtConfig, OpenApiConfig, Pagina
 ├── enums/
 └── exception/  GlobalExceptionHandler e erros padronizados
 ```
@@ -168,7 +179,7 @@ curl localhost:8080/api/v1/auth/me -H "Authorization: Bearer <token>"
 
 ## Testes
 
-São 177 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
+São 196 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
 
 ```bash
 cd backend

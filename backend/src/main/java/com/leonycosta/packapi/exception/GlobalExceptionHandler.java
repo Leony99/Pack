@@ -3,6 +3,7 @@ package com.leonycosta.packapi.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -31,6 +32,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiError> handleUnauthorized(UnauthorizedException ex, HttpServletRequest req) {
         return build(401, "Unauthorized", ex.getMessage(), req.getRequestURI());
+    }
+
+    // Tentativas demais de login ou cadastro → 429, com o Retry-After dizendo quantos segundos faltam
+    @ExceptionHandler(MuitasTentativasException.class)
+    public ResponseEntity<ApiError> handleMuitasTentativas(MuitasTentativasException ex, HttpServletRequest req) {
+        ApiError body = new ApiError(LocalDateTime.now(), 429, "Too Many Requests", ex.getMessage(), req.getRequestURI(), null);
+        return ResponseEntity.status(429)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getSegundosParaLiberar()))
+                .body(body);
     }
 
     // Regra de negócio violada (estoque, cupom expirado etc.) → 422

@@ -1,5 +1,7 @@
 package com.leonycosta.packapi.order.coupon;
 
+import org.springframework.data.domain.Sort;
+import com.leonycosta.packapi.config.Pagina;
 import com.leonycosta.packapi.enums.CouponTipo;
 import com.leonycosta.packapi.exception.BusinessException;
 import com.leonycosta.packapi.exception.ConflictException;
@@ -9,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -18,10 +19,9 @@ public class CouponService {
 
     private final CouponRepository couponRepository;
 
-    public List<CouponResponse> findAll() {
-        return couponRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+    public Pagina<CouponResponse> findAll(int pagina, int tamanho) {
+        Sort ordem = Sort.by("codigo", "id");
+        return Pagina.de(couponRepository.findAll(Pagina.pedido(pagina, tamanho, ordem)).map(this::toResponse));
     }
 
     public CouponResponse findById(UUID id) {

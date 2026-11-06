@@ -1,5 +1,6 @@
 package com.leonycosta.packapi.customer.customer;
 
+import com.leonycosta.packapi.config.Pagina;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -7,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Clientes", description = "Listar exige CUSTOMER_READ. O cliente vê, altera e apaga só o próprio cadastro.")
@@ -18,10 +18,11 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    @Operation(summary = "Lista todos os clientes")
+    @Operation(summary = "Lista os clientes em páginas")
     @GetMapping
-    public List<CustomerResponse> findAll() {
-        return customerService.findAll();
+    public Pagina<CustomerResponse> findAll(@RequestParam(defaultValue = "0") int pagina,
+                                          @RequestParam(defaultValue = Pagina.TAMANHO_PADRAO) int tamanho) {
+        return customerService.findAll(pagina, tamanho);
     }
 
     @Operation(summary = "Busca um cliente")

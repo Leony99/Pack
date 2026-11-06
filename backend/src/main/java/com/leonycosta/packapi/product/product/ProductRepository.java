@@ -1,9 +1,10 @@
 package com.leonycosta.packapi.product.product;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,9 +16,14 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             SELECT * FROM products
             WHERE translate(lower(nome), 'áàâãäéèêëíìîïóòôõöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')
                   LIKE '%' || translate(lower(:nome), 'áàâãäéèêëíìîïóòôõöúùûüç', 'aaaaaeeeeiiiiooooouuuuc') || '%'
+            ORDER BY nome, id
+            """, countQuery = """
+            SELECT count(*) FROM products
+            WHERE translate(lower(nome), 'áàâãäéèêëíìîïóòôõöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')
+                  LIKE '%' || translate(lower(:nome), 'áàâãäéèêëíìîïóòôõöúùûüç', 'aaaaaeeeeiiiiooooouuuuc') || '%'
             """, nativeQuery = true)
-    List<Product> searchByNome(String nome);
+    Page<Product> searchByNome(String nome, Pageable pedido);
 
     @Query("SELECT DISTINCT p FROM Product p JOIN p.tags tl WHERE tl.tag.tag = :tag")
-    List<Product> findByTag(String tag);
+    Page<Product> findByTag(String tag, Pageable pedido);
 }

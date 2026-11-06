@@ -38,7 +38,7 @@ GitHub lê .github/workflows/ci.yml
         ▼
 ┌─ job "backend" (CI) ── ci-cd/ci-backend ─┐   falhou → ✗ para aqui, nada é publicado
 │ 1. instala o Java 21 (com cache)         │            (relatórios dos testes ficam
-│ 2. ./mvnw test   (177 testes)            │             para download)
+│ 2. ./mvnw test   (196 testes)            │             para download)
 │ 3. docker build  (confere a imagem)      │
 └────────────────┬─────────────────────────┘
                  │ passou, e é push na main?
@@ -62,7 +62,7 @@ O resultado aparece:
 **Passos** ([`ci-backend/action.yml`](ci-backend/action.yml)):
 
 1. **Instala o Java 21.** As dependências do Maven ficam em cache entre execuções, o que deixa as seguintes mais rápidas.
-2. **Roda os 177 testes** (`./mvnw test`): unidade, integração e concorrência.
+2. **Roda os 196 testes** (`./mvnw test`): unidade, integração e concorrência.
    - O Testcontainers sobe um PostgreSQL 18 descartável no Docker, que já vem instalado na máquina do GitHub.
    - Não há segredo envolvido: os testes definem a própria configuração e não dependem de `.env`.
 3. **Monta a imagem Docker**, só para conferir que o [`Dockerfile`](../backend/Dockerfile) continua funcionando.
@@ -82,8 +82,8 @@ Pull requests passam pelo CI, mas nunca seguem para o CD.
 **Passos** ([`deploy/action.yml`](deploy/action.yml)):
 
 1. **Entra no Google Cloud sem senha (Workload Identity Federation).**
-   - O GitHub gera um **token temporário assinado** (OIDC), dizendo "esta execução é do repositório `Leony99/Pack`". Para isso, o job tem a permissão `id-token: write`.
-   - O Google confere a assinatura e **só aceita esse repositório**.
+   - O GitHub gera um **token temporário assinado** (OIDC), dizendo "esta execução é do repositório `Leony99/Pack`, na branch `main`". Para isso, o job tem a permissão `id-token: write`.
+   - O Google confere a assinatura e **só aceita esse repositório, e só na `main`**. Um workflow rodando em outra branch ou num pull request não consegue entrar, mesmo sendo do mesmo repositório.
    - Em troca, devolve um acesso de poucos minutos para a conta de serviço `github-deploy`.
 2. **Monta e envia a imagem.** `docker build` usa o mesmo `Dockerfile` do desenvolvimento, e `docker push` envia a imagem ao **Artifact Registry**, em São Paulo. A tag é o código do commit (`pack-api:<sha>`), então cada versão publicada aponta para o código exato que a gerou.
 3. **Publica no Cloud Run.** A ação `deploy-cloudrun` cria uma **revisão** nova do serviço `pack-api`, e ela passa a receber todo o tráfego. A revisão anterior continua guardada, e dá para voltar a ela pelo console.

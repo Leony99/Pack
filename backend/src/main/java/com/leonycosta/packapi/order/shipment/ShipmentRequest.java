@@ -8,7 +8,9 @@ import lombok.*;
 public class ShipmentRequest {
 
     @NotBlank(message = "Transportadora é obrigatória")
+    @Size(max = 50, message = "Transportadora deve ter no máximo 50 caracteres")
     private String transportadora;
 
+    @Size(max = 50, message = "Código de rastreio deve ter no máximo 50 caracteres")
     private String codigoRastreio;
 }

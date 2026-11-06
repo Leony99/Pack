@@ -1,5 +1,7 @@
 package com.leonycosta.packapi.staff.staff;
 
+import org.springframework.data.domain.Sort;
+import com.leonycosta.packapi.config.Pagina;
 import com.leonycosta.packapi.staff.role.Role;
 import com.leonycosta.packapi.staff.role.RoleService;
 import com.leonycosta.packapi.exception.BusinessException;
@@ -10,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,8 +23,9 @@ public class StaffService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
-    public List<StaffResponse> findAll() {
-        return staffRepository.findAll().stream().map(this::toResponse).toList();
+    public Pagina<StaffResponse> findAll(int pagina, int tamanho) {
+        Sort ordem = Sort.by("nome", "id");
+        return Pagina.de(staffRepository.findAll(Pagina.pedido(pagina, tamanho, ordem)).map(this::toResponse));
     }
 
     @Transactional

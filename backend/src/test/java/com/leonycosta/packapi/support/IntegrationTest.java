@@ -33,6 +33,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
         "app.admin.senha=" + IntegrationTest.ADMIN_SENHA,
         "spring.datasource.password=definida-pelo-testcontainers",
         "spring.jpa.show-sql=false",
+        // todas as requisições do MockMvc vêm do mesmo IP (127.0.0.1): com o limite real de 20 por IP,
+        // os testes se bloqueariam entre si. O limite por e-mail + IP continua o real (5).
+        "app.login.max-falhas-ip=1000000",
         // saída limpa: só avisos e erros da aplicação. O Hibernate avisa que não achou restrições para
         // apagar no banco vazio e o springdoc lembra de desligar o Swagger em produção, nada útil aqui.
         "logging.level.root=WARN",

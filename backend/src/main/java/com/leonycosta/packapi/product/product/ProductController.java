@@ -1,5 +1,6 @@
 package com.leonycosta.packapi.product.product;
 
+import com.leonycosta.packapi.config.Pagina;
 import com.leonycosta.packapi.product.product_tag_link.ProductTagLinkRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Produtos", description = "Leitura pública; criar, alterar e apagar exige CATALOG_WRITE.")
@@ -19,18 +19,20 @@ public class ProductController {
 
     private final ProductService productService;
 
-    // GET /products, /products?nome=camiseta ou /products?tag=verao
-    @Operation(summary = "Lista os produtos, com filtro opcional por nome ou tag")
+    // GET /products, /products?nome=camiseta ou /products?tag=verao, em páginas: &pagina=1&tamanho=20
+    @Operation(summary = "Lista os produtos em páginas, com filtro opcional por nome ou tag")
     @GetMapping
-    public List<ProductResponse> findAll(@RequestParam(required = false) String nome,
-                                         @RequestParam(required = false) String tag) {
+    public Pagina<ProductResponse> findAll(@RequestParam(required = false) String nome,
+                                           @RequestParam(required = false) String tag,
+                                           @RequestParam(defaultValue = "0") int pagina,
+                                           @RequestParam(defaultValue = Pagina.TAMANHO_PADRAO) int tamanho) {
         if (tag != null && !tag.isBlank()) {
-            return productService.findByTag(tag);
+            return productService.findByTag(tag, pagina, tamanho);
         }
         if (nome != null && !nome.isBlank()) {
-            return productService.search(nome);
+            return productService.search(nome, pagina, tamanho);
         }
-        return productService.findAll();
+        return productService.findAll(pagina, tamanho);
     }
 
     @Operation(summary = "Busca um produto")

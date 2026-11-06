@@ -11,6 +11,21 @@
       "description": "Por quantos minutos o token vale depois do login."
     },
     {
+      "name": "app.login.max-falhas-email-ip",
+      "type": "java.lang.Integer",
+      "description": "Senhas erradas do mesmo e-mail, vindas do mesmo IP, até bloquear esse par (429)."
+    },
+    {
+      "name": "app.login.max-falhas-ip",
+      "type": "java.lang.Integer",
+      "description": "Falhas de login e cadastros vindos do mesmo IP até bloquear o IP inteiro (429)."
+    },
+    {
+      "name": "app.login.bloqueio-minutos",
+      "type": "java.lang.Long",
+      "description": "Duração do bloqueio e da janela de contagem das tentativas, em minutos."
+    },
+    {
       "name": "app.admin.email",
       "type": "java.lang.String",
       "description": "E-mail do admin criado na primeira vez que a aplicação sobe (variável ADMIN_EMAIL)."
