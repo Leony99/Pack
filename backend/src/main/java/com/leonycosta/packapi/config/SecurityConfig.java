@@ -1,6 +1,7 @@
 package com.leonycosta.packapi.config;
 
 import com.leonycosta.packapi.auth.AccessGuard;
+import com.leonycosta.packapi.auth.TokenAuthenticationConverter;
 import com.leonycosta.packapi.staff.permission.Permissao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +11,6 @@ import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
@@ -27,7 +27,8 @@ public class SecurityConfig {
 
     private final AccessGuard guard;
     private final SecurityErrorHandler errorHandler;
-    private final JwtAuthenticationConverter jwtAuthenticationConverter;
+    // permissões do funcionário lidas do banco a cada requisição (ver TokenAuthenticationConverter)
+    private final TokenAuthenticationConverter tokenAuthenticationConverter;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -36,7 +37,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(o -> o
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(tokenAuthenticationConverter))
                         .authenticationEntryPoint(errorHandler))
                 .exceptionHandling(e -> e.authenticationEntryPoint(errorHandler).accessDeniedHandler(errorHandler))
                 .authorizeHttpRequests(auth -> auth

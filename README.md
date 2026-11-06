@@ -55,7 +55,7 @@ Clientes e funcionários fazem login e recebem um token JWT, que vai no cabeçal
 
 - **Sem login:** só é possível ver o catálogo.
 - **Cliente:** acessa apenas o próprio cadastro, endereços, carrinho e pedidos.
-- **Funcionário:** o que pode fazer depende das permissões do papel dele.
+- **Funcionário:** o que pode fazer depende das permissões do papel dele. Elas são lidas do banco a cada requisição: excluir um funcionário, trocar o papel dele ou tirar uma permissão do papel vale na hora, mesmo para um token já emitido.
 
 | Papel | Permissões |
 |---|---|

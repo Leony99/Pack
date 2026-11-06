@@ -143,10 +143,10 @@ class StaffAndRolesTest extends IntegrationTest {
         post("/customers/" + ana.id() + "/orders", corpo("addressId", endereco), supervisor).esperar(403);
     }
 
-    // ------------------------------------------------------------------ permissão muda só no próximo login
+    // ------------------------------------------------------------------ permissões lidas do banco a cada requisição
 
     @Test
-    void permissaoNovaOuRemovidaSoValeNoProximoLogin() {
+    void permissaoRemovidaDoPapelValeNaHoraMesmoComTokenAntigo() {
         // papel novo com COUPON_MANAGE e um funcionário nele
         String papel = post("/roles", corpo("nome", "TESTE_" + unico()), admin()).esperar(201).str("$.id");
         List<String> ids = get("/permissions", admin()).ler("$[?(@.nome == 'COUPON_MANAGE')].id");
@@ -156,17 +156,28 @@ class StaffAndRolesTest extends IntegrationTest {
         String email = "teo-" + unico() + "@teste.com";
         post("/staff", corpo("nome", "Teo", "email", email, "senha", "teste1234", "roleId", papel), admin())
                 .esperar(201);
-        String tokenAntigo = login("/auth/staff/login", email, "teste1234");
-        get("/coupons", tokenAntigo).esperar(200);
+        String token = login("/auth/staff/login", email, "teste1234");
+        get("/coupons", token).esperar(200);
 
-        // tira a permissão do papel
+        // tira a permissão do papel: o mesmo token já não acessa, sem esperar um login novo
         delete("/roles/" + papel + "/permissions/" + cupons, admin()).esperar(200);
 
-        // o token antigo continua valendo: as permissões estão escritas dentro dele (a API não guarda sessão)
-        get("/coupons", tokenAntigo).esperar(200);
+        get("/coupons", token).esperar(403);
+        assertThat(get("/auth/me", token).esperar(200).lista("$.permissoes")).isEmpty();
+    }
 
-        // num login novo, o token já sai sem a permissão
-        String tokenNovo = login("/auth/staff/login", email, "teste1234");
-        get("/coupons", tokenNovo).esperar(403);
+    @Test
+    void funcionarioExcluidoPerdeOAcessoNaHora() {
+        String email = "rui-" + unico() + "@teste.com";
+        String id = post("/staff", corpo("nome", "Rui", "email", email, "senha", "estoque123",
+                "roleId", papelId("ESTOQUISTA")), admin()).esperar(201).str("$.id");
+        String token = login("/auth/staff/login", email, "estoque123");
+        post("/sizes", corpo("label", "T" + unico()), token).esperar(201);
+
+        delete("/staff/" + id, admin()).esperar(204);
+
+        // o token ainda está dentro da validade, mas o funcionário não existe mais
+        post("/sizes", corpo("label", "T" + unico()), token).esperar(401);
+        get("/auth/me", token).esperar(401);
     }
 }

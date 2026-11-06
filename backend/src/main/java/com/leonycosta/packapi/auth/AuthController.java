@@ -5,10 +5,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Autenticação", description = "Cadastro e login de clientes e funcionários. O token devolvido vai no botão Authorize.")
@@ -38,12 +40,15 @@ public class AuthController {
         return authService.loginStaff(request);
     }
 
-    // Quem sou eu: lê direto do token, sem ir ao banco
+    // Quem sou eu: os dados vêm do token; as permissões, do usuário logado
+    // (para funcionário, são as atuais do banco, não as da hora do login)
     @Operation(summary = "Dados do usuário dono do token")
     @GetMapping("/me")
-    public UsuarioResponse me(@AuthenticationPrincipal Jwt jwt) {
+    public UsuarioResponse me(JwtAuthenticationToken auth) {
+        Jwt jwt = auth.getToken();
+        List<String> permissoes = AuthorityUtils.authorityListToSet(auth.getAuthorities()).stream().sorted().toList();
         return new UsuarioResponse(UUID.fromString(jwt.getSubject()),
                 jwt.getClaimAsString("nome"), jwt.getClaimAsString("email"),
-                TipoUsuario.valueOf(jwt.getClaimAsString("tipo")), jwt.getClaimAsStringList("authorities"));
+                TipoUsuario.valueOf(jwt.getClaimAsString("tipo")), permissoes);
     }
 }

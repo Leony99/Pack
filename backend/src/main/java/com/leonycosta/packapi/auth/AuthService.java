@@ -47,7 +47,8 @@ public class AuthService {
         Staff s = staffRepository.findByEmail(request.getEmail().toLowerCase())
                 .filter(x -> senhaConfere(request.getSenha(), x.getSenhaHash()))
                 .orElseThrow(UnauthorizedException::credenciaisInvalidas);
-        // O token leva as permissões da Role: mudar a Role só vale a partir do próximo login
+        // O token leva as permissões da Role só para o frontend saber o que mostrar.
+        // A API não confia nelas: a cada requisição, lê as permissões atuais no banco (TokenAuthenticationConverter).
         List<String> permissoes = s.getRole().getPermissoes().stream()
                 .map(rp -> rp.getPermission().getNome())
                 .sorted()
