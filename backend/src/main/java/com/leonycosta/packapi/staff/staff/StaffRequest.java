@@ -1,5 +1,6 @@
 package com.leonycosta.packapi.staff.staff;
 
+import com.leonycosta.packapi.auth.CabeNoBcrypt;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.util.UUID;
@@ -15,7 +16,8 @@ public class StaffRequest {
     private String email;
 
     @NotBlank(message = "Senha é obrigatória")
-    @Size(min = 8, message = "Senha deve ter no mínimo 8 caracteres")
+    @Size(min = 8, max = 32, message = "Senha deve ter entre 8 e 32 caracteres")
+    @CabeNoBcrypt
     private String senha;
 
     @NotNull(message = "Role é obrigatória")

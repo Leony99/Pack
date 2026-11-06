@@ -17,6 +17,7 @@ public class RegisterRequest {
     private String telefone;
 
     @NotBlank(message = "Senha é obrigatória")
-    @Size(min = 8, message = "Senha deve ter no mínimo 8 caracteres")
+    @Size(min = 8, max = 32, message = "Senha deve ter entre 8 e 32 caracteres")
+    @CabeNoBcrypt
     private String senha;
 }

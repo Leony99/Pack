@@ -42,6 +42,39 @@ class AuthTest extends IntegrationTest {
     }
 
     @Test
+    void cadastroComSenhaDeMaisDe32Caracteres() {
+        Resposta r = post("/auth/register", corpo("nome", "X", "email", "x-" + unico() + "@teste.com",
+                "telefone", "1", "senha", "a".repeat(33)), null);
+
+        r.esperar(400);
+        assertThat(r.lista("$.fieldErrors[*].field")).contains("senha");
+    }
+
+    @Test
+    void cadastroComSenhaQuePassaDos72BytesDoBcrypt() {
+        // 25 caracteres (dentro dos 32), mas o "€" ocupa 3 bytes: 75 bytes. Antes, isso dava 500.
+        Resposta r = post("/auth/register", corpo("nome", "X", "email", "x-" + unico() + "@teste.com",
+                "telefone", "1", "senha", "€".repeat(25)), null);
+
+        r.esperar(400);
+        assertThat(r.lista("$.fieldErrors[*].message")).anyMatch(m -> m.contains("72 bytes"));
+    }
+
+    @Test
+    void funcionarioComSenhaDeMaisDe32Caracteres() {
+        post("/staff", corpo("nome", "Gil", "email", "gil-" + unico() + "@teste.com", "senha", "a".repeat(100),
+                "roleId", papelId("ESTOQUISTA")), admin()).esperar(400);
+    }
+
+    @Test
+    void loginComSenhaGiganteSoDiz401() {
+        // o login não tem limite de tamanho (senhas antigas continuam valendo), e senha longa não derruba a API
+        Cliente ana = novoCliente();
+
+        post("/auth/login", corpo("email", ana.email(), "senha", "a".repeat(100)), null).esperar(401);
+    }
+
+    @Test
     void cadastroComEmailInvalido() {
         post("/auth/register", corpo("nome", "X", "email", "nao-e-email", "telefone", "1", "senha", "senha1234"), null)
                 .esperar(400);
