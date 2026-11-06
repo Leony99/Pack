@@ -73,7 +73,11 @@ Clientes e funcionários fazem login e recebem um token JWT, que vai no cabeçal
 - 5 senhas erradas do mesmo e-mail, vindas do mesmo IP, bloqueiam esse par por 15 min;
 - 20 falhas ou cadastros vindos do mesmo IP bloqueiam o IP por 15 min.
 
-Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos que faltam), sem nem conferir a senha. Isso também protege a cota grátis: cada conferência de senha (BCrypt) gasta CPU de propósito.
+O mesmo vale para os **cupons**, contra quem tenta adivinhar um código: 5 códigos errados (inexistentes ou vencidos) no checkout deixam o cliente 15 min sem poder usar cupom. A compra sem cupom continua liberada.
+
+Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos que faltam), sem nem conferir a senha ou o cupom. Isso também protege a cota grátis: cada conferência de senha (BCrypt) gasta CPU de propósito.
+
+**Carrinho:** no máximo 99 unidades de cada item, contando o que já está nele. Sem esse teto, uma soma enorme "dava a volta" no `int` e virava um número negativo, que o checkout usava para baixar o estoque.
 
 Todas as regras de acesso ficam em um só lugar: [`SecurityConfig`](backend/src/main/java/com/leonycosta/packapi/config/SecurityConfig.java).
 
@@ -179,7 +183,7 @@ curl localhost:8080/api/v1/auth/me -H "Authorization: Bearer <token>"
 
 ## Testes
 
-São 196 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
+São 201 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
 
 ```bash
 cd backend
