@@ -100,12 +100,18 @@ etapa_github() {
     # e o Google troca por um acesso de poucos minutos. Nenhuma chave fica guardada no GitHub.
     local numero
     numero=$(gc projects describe "$PROJETO" --format='value(projectNumber)')
+    # só aceita tokens deste repositório E de execuções na branch main: um workflow rodando em outra branch
+    # (ou num pull request) não consegue entrar no Google Cloud, mesmo sendo do mesmo repositório
+    local condicao="assertion.repository == '$REPO_GITHUB' && assertion.ref == 'refs/heads/main'"
     gc iam workload-identity-pools create github --location=global --display-name="GitHub Actions" || true
     gc iam workload-identity-pools providers create-oidc github --location=global \
         --workload-identity-pool=github --display-name="GitHub" \
         --issuer-uri=https://token.actions.githubusercontent.com \
         --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
-        --attribute-condition="assertion.repository == '$REPO_GITHUB'" || true
+        --attribute-condition="$condicao" || true
+    # se o provedor já existia, garante a condição atual
+    gc iam workload-identity-pools providers update-oidc github --location=global \
+        --workload-identity-pool=github --attribute-condition="$condicao" >/dev/null
     # só este repositório pode agir como a conta de deploy
     gc iam service-accounts add-iam-policy-binding "$(sa $CONTA_DEPLOY)" \
         --role=roles/iam.workloadIdentityUser \

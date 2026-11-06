@@ -82,8 +82,8 @@ Pull requests passam pelo CI, mas nunca seguem para o CD.
 **Passos** ([`deploy/action.yml`](deploy/action.yml)):
 
 1. **Entra no Google Cloud sem senha (Workload Identity Federation).**
-   - O GitHub gera um **token temporário assinado** (OIDC), dizendo "esta execução é do repositório `Leony99/Pack`". Para isso, o job tem a permissão `id-token: write`.
-   - O Google confere a assinatura e **só aceita esse repositório**.
+   - O GitHub gera um **token temporário assinado** (OIDC), dizendo "esta execução é do repositório `Leony99/Pack`, na branch `main`". Para isso, o job tem a permissão `id-token: write`.
+   - O Google confere a assinatura e **só aceita esse repositório, e só na `main`**. Um workflow rodando em outra branch ou num pull request não consegue entrar, mesmo sendo do mesmo repositório.
    - Em troca, devolve um acesso de poucos minutos para a conta de serviço `github-deploy`.
 2. **Monta e envia a imagem.** `docker build` usa o mesmo `Dockerfile` do desenvolvimento, e `docker push` envia a imagem ao **Artifact Registry**, em São Paulo. A tag é o código do commit (`pack-api:<sha>`), então cada versão publicada aponta para o código exato que a gerou.
 3. **Publica no Cloud Run.** A ação `deploy-cloudrun` cria uma **revisão** nova do serviço `pack-api`, e ela passa a receber todo o tráfego. A revisão anterior continua guardada, e dá para voltar a ela pelo console.

@@ -196,7 +196,7 @@ O [`gcp/setup.sh`](gcp/setup.sh) é o registro de tudo o que existe no Google Cl
 | `imagens` | Repositório de imagens com a regra de limpeza |
 | `segredos` | Segredos no Secret Manager, lidos de um `.env.prod` local (fora do git) |
 | `contas` | Contas de serviço da API e do deploy, com permissões mínimas |
-| `github` | Workload Identity Federation para o repositório |
+| `github` | Workload Identity Federation para o repositório (só a branch `main`) |
 | `api` | Primeiro deploy do serviço no Cloud Run, com os limites |
 | `disjuntor` | Tópico do Pub/Sub, conta e função do disjuntor (com permissão de ler as métricas de uso) |
 | `agendador` | Tarefa do Cloud Scheduler que aciona a medição da cota de hora em hora |
