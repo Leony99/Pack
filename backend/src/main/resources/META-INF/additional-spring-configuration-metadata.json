@@ -23,7 +23,12 @@
     {
       "name": "app.login.bloqueio-minutos",
       "type": "java.lang.Long",
-      "description": "Duração do bloqueio e da janela de contagem das tentativas, em minutos."
+      "description": "Duração do bloqueio e da janela de contagem das tentativas (login, cadastro e cupom), em minutos."
+    },
+    {
+      "name": "app.cupom.max-erros",
+      "type": "java.lang.Integer",
+      "description": "Códigos de cupom errados (inexistentes ou vencidos) do mesmo cliente no checkout até bloquear o uso de cupom por ele (429)."
     },
     {
       "name": "app.admin.email",

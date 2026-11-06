@@ -2,7 +2,7 @@ package com.leonycosta.packapi.exception;
 
 import lombok.Getter;
 
-// Tentativas demais de login ou cadastro → 429. Leva quantos segundos faltam para liberar (cabeçalho Retry-After).
+// Tentativas demais de login, cadastro ou cupom → 429. Leva quantos segundos faltam para liberar (cabeçalho Retry-After).
 @Getter
 public class MuitasTentativasException extends RuntimeException {
 

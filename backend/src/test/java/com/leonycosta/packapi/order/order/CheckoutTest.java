@@ -259,6 +259,30 @@ class CheckoutTest extends IntegrationTest {
     }
 
     @Test
+    void cincoCuponsErradosBloqueiamOCupomPor15Minutos() {
+        Cliente ana = novoCliente();
+        String endereco = novoEndereco(ana);
+        colocarNoCarrinho(ana, novaVariante(100, 10), 1);
+        String valido = novoCupom("10", "PERCENTUAL");
+
+        for (int i = 0; i < 5; i++) {
+            post("/customers/" + ana.id() + "/orders", corpo("addressId", endereco, "codigoCupom", "CHUTE" + i),
+                    ana.token()).esperar(404);
+        }
+
+        // nem um código certo passa durante o bloqueio, mas a compra sem cupom continua liberada
+        post("/customers/" + ana.id() + "/orders", corpo("addressId", endereco, "codigoCupom", valido), ana.token())
+                .esperar(429);
+        checkout(ana, endereco).esperar(201);
+
+        // outro cliente não é afetado
+        Cliente bia = novoCliente();
+        colocarNoCarrinho(bia, novaVariante(100, 10), 1);
+        post("/customers/" + bia.id() + "/orders", corpo("addressId", novoEndereco(bia), "codigoCupom", valido),
+                bia.token()).esperar(201);
+    }
+
+    @Test
     void cupomComValidadeNoPassado() {
         post("/coupons", corpo("codigo", "VELHO" + unico(), "desconto", 10, "tipo", "PERCENTUAL",
                 "validade", "2020-01-01T00:00:00"), admin()).esperar(422);

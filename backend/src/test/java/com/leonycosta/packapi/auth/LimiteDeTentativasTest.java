@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -40,7 +41,7 @@ class LimiteDeTentativasTest {
     }
 
     private final RelogioDeTeste relogio = new RelogioDeTeste();
-    private final LimiteDeTentativas limite = new LimiteDeTentativas(5, 20, Duration.ofMinutes(15), relogio);
+    private final LimiteDeTentativas limite = new LimiteDeTentativas(5, 20, 5, Duration.ofMinutes(15), relogio);
 
     private void errar(String ip, String email, int vezes) {
         for (int i = 0; i < vezes; i++) {
@@ -124,5 +125,20 @@ class LimiteDeTentativasTest {
         errar("8.8.8.8", "Ana@X.com", 5);
 
         assertThatThrownBy(() -> limite.verificarLogin("8.8.8.8", "ana@x.com")).isInstanceOf(MuitasTentativasException.class);
+    }
+
+    @Test
+    void quintoCupomErradoBloqueiaSoAqueleCliente() {
+        UUID ana = UUID.randomUUID();
+        UUID bia = UUID.randomUUID();
+        for (int i = 0; i < 5; i++) {
+            limite.verificarCupom(ana);
+            limite.cupomErrado(ana);
+        }
+
+        assertThatThrownBy(() -> limite.verificarCupom(ana)).isInstanceOf(MuitasTentativasException.class);
+        assertThatCode(() -> limite.verificarCupom(bia)).doesNotThrowAnyException();
+        relogio.avancar(Duration.ofMinutes(15));
+        assertThatCode(() -> limite.verificarCupom(ana)).doesNotThrowAnyException();
     }
 }

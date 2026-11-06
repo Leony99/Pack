@@ -2,6 +2,7 @@ package com.leonycosta.packapi.order.order;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Pageable;
+import com.leonycosta.packapi.auth.LimiteDeTentativas;
 import com.leonycosta.packapi.config.Pagina;
 import com.leonycosta.packapi.customer.address.Address;
 import com.leonycosta.packapi.customer.address.AddressService;
@@ -45,6 +46,7 @@ public class OrderService {
     private final CartService cartService;
     private final CouponService couponService;
     private final InventoryMovementService inventoryService;
+    private final LimiteDeTentativas limite;
 
     public Pagina<OrderResponse> findByCustomer(UUID customerId, int pagina, int tamanho) {
         Pageable pedido = Pagina.pedido(pagina, tamanho, Sort.by(Sort.Order.desc("criadoEm"), Sort.Order.asc("id")));
@@ -100,7 +102,14 @@ public class OrderService {
         Coupon coupon = null;
         BigDecimal total = subtotalBruto;
         if (request.getCodigoCupom() != null && !request.getCodigoCupom().isBlank()) {
-            coupon = couponService.findValidByCodigo(request.getCodigoCupom());
+            // 5 cupons errados bloqueiam o cliente por 15 min (contra quem tenta adivinhar códigos)
+            limite.verificarCupom(customerId);
+            try {
+                coupon = couponService.findValidByCodigo(request.getCodigoCupom());
+            } catch (ResourceNotFoundException | BusinessException e) {
+                limite.cupomErrado(customerId);
+                throw e;
+            }
             total = aplicarDesconto(subtotalBruto, coupon);
         }
 
