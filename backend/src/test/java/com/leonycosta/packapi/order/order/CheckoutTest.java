@@ -44,7 +44,7 @@ class CheckoutTest extends IntegrationTest {
 
         assertThat(estoque(v)).isEqualTo(7);
         Resposta movimentos = get("/variants/" + v.id() + "/movements", admin()).esperar(200);
-        assertThat(movimentos.lista("$[*].tipoMovimentacao")).containsExactly("SAIDA");
+        assertThat(movimentos.lista("$.itens[*].tipoMovimentacao")).containsExactly("SAIDA");
     }
 
     @Test
@@ -57,7 +57,7 @@ class CheckoutTest extends IntegrationTest {
             checkout(ana, endereco).esperar(201);
         }
 
-        assertThat(get("/customers/" + ana.id() + "/orders", ana.token()).esperar(200).tamanho()).isEqualTo(2);
+        assertThat(get("/customers/" + ana.id() + "/orders", ana.token()).esperar(200).tamanho("$.itens")).isEqualTo(2);
     }
 
     // ------------------------------------------------------------------ snapshot: o pedido guarda o momento da compra
@@ -234,7 +234,7 @@ class CheckoutTest extends IntegrationTest {
         // rollback: o erro aconteceu no meio do checkout, mas nada ficou pela metade
         assertThat(estoque(v)).isEqualTo(10);
         assertThat(get(ana.carrinho(), ana.token()).tamanho("$.itens")).isEqualTo(1);
-        assertThat(get("/customers/" + ana.id() + "/orders", ana.token()).tamanho()).isZero();
+        assertThat(get("/customers/" + ana.id() + "/orders", ana.token()).tamanho("$.itens")).isZero();
     }
 
     @Test

@@ -1,5 +1,8 @@
 package com.leonycosta.packapi.product.product;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
+import com.leonycosta.packapi.config.Pagina;
 import com.leonycosta.packapi.exception.ConflictException;
 import com.leonycosta.packapi.exception.ResourceNotFoundException;
 import com.leonycosta.packapi.product.product_image.ProductImageResponse;
@@ -26,22 +29,21 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductTagService productTagService;
 
-    public List<ProductResponse> findAll() {
-        return productRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+    private static final Sort ORDEM = Sort.by("nome", "id");
+
+    public Pagina<ProductResponse> findAll(int pagina, int tamanho) {
+        return Pagina.de(productRepository.findAll(Pagina.pedido(pagina, tamanho, ORDEM)).map(this::toResponse));
     }
 
-    public List<ProductResponse> search(String nome) {
-        return productRepository.searchByNome(nome).stream()
-                .map(this::toResponse)
-                .toList();
+    public Pagina<ProductResponse> search(String nome, int pagina, int tamanho) {
+        // a ordem já está escrita na consulta (SQL nativo)
+        Pageable pedido = Pagina.pedido(pagina, tamanho, Sort.unsorted());
+        return Pagina.de(productRepository.searchByNome(nome, pedido).map(this::toResponse));
     }
 
-    public List<ProductResponse> findByTag(String tag) {
-        return productRepository.findByTag(tag.toLowerCase()).stream()
-                .map(this::toResponse)
-                .toList();
+    public Pagina<ProductResponse> findByTag(String tag, int pagina, int tamanho) {
+        Pageable pedido = Pagina.pedido(pagina, tamanho, ORDEM);
+        return Pagina.de(productRepository.findByTag(tag.toLowerCase(), pedido).map(this::toResponse));
     }
 
     public ProductResponse findById(UUID id) {

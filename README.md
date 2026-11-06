@@ -47,6 +47,11 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
   - o status só avança na ordem: aguardando pagamento → pago → em separação → enviado → entregue;
   - o pedido pode ser cancelado antes do envio, e o cancelamento devolve o estoque;
   - o pagamento precisa ter o valor exato do pedido, e o envio só é aceito depois do pagamento aprovado.
+- **Listagens paginadas:** produtos, clientes, funcionários, cupons, pedidos e movimentos de estoque vêm em páginas (`?pagina=0&tamanho=20`, no máximo 100 por página), com os totais para montar a navegação:
+
+  ```json
+  { "itens": [ ... ], "pagina": 0, "tamanho": 20, "totalItens": 347, "totalPaginas": 18 }
+  ```
 - **Erros padronizados:** 400, 401, 403, 404, 409 e 422 vêm sempre no mesmo formato JSON.
 
 ## Segurança
@@ -78,7 +83,7 @@ backend/src/main/java/com/leonycosta/packapi/
 ├── order/      order, order_item, payment, shipment, coupon
 ├── product/    product, product_variant, product_image, product_tag, size, color, inventory
 ├── auth/       login, cadastro, geração do token e regras de "dono"
-├── config/     SecurityConfig, JwtConfig, OpenApiConfig
+├── config/     SecurityConfig, JwtConfig, OpenApiConfig, Pagina
 ├── enums/
 └── exception/  GlobalExceptionHandler e erros padronizados
 ```
@@ -168,7 +173,7 @@ curl localhost:8080/api/v1/auth/me -H "Authorization: Bearer <token>"
 
 ## Testes
 
-São 177 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
+São 186 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
 
 ```bash
 cd backend

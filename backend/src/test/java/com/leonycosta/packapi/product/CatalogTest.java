@@ -72,7 +72,7 @@ class CatalogTest extends IntegrationTest {
         Resposta r = executar(MockMvcRequestBuilders.get("/api/v1/products").param("nome", termo + " " + sufixo))
                 .esperar(200);
 
-        assertThat(r.tamanho()).isEqualTo(1);
+        assertThat(r.tamanho("$.itens")).isEqualTo(1);
     }
 
     @Test
@@ -178,7 +178,41 @@ class CatalogTest extends IntegrationTest {
 
         Resposta r = executar(MockMvcRequestBuilders.get("/api/v1/products").param("tag", nomeDaTag)).esperar(200);
 
-        assertThat(r.lista("$[*].id")).containsExactly(comTag);
+        assertThat(r.lista("$.itens[*].id")).containsExactly(comTag);
+    }
+
+    // ------------------------------------------------------------------ paginação
+
+    @Test
+    void listagemVemEmPaginasNaOrdemDoNome() {
+        String sufixo = unico();
+        for (String letra : new String[]{"C", "A", "B"}) {
+            post("/products", corpo("nome", "Paginado " + sufixo + " " + letra, "preco", 10), admin()).esperar(201);
+        }
+
+        Resposta primeira = executar(MockMvcRequestBuilders.get("/api/v1/products")
+                .param("nome", "Paginado " + sufixo).param("tamanho", "2")).esperar(200);
+        Resposta segunda = executar(MockMvcRequestBuilders.get("/api/v1/products")
+                .param("nome", "Paginado " + sufixo).param("tamanho", "2").param("pagina", "1")).esperar(200);
+
+        assertThat(primeira.lista("$.itens[*].nome")).containsExactly("Paginado " + sufixo + " A", "Paginado " + sufixo + " B");
+        assertThat(primeira.inteiro("$.totalItens")).isEqualTo(3);
+        assertThat(primeira.inteiro("$.totalPaginas")).isEqualTo(2);
+        assertThat(segunda.lista("$.itens[*].nome")).containsExactly("Paginado " + sufixo + " C");
+    }
+
+    @Test
+    void tamanhoDaPaginaTemTetoDe100EPaginaNegativaViraZero() {
+        Resposta r = executar(MockMvcRequestBuilders.get("/api/v1/products")
+                .param("tamanho", "1000000").param("pagina", "-5")).esperar(200);
+
+        assertThat(r.inteiro("$.tamanho")).isEqualTo(100);
+        assertThat(r.inteiro("$.pagina")).isZero();
+    }
+
+    @Test
+    void paginaComTextoNoLugarDoNumeroDa400() {
+        executar(MockMvcRequestBuilders.get("/api/v1/products").param("pagina", "abc")).esperar(400);
     }
 
     // ------------------------------------------------------------------ exclusões que deixariam o histórico quebrado

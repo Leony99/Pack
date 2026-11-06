@@ -1,5 +1,6 @@
 package com.leonycosta.packapi.order.coupon;
 
+import com.leonycosta.packapi.config.Pagina;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -7,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Cupons", description = "Cupons de desconto fixos ou percentuais. Exige COUPON_MANAGE.")
@@ -18,10 +18,11 @@ public class CouponController {
 
     private final CouponService couponService;
 
-    @Operation(summary = "Lista os cupons")
+    @Operation(summary = "Lista os cupons em páginas")
     @GetMapping
-    public List<CouponResponse> findAll() {
-        return couponService.findAll();
+    public Pagina<CouponResponse> findAll(@RequestParam(defaultValue = "0") int pagina,
+                                        @RequestParam(defaultValue = Pagina.TAMANHO_PADRAO) int tamanho) {
+        return couponService.findAll(pagina, tamanho);
     }
 
     @Operation(summary = "Busca um cupom")

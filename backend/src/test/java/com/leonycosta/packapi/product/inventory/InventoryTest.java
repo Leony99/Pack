@@ -70,7 +70,7 @@ class InventoryTest extends IntegrationTest {
 
         Resposta r = get("/variants/" + v.id() + "/movements", admin()).esperar(200);
 
-        assertThat(r.lista("$[*].tipoMovimentacao")).containsExactlyInAnyOrder("ENTRADA", "AJUSTE");
+        assertThat(r.lista("$.itens[*].tipoMovimentacao")).containsExactlyInAnyOrder("ENTRADA", "AJUSTE");
     }
 
     @Test

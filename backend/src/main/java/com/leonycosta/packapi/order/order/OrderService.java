@@ -1,5 +1,8 @@
 package com.leonycosta.packapi.order.order;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
+import com.leonycosta.packapi.config.Pagina;
 import com.leonycosta.packapi.customer.address.Address;
 import com.leonycosta.packapi.customer.address.AddressService;
 import com.leonycosta.packapi.cart.cart.Cart;
@@ -43,10 +46,9 @@ public class OrderService {
     private final CouponService couponService;
     private final InventoryMovementService inventoryService;
 
-    public List<OrderResponse> findByCustomer(UUID customerId) {
-        return orderRepository.findByCustomerId(customerId).stream()
-                .map(this::toResponse)
-                .toList();
+    public Pagina<OrderResponse> findByCustomer(UUID customerId, int pagina, int tamanho) {
+        Pageable pedido = Pagina.pedido(pagina, tamanho, Sort.by(Sort.Order.desc("criadoEm"), Sort.Order.asc("id")));
+        return Pagina.de(orderRepository.findByCustomerId(customerId, pedido).map(this::toResponse));
     }
 
     public OrderResponse findById(UUID id) {

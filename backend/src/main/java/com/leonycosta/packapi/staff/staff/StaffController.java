@@ -1,5 +1,6 @@
 package com.leonycosta.packapi.staff.staff;
 
+import com.leonycosta.packapi.config.Pagina;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -9,7 +10,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Funcionários", description = "Exige STAFF_MANAGE.")
@@ -20,10 +20,11 @@ public class StaffController {
 
     private final StaffService staffService;
 
-    @Operation(summary = "Lista os funcionários")
+    @Operation(summary = "Lista os funcionários em páginas")
     @GetMapping
-    public List<StaffResponse> findAll() {
-        return staffService.findAll();
+    public Pagina<StaffResponse> findAll(@RequestParam(defaultValue = "0") int pagina,
+                                         @RequestParam(defaultValue = Pagina.TAMANHO_PADRAO) int tamanho) {
+        return staffService.findAll(pagina, tamanho);
     }
 
     @Operation(summary = "Cadastra um funcionário com um papel")

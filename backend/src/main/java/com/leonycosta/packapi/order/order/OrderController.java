@@ -1,5 +1,6 @@
 package com.leonycosta.packapi.order.order;
 
+import com.leonycosta.packapi.config.Pagina;
 import com.leonycosta.packapi.enums.OrderStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Pedidos", description = "O cliente fecha e consulta os próprios pedidos; mudar o status exige ORDER_MANAGE.")
@@ -19,10 +19,12 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    @Operation(summary = "Lista os pedidos do cliente")
+    @Operation(summary = "Lista os pedidos do cliente em páginas, do mais novo ao mais antigo")
     @GetMapping("/customers/{customerId}/orders")
-    public List<OrderResponse> findByCustomer(@PathVariable UUID customerId) {
-        return orderService.findByCustomer(customerId);
+    public Pagina<OrderResponse> findByCustomer(@PathVariable UUID customerId,
+                                                @RequestParam(defaultValue = "0") int pagina,
+                                                @RequestParam(defaultValue = Pagina.TAMANHO_PADRAO) int tamanho) {
+        return orderService.findByCustomer(customerId, pagina, tamanho);
     }
 
     // Checkout: transforma o carrinho do cliente em pedido

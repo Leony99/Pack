@@ -1,5 +1,8 @@
 package com.leonycosta.packapi.product.inventory;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
+import com.leonycosta.packapi.config.Pagina;
 import com.leonycosta.packapi.enums.MovimentoTipo;
 import com.leonycosta.packapi.exception.BusinessException;
 import com.leonycosta.packapi.product.product_variant.ProductVariant;
@@ -12,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -24,10 +26,9 @@ public class InventoryMovementService {
     private final ProductVariantRepository variantRepository;
     private final EntityManager entityManager;
 
-    public List<InventoryMovementResponse> findByVariant(UUID variantId) {
-        return movementRepository.findByVariantId(variantId).stream()
-                .map(this::toResponse)
-                .toList();
+    public Pagina<InventoryMovementResponse> findByVariant(UUID variantId, int pagina, int tamanho) {
+        Pageable pedido = Pagina.pedido(pagina, tamanho, Sort.by(Sort.Order.desc("data"), Sort.Order.asc("id")));
+        return Pagina.de(movementRepository.findByVariantId(variantId, pedido).map(this::toResponse));
     }
 
     @Transactional
