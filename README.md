@@ -8,8 +8,8 @@ E-commerce de roupas. O repositório é um monorepo:
 |---|---|
 | [`backend/`](backend/) | API REST em Spring Boot (descrita abaixo) |
 | `frontend/` | Loja em React / Next.js (em desenvolvimento) |
-| [`producao/`](producao/) | Como a API roda em produção: deploy no Google Cloud, banco no Neon, limitadores e disjuntor de custos ([explicação](producao/README.md)) |
-| [`.github/workflows/`](.github/workflows/) | Pipeline de CI/CD (GitHub Actions) |
+| [`ci-cd/`](ci-cd/) | Pipeline de CI/CD no GitHub Actions: testes e publicação automáticos ([explicação](ci-cd/README.md)) |
+| [`producao/`](producao/) | Como a API roda em produção: Google Cloud Run, banco no Neon, limitadores e disjuntor de custos ([explicação](producao/README.md)) |
 
 ## Backend: Pack API
 
@@ -189,36 +189,13 @@ Os passos:
 
 Os testes ficam em [`backend/src/test/`](backend/src/test/java/com/leonycosta/packapi), nos mesmos pacotes do código que testam. A base comum, com a configuração do banco descartável e atalhos para montar os dados, fica em `support/`.
 
+Eles também rodam sozinhos a cada envio ao GitHub (ver [CI/CD](#cicd)).
+
 ## CI/CD
 
-O [GitHub Actions](.github/workflows/ci.yml) roda a cada envio ao GitHub, numa máquina Linux temporária, criada para a execução e apagada no fim:
+A cada envio ao GitHub, o **GitHub Actions** roda os testes e monta a imagem Docker (CI). Se tudo passa e o envio é para a `main`, ele publica a versão nova no Google Cloud Run (CD). Se um teste falha, nada é publicado.
 
-```
-push / pull request
-        │
-        ▼
-┌─ CI (job "backend") ───────────────┐   falhou → ✗ para aqui, nada é publicado
-│ 1. baixa o código                  │            (relatórios dos testes ficam
-│ 2. instala o Java 21 (com cache)   │             para download)
-│ 3. ./mvnw test   (177 testes)      │
-│ 4. docker build  (confere imagem)  │
-└────────────────┬───────────────────┘
-                 │ passou, e é push na main?
-                 ▼
-┌─ CD (job "deploy") ────────────────┐
-│ publica a versão nova em produção  │──► Google Cloud Run
-└────────────────────────────────────┘
-```
-
-- **CI:**
-  - roda a cada envio para a `main` e a cada pull request;
-  - os testes sobem o PostgreSQL descartável no Docker da própria máquina do GitHub, sem nenhum segredo envolvido;
-  - se algo falha, o commit fica marcado com ✗ e nada segue adiante;
-  - o selo no topo deste README mostra o resultado da última execução, e o histórico fica na aba [Actions](https://github.com/Leony99/Pack/actions).
-- **CD:**
-  - só roda num envio para a `main` e depois que o CI passou;
-  - ele entra no Google Cloud sem senha guardada, envia a imagem e publica a versão nova;
-  - os detalhes estão em [`producao/README.md`](producao/README.md#do-git-push-até-a-api-no-ar).
+Como o pipeline funciona, passo a passo, está em **[`ci-cd/README.md`](ci-cd/README.md)**.
 
 ## Documentação
 

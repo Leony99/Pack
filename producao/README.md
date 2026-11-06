@@ -2,10 +2,12 @@
 
 Como a Pack API roda em produção:
 - **onde ela fica:** Google Cloud Run, com o banco no Neon;
-- **como uma versão nova chega lá:** CD pelo GitHub Actions;
+- **como os segredos chegam até ela;**
 - **como o custo fica em zero:** limitadores e disjuntor.
 
-O desenvolvimento local, o Docker, os testes e o CI estão no [README principal](../README.md).
+Os outros assuntos ficam em outros lugares:
+- o desenvolvimento local e os testes estão no [README principal](../README.md);
+- como uma versão nova chega aqui está no [CI/CD](../ci-cd/README.md).
 
 **API no ar:** https://pack-api-872578691493.southamerica-east1.run.app/swagger-ui.html
 
@@ -55,69 +57,17 @@ O desenvolvimento local, o Docker, os testes e o CI estão no [README principal]
 
 ## Do git push até a API no ar
 
-Você não monta nem envia nenhuma imagem: **só envia o código**. O resto acontece sozinho.
+Você só envia o código. O **CI/CD** (GitHub Actions) testa, monta a imagem Docker, envia ao Artifact Registry e cria uma revisão nova no Cloud Run, tudo sozinho e sem nenhuma senha guardada no GitHub. Esse caminho está explicado em **[`ci-cd/README.md`](../ci-cd/README.md)**.
+
+A partir daí, começa a parte de produção:
 
 ```
- git push (main)
-   │
-   ▼
- GitHub ── recebe o código e lê .github/workflows/ci.yml
-   │
-   ▼
- GitHub Actions ── liga uma máquina Linux temporária
-   │
-   ├─ 1. CI ─────── testes + docker build (ver README principal)
-   │                    └─ falhou? ✗ para aqui, nada é publicado
-   │
-   ├─ 2. Login ──── entra no Google Cloud com um token temporário (sem senha)
-   │
-   ├─ 3. Imagem ─── docker build + docker push ──► Artifact Registry (São Paulo)
-   │
-   └─ 4. Deploy ─── manda o Cloud Run usar a imagem nova ──► Cloud Run: nova revisão
-                                                                  │
  usuário ──https──► Cloud Run liga o container ──► API (perfil prod) ──SSL──► Neon
                                                        ▲
                                          Secret Manager (senhas e chave JWT)
 ```
 
-### Passo 1: o CI aprova
-
-Um `git push` para a `main` dispara o workflow [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). O job `backend` (CI) roda os 177 testes e monta a imagem. **Se algo falha, nada é publicado**, e a versão no ar continua a anterior. O CI está explicado no [README principal](../README.md#cicd).
-
-### Passo 2: login no Google Cloud, sem senha
-
-Com o CI aprovado, começa o job `deploy`, que só roda em push na `main`. Ele entra no Google Cloud com **Workload Identity Federation**:
-
-1. O GitHub gera um **token temporário assinado** (OIDC), dizendo "esta execução é do repositório `Leony99/Pack`".
-2. O Google confere a assinatura e **só aceita esse repositório**.
-3. O Google devolve um acesso de poucos minutos para a conta de serviço `github-deploy`.
-
-Nenhuma senha ou chave fica guardada no GitHub. Lá ficam só 4 **variáveis**, nenhuma secreta (*Settings → Secrets and variables → Actions → Variables*):
-
-| Variável | O que é |
-|---|---|
-| `GCP_PROJECT_ID` | O projeto do Google Cloud |
-| `GCP_REGION` | `southamerica-east1` (São Paulo) |
-| `GCP_WIF_PROVIDER` | O provedor que aceita os tokens do GitHub |
-| `GCP_DEPLOY_SA` | A conta de serviço que o deploy assume |
-
-### Passo 3: a imagem vai para o Artifact Registry
-
-Na mesma máquina do GitHub:
-- `docker build` monta a imagem com o mesmo [`Dockerfile`](../backend/Dockerfile) do desenvolvimento;
-- `docker push` a envia ao **Artifact Registry**, o "depósito de imagens" do Google em São Paulo;
-- a tag da imagem é o código do commit (`pack-api:<sha>`), então cada versão publicada aponta para o commit exato que a gerou.
-
-### Passo 4: o Cloud Run publica a versão nova
-
-A ação `deploy-cloudrun` manda o serviço `pack-api` usar a imagem nova:
-1. O Cloud Run cria uma **revisão** nova do serviço.
-2. Assim que ela fica pronta, recebe 100% do tráfego.
-3. A revisão anterior continua guardada, e dá para voltar a ela pelo console.
-
-O deploy **só troca a imagem**. Memória, limites, variáveis, segredos e acesso público continuam como estavam. A conta de deploy nem tem permissão para mexer em acessos. Só roda um deploy por vez (`concurrency`).
-
-### Passo 5: a API roda
+### A API roda
 
 Quando uma requisição chega em `https://pack-api-….run.app`:
 
@@ -134,7 +84,7 @@ Quando uma requisição chega em `https://pack-api-….run.app`:
 6. **A resposta volta** ao usuário.
 7. **Uns 15 minutos sem requisições, o container desliga** e para de cobrar. A próxima requisição volta ao item 2.
 
-### Passo 6: vigilância de custo (o tempo todo)
+### Vigilância de custo (o tempo todo)
 
 - **De hora em hora,** o disjuntor mede quanto da cota grátis do mês já foi usado e tira a API do ar sozinho se algum recurso passar de **85%**.
 - O **orçamento** de R$ 1 é a segunda camada, para qualquer cobrança real.

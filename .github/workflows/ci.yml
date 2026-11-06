@@ -1,7 +1,9 @@
-# CI/CD da Pack.
-#   CI (todo push e pull request para a main): roda os testes da API e confere se a imagem Docker monta.
-#   CD (só push na main, e só se o CI passar): envia a imagem ao Google Cloud e publica no Cloud Run.
-# Resultado na aba "Actions" do repositório e no selo do README.
+# Porta de entrada do CI/CD da Pack: diz QUANDO rodar e EM QUE ORDEM.
+# Os passos de cada etapa ficam em ci-cd/ (o GitHub só lê workflows desta pasta,
+# mas aceita ações locais em qualquer lugar do repositório). Explicação: ci-cd/README.md
+#
+#   CI (todo push e pull request para a main): testes da API + imagem Docker  → ci-cd/ci-backend
+#   CD (só push na main, e só se o CI passar): publica no Google Cloud Run     → ci-cd/deploy
 
 name: CI/CD
 
@@ -15,36 +17,13 @@ jobs:
   backend:
     name: Backend (testes + imagem Docker)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend   # todos os comandos rodam de dentro de backend/
-
     steps:
+      # ações locais só existem depois que o código é baixado
       - name: Baixar o código
         uses: actions/checkout@v7
 
-      - name: Instalar o Java 21
-        uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: 21
-          cache: maven                # guarda as dependências entre execuções (fica mais rápido)
-
-      # Os testes sobem o próprio PostgreSQL com Testcontainers.
-      # O Docker já vem instalado na máquina do GitHub, e não precisa de .env nem de segredos.
-      - name: Rodar os testes
-        run: ./mvnw -B test
-
-      # Se algum teste falhar, guarda os relatórios para baixar na página da execução
-      - name: Guardar relatórios dos testes
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: relatorios-testes
-          path: backend/target/surefire-reports/
-
-      - name: Montar a imagem Docker
-        run: docker build -t pack-api .
+      - name: CI do backend
+        uses: ./ci-cd/ci-backend
 
   deploy:
     name: Deploy no Cloud Run
@@ -56,34 +35,14 @@ jobs:
     permissions:
       contents: read
       id-token: write                   # permite pedir o token OIDC que o Google aceita no lugar de uma senha
-    env:
-      IMAGEM: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/pack/pack-api:${{ github.sha }}
-
     steps:
       - name: Baixar o código
         uses: actions/checkout@v7
 
-      # Entra no Google Cloud sem chave guardada (Workload Identity Federation, ver producao/gcp/setup.sh)
-      - name: Entrar no Google Cloud
-        uses: google-github-actions/auth@v3
+      - name: Deploy no Cloud Run
+        uses: ./ci-cd/deploy
         with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account: ${{ vars.GCP_DEPLOY_SA }}
-
-      - name: Instalar o gcloud
-        uses: google-github-actions/setup-gcloud@v3
-
-      - name: Montar e enviar a imagem
-        run: |
-          gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev --quiet
-          docker build -t "$IMAGEM" backend
-          docker push "$IMAGEM"
-
-      # Só troca a imagem: memória, variáveis, segredos e acesso público continuam como estão.
-      # Por isso um deploy nunca religa a API se o disjuntor de custos a tiver tirado do ar.
-      - name: Publicar no Cloud Run
-        uses: google-github-actions/deploy-cloudrun@v3
-        with:
-          service: pack-api
-          region: ${{ vars.GCP_REGION }}
-          image: ${{ env.IMAGEM }}
+          projeto: ${{ vars.GCP_PROJECT_ID }}
+          regiao: ${{ vars.GCP_REGION }}
+          provedor-wif: ${{ vars.GCP_WIF_PROVIDER }}
+          conta-deploy: ${{ vars.GCP_DEPLOY_SA }}

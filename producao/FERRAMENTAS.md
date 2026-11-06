@@ -57,7 +57,7 @@ Os deploys seguintes são feitos pelo GitHub Actions, que monta e envia a imagem
 
 ## Serviços usados a partir do GitHub Actions
 
-O workflow [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) usa ações oficiais do Google, que rodam só na máquina temporária do GitHub:
+A ação de deploy [`ci-cd/deploy/action.yml`](../ci-cd/deploy/action.yml), chamada pelo workflow, usa ações oficiais do Google, que rodam só na máquina temporária do GitHub:
 
 - `google-github-actions/auth@v3`: entra no Google Cloud com Workload Identity Federation, sem chave guardada;
 - `google-github-actions/setup-gcloud@v3`: instala o gcloud na máquina do GitHub, só durante a execução;
