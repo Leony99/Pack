@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public class CouponRequest {
 
     @NotBlank(message = "Código é obrigatório")
+    @Size(max = 30, message = "Código deve ter no máximo 30 caracteres")
     private String codigo;
 
     @NotNull(message = "Desconto é obrigatório")

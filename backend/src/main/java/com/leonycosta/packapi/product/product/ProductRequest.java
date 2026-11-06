@@ -19,5 +19,6 @@ public class ProductRequest {
     private BigDecimal preco;
 
     // Opcional — se não enviado o Service gera automaticamente a partir do nome
+    @Size(max = 120, message = "Slug deve ter no máximo 120 caracteres")
     private String slug;
 }

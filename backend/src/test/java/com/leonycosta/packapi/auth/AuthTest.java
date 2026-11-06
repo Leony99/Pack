@@ -75,6 +75,16 @@ class AuthTest extends IntegrationTest {
     }
 
     @Test
+    void cadastroComNomeGiganteDa400ENao409() {
+        // sem limite, o texto ia até o banco, que recusava e virava um 409 "conflito" enganoso
+        Resposta r = post("/auth/register", corpo("nome", "x".repeat(100_000), "email", "x-" + unico() + "@teste.com",
+                "telefone", "1", "senha", "senha-forte-1"), null);
+
+        r.esperar(400);
+        assertThat(r.lista("$.fieldErrors[*].field")).containsExactly("nome");
+    }
+
+    @Test
     void cadastroComEmailInvalido() {
         post("/auth/register", corpo("nome", "X", "email", "nao-e-email", "telefone", "1", "senha", "senha1234"), null)
                 .esperar(400);

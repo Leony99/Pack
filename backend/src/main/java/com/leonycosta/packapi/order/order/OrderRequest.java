@@ -11,5 +11,6 @@ public class OrderRequest {
     private UUID addressId;
 
     // Opcional — cliente pode finalizar sem cupom
+    @Size(max = 30, message = "Código do cupom deve ter no máximo 30 caracteres")
     private String codigoCupom;
 }

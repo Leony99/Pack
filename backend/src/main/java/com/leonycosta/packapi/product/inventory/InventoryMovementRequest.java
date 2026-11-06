@@ -20,5 +20,6 @@ public class InventoryMovementRequest {
     private Integer quantidade;
 
     // Obrigatório só para AJUSTE — validado no Service
+    @Size(max = 255, message = "Motivo deve ter no máximo 255 caracteres")
     private String motivo;
 }

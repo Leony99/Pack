@@ -15,6 +15,7 @@ public class ProductVariantRequest {
     private UUID colorId;
 
     @NotBlank(message = "SKU é obrigatório")
+    @Size(max = 50, message = "SKU deve ter no máximo 50 caracteres")
     private String sku;
 
     // Opcional — se nulo herda o preço do produto

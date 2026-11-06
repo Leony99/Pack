@@ -7,6 +7,7 @@ import lombok.*;
 public class ProductImageRequest {
 
     @NotBlank(message = "URL é obrigatória")
+    @Size(max = 255, message = "URL deve ter no máximo 255 caracteres")
     private String url;
 
     @NotNull(message = "Ordem é obrigatória")
