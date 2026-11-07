@@ -165,26 +165,20 @@ public class OrderService {
         return toResponse(order);
     }
 
-    // Mudança pelo funcionário (PATCH /orders/{id}/status).
-    // PAGO não vale aqui: o pedido só fica pago pela aprovação de um pagamento registrado, para sempre
-    // existir o registro de quanto e como foi recebido. Cancelar acerta o pagamento junto.
+    // Mudança pelo funcionário (PATCH /orders/{id}/status): só CANCELADO.
+    // Os outros status vêm de um registro que prova a mudança: PAGO da aprovação do pagamento
+    // (quanto e como foi recebido) e EM_SEPARACAO, ENVIADO, ENTREGUE e DEVOLVIDO do envio (transportadora e rastreio).
     @Transactional
     public OrderResponse updateStatus(UUID id, OrderStatus status) {
         if (status == OrderStatus.PAGO) {
             throw new BusinessException("O pedido só fica PAGO pela aprovação do pagamento. Recebeu por fora? "
                     + "Registre o pagamento com o método OUTRO e aprove-o");
         }
-        Order order = aplicarStatus(findOrThrow(id), status);
-        Payment payment = order.getPayment();
-        if (status == OrderStatus.CANCELADO && payment != null) {
-            // já recebido → estornado; ainda não recebido → recusado (não pode mais ser aprovado)
-            if (payment.getStatus() == PaymentStatus.APROVADO) {
-                payment.setStatus(PaymentStatus.ESTORNADO);
-            } else if (payment.getStatus() == PaymentStatus.PENDENTE) {
-                payment.setStatus(PaymentStatus.RECUSADO);
-            }
+        if (status != OrderStatus.CANCELADO) {
+            throw new BusinessException("O status " + status + " vem do envio do pedido: "
+                    + "crie o envio e mude o status dele");
         }
-        return toResponse(orderRepository.save(order));
+        return toResponse(orderRepository.save(aplicarStatus(findOrThrow(id), status)));
     }
 
     // Mudança vinda do pagamento ou do envio (PaymentService e ShipmentService), que já cuidam do próprio status
@@ -193,20 +187,28 @@ public class OrderService {
         orderRepository.save(aplicarStatus(findOrThrow(id), status));
     }
 
-    // Confere se o fluxo permite a mudança e, se for um cancelamento, devolve o estoque
+    // Confere se o fluxo permite a mudança. Cancelado ou devolvido, o produto volta para o estoque
+    // e o pagamento é acertado: já recebido → estornado; ainda não recebido → recusado (não pode mais ser aprovado)
     private Order aplicarStatus(Order order, OrderStatus status) {
         if (!order.getStatus().podeMudarPara(status)) {
             throw new BusinessException(
                     "Não é possível mudar o pedido de " + order.getStatus() + " para " + status);
         }
-        if (status == OrderStatus.CANCELADO) {
+        if (status == OrderStatus.CANCELADO || status == OrderStatus.DEVOLVIDO) {
+            Payment payment = order.getPayment();
+            if (payment != null && payment.getStatus() == PaymentStatus.APROVADO) {
+                payment.setStatus(PaymentStatus.ESTORNADO);
+            } else if (payment != null && payment.getStatus() == PaymentStatus.PENDENTE) {
+                payment.setStatus(PaymentStatus.RECUSADO);
+            }
+            String motivo = (status == OrderStatus.CANCELADO ? "Cancelamento" : "Devolução") + " do pedido ";
             // mesma ordem do checkout, para as travas de estoque não se cruzarem
             List<OrderItem> itensEmOrdem = order.getItens().stream()
                     .sorted(Comparator.comparing(item -> item.getVariant().getId()))
                     .toList();
             for (OrderItem item : itensEmOrdem) {
                 inventoryService.registerDevolucao(item.getVariant(), item.getQuantidade(),
-                        "Cancelamento do pedido " + order.getId());
+                        motivo + order.getId());
             }
         }
         order.setStatus(status);

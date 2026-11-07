@@ -19,7 +19,9 @@ class OrderStatusTest {
             "PAGO, CANCELADO",
             "EM_SEPARACAO, ENVIADO",
             "EM_SEPARACAO, CANCELADO",
-            "ENVIADO, ENTREGUE"
+            "ENVIADO, ENTREGUE",
+            "ENVIADO, DEVOLVIDO",               // a transportadora trouxe de volta
+            "ENTREGUE, DEVOLVIDO"               // o cliente devolveu
     })
     void caminhoNormalDoPedido(OrderStatus atual, OrderStatus novo) {
         assertThat(atual.podeMudarPara(novo)).isTrue();
@@ -31,17 +33,19 @@ class OrderStatusTest {
             "AGUARDANDO_PAGAMENTO, ENVIADO",
             "PAGO, AGUARDANDO_PAGAMENTO",       // voltar
             "ENVIADO, EM_SEPARACAO",
-            "ENVIADO, CANCELADO"                // já saiu do estoque: não dá para devolver
+            "ENVIADO, CANCELADO",               // já saiu do estoque: só volta como DEVOLVIDO, pelo envio
+            "EM_SEPARACAO, DEVOLVIDO",          // ainda não saiu: é cancelamento
+            "ENTREGUE, CANCELADO"
     })
     void naoPulaEtapasNemVolta(OrderStatus atual, OrderStatus novo) {
         assertThat(atual.podeMudarPara(novo)).isFalse();
     }
 
-    @ParameterizedTest(name = "ENTREGUE e CANCELADO não mudam para {0}")
+    @ParameterizedTest(name = "CANCELADO e DEVOLVIDO não mudam para {0}")
     @EnumSource(OrderStatus.class)
-    void entregueECanceladoSaoFinais(OrderStatus novo) {
-        assertThat(ENTREGUE.podeMudarPara(novo)).isFalse();
+    void canceladoEDevolvidoSaoFinais(OrderStatus novo) {
         assertThat(CANCELADO.podeMudarPara(novo)).isFalse();
+        assertThat(DEVOLVIDO.podeMudarPara(novo)).isFalse();
     }
 
     @ParameterizedTest(name = "{0} não muda para ele mesmo")

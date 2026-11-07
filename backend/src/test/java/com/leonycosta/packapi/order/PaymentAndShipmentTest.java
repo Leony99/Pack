@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 // Pagamento e envio, e como eles mudam o status do pedido:
 // AGUARDANDO_PAGAMENTO → PAGO (pagamento aprovado) → EM_SEPARACAO (envio criado)
-//   → ENVIADO (despachado) → ENTREGUE (entregue)
+//   → ENVIADO (despachado) → ENTREGUE (entregue); DEVOLVIDO se o pacote voltar para a loja
 class PaymentAndShipmentTest extends IntegrationTest {
 
     // ------------------------------------------------------------------ pagamento
@@ -224,6 +224,67 @@ class PaymentAndShipmentTest extends IntegrationTest {
         assertThat(get("/orders/" + p.id() + "/payment", admin()).str("$.status")).isEqualTo("RECUSADO");
         // e não dá mais para aprovar o pagamento de um pedido cancelado
         patch("/payments/" + pagamento + "/status?status=APROVADO", admin()).esperar(422);
+    }
+
+    // ------------------------------------------------------------------ regras do envio
+
+    @Test
+    void envioNaoPulaNemVoltaParaTras() {
+        Pedido p = novoPedidoPago(novaVariante(80, 10));
+        String envio = criarEnvio(p);
+
+        patch("/shipments/" + envio + "/status?status=ENTREGUE", admin()).esperar(422);
+        patch("/shipments/" + envio + "/status?status=DESPACHADO", admin()).esperar(200);
+        patch("/shipments/" + envio + "/status?status=PREPARANDO", admin()).esperar(422);
+        patch("/shipments/" + envio + "/status?status=ENTREGUE", admin()).esperar(200);
+        patch("/shipments/" + envio + "/status?status=DESPACHADO", admin()).esperar(422);
+
+        assertThat(get("/orders/" + p.id() + "/shipment", admin()).str("$.status")).isEqualTo("ENTREGUE");
+        assertThat(statusDoPedido(p)).isEqualTo("ENTREGUE");
+    }
+
+    @Test
+    void pacoteQueVoltaDaTransportadoraDevolveOEstoqueEEstorna() {
+        Variante v = novaVariante(80, 10);
+        Pedido p = novoPedidoPago(v);
+        String envio = criarEnvio(p);
+        patch("/shipments/" + envio + "/status?status=DESPACHADO", admin()).esperar(200);
+
+        patch("/shipments/" + envio + "/status?status=DEVOLVIDO", admin()).esperar(200);
+
+        assertThat(statusDoPedido(p)).isEqualTo("DEVOLVIDO");
+        assertThat(estoque(v)).isEqualTo(10);
+        assertThat(get("/orders/" + p.id() + "/payment", admin()).str("$.status")).isEqualTo("ESTORNADO");
+        // final: não é entregue depois, nem devolve o estoque duas vezes
+        patch("/shipments/" + envio + "/status?status=ENTREGUE", admin()).esperar(422);
+        patch("/shipments/" + envio + "/status?status=DEVOLVIDO", admin()).esperar(422);
+        assertThat(estoque(v)).isEqualTo(10);
+    }
+
+    @Test
+    void clienteDevolveDepoisDeEntregue() {
+        Variante v = novaVariante(80, 10);
+        Pedido p = novoPedidoPago(v);
+        String envio = criarEnvio(p);
+        patch("/shipments/" + envio + "/status?status=DESPACHADO", admin()).esperar(200);
+        patch("/shipments/" + envio + "/status?status=ENTREGUE", admin()).esperar(200);
+
+        patch("/shipments/" + envio + "/status?status=DEVOLVIDO", admin()).esperar(200);
+
+        assertThat(statusDoPedido(p)).isEqualTo("DEVOLVIDO");
+        assertThat(estoque(v)).isEqualTo(10);
+        assertThat(get("/orders/" + p.id() + "/payment", admin()).str("$.status")).isEqualTo("ESTORNADO");
+    }
+
+    @Test
+    void patchDoPedidoSoCancela() {
+        Pedido p = novoPedidoPago(novaVariante(80, 10));
+
+        // sem envio criado, o pedido não pode aparecer como enviado ou entregue
+        for (String status : new String[] {"EM_SEPARACAO", "ENVIADO", "ENTREGUE", "DEVOLVIDO"}) {
+            patch("/orders/" + p.id() + "/status?status=" + status, admin()).esperar(422);
+        }
+        assertThat(statusDoPedido(p)).isEqualTo("PAGO");
     }
 
     // ------------------------------------------------------------------ atalhos

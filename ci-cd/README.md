@@ -38,7 +38,7 @@ GitHub lê .github/workflows/ci.yml
         ▼
 ┌─ job "backend" (CI) ── ci-cd/ci-backend ─┐   falhou → ✗ para aqui, nada é publicado
 │ 1. instala o Java 21 (com cache)         │            (relatórios dos testes ficam
-│ 2. ./mvnw test   (225 testes)            │             para download)
+│ 2. ./mvnw test   (237 testes)            │             para download)
 │ 3. docker build  (confere a imagem)      │
 └────────────────┬─────────────────────────┘
                  │ passou, e é push na main?
@@ -62,7 +62,7 @@ O resultado aparece:
 **Passos** ([`ci-backend/action.yml`](ci-backend/action.yml)):
 
 1. **Instala o Java 21.** As dependências do Maven ficam em cache entre execuções, o que deixa as seguintes mais rápidas.
-2. **Roda os 225 testes** (`./mvnw test`): unidade, integração e concorrência.
+2. **Roda os 237 testes** (`./mvnw test`): unidade, integração e concorrência.
    - O Testcontainers sobe um PostgreSQL 18 descartável no Docker, que já vem instalado na máquina do GitHub.
    - Não há segredo envolvido: os testes definem a própria configuração e não dependem de `.env`.
 3. **Monta a imagem Docker**, só para conferir que o [`Dockerfile`](../backend/Dockerfile) continua funcionando.
