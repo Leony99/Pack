@@ -265,6 +265,16 @@ class CatalogTest extends IntegrationTest {
     }
 
     @Test
+    void paginaEnormeVoltaVaziaSemErro() {
+        // antes dava 500: o deslocamento (página × tamanho) passava do maior int
+        for (String tamanho : new String[]{"1", "20", "100"}) {
+            Resposta r = executar(MockMvcRequestBuilders.get("/api/v1/products")
+                    .param("pagina", "2147483647").param("tamanho", tamanho)).esperar(200);
+            assertThat(r.tamanho("$.itens")).isZero();
+        }
+    }
+
+    @Test
     void paginaComTextoNoLugarDoNumeroDa400() {
         executar(MockMvcRequestBuilders.get("/api/v1/products").param("pagina", "abc")).esperar(400);
     }

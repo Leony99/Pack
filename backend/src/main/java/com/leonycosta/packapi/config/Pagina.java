@@ -21,7 +21,10 @@ public record Pagina<T>(List<T> itens, int pagina, int tamanho, long totalItens,
 
     // Monta o pedido ao banco (LIMIT/OFFSET). A ordem é fixa, definida por quem chama, e não vem da URL.
     // Valores fora do intervalo são ajustados em vez de virar erro: página negativa vira 0; tamanho, de 1 a 100.
+    // A página também tem teto: o banco recebe o deslocamento (página × tamanho) como int, e
+    // pagina=2147483647 passava do maior int e dava 500. Uma página além do fim só volta vazia.
     public static Pageable pedido(int pagina, int tamanho, Sort ordem) {
-        return PageRequest.of(Math.max(pagina, 0), Math.clamp(tamanho, 1, TAMANHO_MAXIMO), ordem);
+        int tam = Math.clamp(tamanho, 1, TAMANHO_MAXIMO);
+        return PageRequest.of(Math.clamp(pagina, 0, Integer.MAX_VALUE / tam), tam, ordem);
     }
 }
