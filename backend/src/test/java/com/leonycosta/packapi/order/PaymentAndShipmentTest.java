@@ -144,6 +144,88 @@ class PaymentAndShipmentTest extends IntegrationTest {
         patch("/orders/" + p.id() + "/status?status=CANCELADO", admin()).esperar(422);
     }
 
+    // ------------------------------------------------------------------ regras do pagamento
+
+    @Test
+    void funcionarioRegistraPagamentoRecebidoPorFora() {
+        Pedido p = novoPedido(novaVariante(80, 10), 1);
+        String atendente = novoFuncionario("ATENDENTE");
+
+        String pagamento = post("/orders/" + p.id() + "/payment", corpo("metodo", "OUTRO", "valor", p.total()), atendente)
+                .esperar(201).str("$.id");
+        patch("/payments/" + pagamento + "/status?status=APROVADO", atendente).esperar(200);
+
+        assertThat(statusDoPedido(p)).isEqualTo("PAGO");
+    }
+
+    @Test
+    void funcionarioSemPermissaoDePedidosNaoRegistraPagamento() {
+        Pedido p = novoPedido(novaVariante(80, 10), 1);
+
+        post("/orders/" + p.id() + "/payment", corpo("metodo", "OUTRO", "valor", p.total()), novoFuncionario("ESTOQUISTA"))
+                .esperar(403);
+    }
+
+    @Test
+    void pedidoSoFicaPagoPeloPagamento() {
+        // antes, o funcionário marcava PAGO sem existir pagamento nenhum
+        Pedido p = novoPedido(novaVariante(80, 10), 1);
+
+        patch("/orders/" + p.id() + "/status?status=PAGO", admin()).esperar(422);
+
+        assertThat(statusDoPedido(p)).isEqualTo("AGUARDANDO_PAGAMENTO");
+    }
+
+    @Test
+    void pagamentoNaoVoltaParaTras() {
+        Pedido p = novoPedido(novaVariante(80, 10), 1);
+        String pagamento = pagar(p).esperar(201).str("$.id");
+        patch("/payments/" + pagamento + "/status?status=APROVADO", admin()).esperar(200);
+
+        // antes, APROVADO → PENDENTE era aceito e o pedido continuava PAGO
+        patch("/payments/" + pagamento + "/status?status=PENDENTE", admin()).esperar(422);
+        patch("/payments/" + pagamento + "/status?status=RECUSADO", admin()).esperar(422);
+
+        assertThat(get("/orders/" + p.id() + "/payment", admin()).str("$.status")).isEqualTo("APROVADO");
+        assertThat(statusDoPedido(p)).isEqualTo("PAGO");
+    }
+
+    @Test
+    void estornoCancelaOPedidoEDevolveOEstoque() {
+        Variante v = novaVariante(80, 10);
+        Pedido p = novoPedidoPago(v);
+        String pagamento = get("/orders/" + p.id() + "/payment", admin()).str("$.id");
+
+        patch("/payments/" + pagamento + "/status?status=ESTORNADO", admin()).esperar(200);
+
+        assertThat(statusDoPedido(p)).isEqualTo("CANCELADO");
+        assertThat(estoque(v)).isEqualTo(10);
+        patch("/payments/" + pagamento + "/status?status=APROVADO", admin()).esperar(422);
+    }
+
+    @Test
+    void cancelarPedidoPagoEstornaOPagamento() {
+        Variante v = novaVariante(80, 10);
+        Pedido p = novoPedidoPago(v);
+
+        patch("/orders/" + p.id() + "/status?status=CANCELADO", admin()).esperar(200);
+
+        assertThat(get("/orders/" + p.id() + "/payment", admin()).str("$.status")).isEqualTo("ESTORNADO");
+        assertThat(estoque(v)).isEqualTo(10);
+    }
+
+    @Test
+    void cancelarPedidoComPagamentoPendenteRecusaOPagamento() {
+        Pedido p = novoPedido(novaVariante(80, 10), 1);
+        String pagamento = pagar(p).esperar(201).str("$.id");
+
+        patch("/orders/" + p.id() + "/status?status=CANCELADO", admin()).esperar(200);
+
+        assertThat(get("/orders/" + p.id() + "/payment", admin()).str("$.status")).isEqualTo("RECUSADO");
+        // e não dá mais para aprovar o pagamento de um pedido cancelado
+        patch("/payments/" + pagamento + "/status?status=APROVADO", admin()).esperar(422);
+    }
+
     // ------------------------------------------------------------------ atalhos
 
     private Resposta pagar(Pedido p) {

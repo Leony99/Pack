@@ -261,6 +261,9 @@ class CheckoutTest extends IntegrationTest {
                 corpo("addressId", novoEndereco(ana), "codigoCupom", codigo.toLowerCase()), ana.token()).esperar(201);
 
         assertThat(r.decimal("$.total")).isEqualByComparingTo("0");
+        // nada a receber: o pedido já nasce pago (um pagamento exige no mínimo R$ 0,01) e pode ser enviado
+        assertThat(r.str("$.status")).isEqualTo("PAGO");
+        post("/orders/" + r.str("$.id") + "/shipment", corpo("transportadora", "Correios"), admin()).esperar(201);
     }
 
     @Test

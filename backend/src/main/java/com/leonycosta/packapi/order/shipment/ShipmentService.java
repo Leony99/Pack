@@ -50,7 +50,7 @@ public class ShipmentService {
         shipment.setCodigoRastreio(request.getCodigoRastreio());
         shipment.setStatus(ShipmentStatus.PREPARANDO);
 
-        orderService.updateStatus(orderId, OrderStatus.EM_SEPARACAO);
+        orderService.mudarStatus(orderId, OrderStatus.EM_SEPARACAO);
 
         return toResponse(shipmentRepository.save(shipment));
     }
@@ -68,7 +68,7 @@ public class ShipmentService {
             default         -> null;
         };
         if (novoStatusPedido != null) {
-            orderService.updateStatus(shipment.getOrder().getId(), novoStatusPedido);
+            orderService.mudarStatus(shipment.getOrder().getId(), novoStatusPedido);
         }
 
         return toResponse(shipmentRepository.save(shipment));

@@ -16,6 +16,8 @@ import com.leonycosta.packapi.customer.customer.CustomerResponse;
 import com.leonycosta.packapi.customer.customer.CustomerService;
 import com.leonycosta.packapi.enums.CouponTipo;
 import com.leonycosta.packapi.enums.OrderStatus;
+import com.leonycosta.packapi.enums.PaymentStatus;
+import com.leonycosta.packapi.order.payment.Payment;
 import com.leonycosta.packapi.exception.BusinessException;
 import com.leonycosta.packapi.exception.ResourceNotFoundException;
 import com.leonycosta.packapi.product.inventory.InventoryMovementService;
@@ -119,7 +121,9 @@ public class OrderService {
         order.setCustomer(customerService.findEntityById(customerId));
         order.setCoupon(coupon);
         order.setTotal(total.setScale(2, RoundingMode.HALF_UP));
-        order.setStatus(OrderStatus.AGUARDANDO_PAGAMENTO);
+        // Total zero (um cupom cobriu tudo): não há o que receber, e um pagamento exige no mínimo R$ 0,01.
+        // Sem isso o pedido ficava parado em AGUARDANDO_PAGAMENTO para sempre.
+        order.setStatus(order.getTotal().signum() == 0 ? OrderStatus.PAGO : OrderStatus.AGUARDANDO_PAGAMENTO);
         order.setEnderecoCep(address.getCep());
         order.setEnderecoRua(address.getRua());
         order.setEnderecoNumero(address.getNumero());
@@ -161,9 +165,36 @@ public class OrderService {
         return toResponse(order);
     }
 
+    // Mudança pelo funcionário (PATCH /orders/{id}/status).
+    // PAGO não vale aqui: o pedido só fica pago pela aprovação de um pagamento registrado, para sempre
+    // existir o registro de quanto e como foi recebido. Cancelar acerta o pagamento junto.
     @Transactional
     public OrderResponse updateStatus(UUID id, OrderStatus status) {
-        Order order = findOrThrow(id);
+        if (status == OrderStatus.PAGO) {
+            throw new BusinessException("O pedido só fica PAGO pela aprovação do pagamento. Recebeu por fora? "
+                    + "Registre o pagamento com o método OUTRO e aprove-o");
+        }
+        Order order = aplicarStatus(findOrThrow(id), status);
+        Payment payment = order.getPayment();
+        if (status == OrderStatus.CANCELADO && payment != null) {
+            // já recebido → estornado; ainda não recebido → recusado (não pode mais ser aprovado)
+            if (payment.getStatus() == PaymentStatus.APROVADO) {
+                payment.setStatus(PaymentStatus.ESTORNADO);
+            } else if (payment.getStatus() == PaymentStatus.PENDENTE) {
+                payment.setStatus(PaymentStatus.RECUSADO);
+            }
+        }
+        return toResponse(orderRepository.save(order));
+    }
+
+    // Mudança vinda do pagamento ou do envio (PaymentService e ShipmentService), que já cuidam do próprio status
+    @Transactional
+    public void mudarStatus(UUID id, OrderStatus status) {
+        orderRepository.save(aplicarStatus(findOrThrow(id), status));
+    }
+
+    // Confere se o fluxo permite a mudança e, se for um cancelamento, devolve o estoque
+    private Order aplicarStatus(Order order, OrderStatus status) {
         if (!order.getStatus().podeMudarPara(status)) {
             throw new BusinessException(
                     "Não é possível mudar o pedido de " + order.getStatus() + " para " + status);
@@ -179,7 +210,7 @@ public class OrderService {
             }
         }
         order.setStatus(status);
-        return toResponse(orderRepository.save(order));
+        return order;
     }
 
     private BigDecimal aplicarDesconto(BigDecimal subtotal, Coupon coupon) {

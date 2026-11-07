@@ -62,6 +62,10 @@ public class PaymentService {
     public PaymentResponse updateStatus(UUID paymentId, PaymentStatus status) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pagamento", paymentId));
+        if (!payment.getStatus().podeMudarPara(status)) {
+            throw new BusinessException(
+                    "Não é possível mudar o pagamento de " + payment.getStatus() + " para " + status);
+        }
         payment.setStatus(status);
 
         // Espelha status do pagamento no pedido
@@ -72,7 +76,7 @@ public class PaymentService {
             default        -> null;
         };
         if (novoStatusPedido != null) {
-            orderService.updateStatus(payment.getOrder().getId(), novoStatusPedido);
+            orderService.mudarStatus(payment.getOrder().getId(), novoStatusPedido);
         }
 
         return toResponse(paymentRepository.save(payment));

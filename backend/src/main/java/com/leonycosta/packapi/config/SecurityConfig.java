@@ -71,10 +71,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/customers/{customerId}", "/api/v1/customers/{customerId}/**")
                                 .access(proprioCliente())
 
-                        // ── pedidos: o dono consulta e paga; funcionário com ORDER_MANAGE gerencia ──
+                        // ── pedidos: o dono consulta e paga; funcionário com ORDER_MANAGE gerencia e registra pagamentos ──
                         .requestMatchers(HttpMethod.GET, "/api/v1/orders/{orderId}", "/api/v1/orders/{orderId}/payment",
                                 "/api/v1/orders/{orderId}/shipment").access(donoDoPedidoOu(ORDER_MANAGE))
-                        .requestMatchers(HttpMethod.POST, "/api/v1/orders/{orderId}/payment").access(donoDoPedido())
+                        // o funcionário registra pagamentos recebidos por fora (método OUTRO)
+                        .requestMatchers(HttpMethod.POST, "/api/v1/orders/{orderId}/payment")
+                                .access(donoDoPedidoOu(ORDER_MANAGE))
                         .requestMatchers("/api/v1/orders/**", "/api/v1/payments/**", "/api/v1/shipments/**")
                                 .hasAuthority(ORDER_MANAGE.name())
 
@@ -90,10 +92,6 @@ public class SecurityConfig {
     private AuthorizationManager<RequestAuthorizationContext> proprioClienteOu(Permissao permissao) {
         return (auth, ctx) -> new AuthorizationDecision(
                 guard.isSelf(auth.get(), ctx.getVariables().get("customerId")) || guard.has(auth.get(), permissao.name()));
-    }
-
-    private AuthorizationManager<RequestAuthorizationContext> donoDoPedido() {
-        return (auth, ctx) -> new AuthorizationDecision(guard.ownsOrder(auth.get(), ctx.getVariables().get("orderId")));
     }
 
     private AuthorizationManager<RequestAuthorizationContext> donoDoPedidoOu(Permissao permissao) {
