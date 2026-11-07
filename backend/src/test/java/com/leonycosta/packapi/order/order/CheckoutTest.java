@@ -1,5 +1,6 @@
 package com.leonycosta.packapi.order.order;
 
+import com.leonycosta.packapi.cart.cart_item.CartItemRepository;
 import com.leonycosta.packapi.exception.BusinessException;
 import com.leonycosta.packapi.support.AoMesmoTempo;
 import com.leonycosta.packapi.support.IntegrationTest;
@@ -20,6 +21,9 @@ class CheckoutTest extends IntegrationTest {
 
     @Autowired
     OrderService orderService;
+
+    @Autowired
+    CartItemRepository cartItemRepository;
 
     // ------------------------------------------------------------------ o caminho feliz
 
@@ -96,6 +100,23 @@ class CheckoutTest extends IntegrationTest {
         Cliente ana = novoCliente();
 
         checkout(ana, novoEndereco(ana)).esperar(422);
+    }
+
+    @Test
+    void itemComQuantidadeNegativaNoCarrinhoNaoPassa() {
+        // a API já não deixa isso acontecer; aqui o banco é alterado direto, para testar a defesa do checkout
+        Cliente ana = novoCliente();
+        Variante v = novaVariante(100, 10);
+        colocarNoCarrinho(ana, v, 1);
+        var item = cartItemRepository.findById(UUID.fromString(get(ana.carrinho(), ana.token()).str("$.itens[0].id")))
+                .orElseThrow();
+        item.setQuantidade(-5);
+        cartItemRepository.save(item);
+
+        checkout(ana, novoEndereco(ana)).esperar(422);
+
+        assertThat(estoque(v)).isEqualTo(10);
+        assertThat(get("/customers/" + ana.id() + "/orders", ana.token()).tamanho("$.itens")).isZero();
     }
 
     @Test
@@ -186,6 +207,26 @@ class CheckoutTest extends IntegrationTest {
         assertThat(estoque(b)).isEqualTo(8);
     }
 
+    // Duplo clique em "finalizar": o mesmo carrinho não pode virar dois pedidos, e ninguém recebe 500.
+    // O segundo checkout espera a trava do carrinho e o encontra vazio (BusinessException → 422).
+    @RepeatedTest(value = 3, name = "rodada {currentRepetition} de {totalRepetitions}")
+    void cincoCheckoutsDoMesmoCarrinhoAoMesmoTempoViramUmPedido() throws Exception {
+        Variante v = novaVariante(50, 10);
+        Cliente ana = novoCliente();
+        String endereco = novoEndereco(ana);
+        colocarNoCarrinho(ana, v, 2);
+        List<Callable<Boolean>> cliques = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            cliques.add(() -> tentarCheckout(ana, endereco));
+        }
+
+        List<Boolean> resultados = AoMesmoTempo.executar(cliques);
+
+        assertThat(resultados).containsOnlyOnce(true);
+        assertThat(estoque(v)).isEqualTo(8);
+        assertThat(get("/customers/" + ana.id() + "/orders", ana.token()).tamanho("$.itens")).isEqualTo(1);
+    }
+
     private boolean tentarCheckout(Cliente c, String enderecoId) {
         try {
             orderService.checkout(UUID.fromString(c.id()), new OrderRequest(UUID.fromString(enderecoId), null));
@@ -220,6 +261,9 @@ class CheckoutTest extends IntegrationTest {
                 corpo("addressId", novoEndereco(ana), "codigoCupom", codigo.toLowerCase()), ana.token()).esperar(201);
 
         assertThat(r.decimal("$.total")).isEqualByComparingTo("0");
+        // nada a receber: o pedido já nasce pago (um pagamento exige no mínimo R$ 0,01) e pode ser enviado
+        assertThat(r.str("$.status")).isEqualTo("PAGO");
+        post("/orders/" + r.str("$.id") + "/shipment", corpo("transportadora", "Correios"), admin()).esperar(201);
     }
 
     @Test
@@ -238,9 +282,39 @@ class CheckoutTest extends IntegrationTest {
     }
 
     @Test
+    void cincoCuponsErradosBloqueiamOCupomPor15Minutos() {
+        Cliente ana = novoCliente();
+        String endereco = novoEndereco(ana);
+        colocarNoCarrinho(ana, novaVariante(100, 10), 1);
+        String valido = novoCupom("10", "PERCENTUAL");
+
+        for (int i = 0; i < 5; i++) {
+            post("/customers/" + ana.id() + "/orders", corpo("addressId", endereco, "codigoCupom", "CHUTE" + i),
+                    ana.token()).esperar(404);
+        }
+
+        // nem um código certo passa durante o bloqueio, mas a compra sem cupom continua liberada
+        post("/customers/" + ana.id() + "/orders", corpo("addressId", endereco, "codigoCupom", valido), ana.token())
+                .esperar(429);
+        checkout(ana, endereco).esperar(201);
+
+        // outro cliente não é afetado
+        Cliente bia = novoCliente();
+        colocarNoCarrinho(bia, novaVariante(100, 10), 1);
+        post("/customers/" + bia.id() + "/orders", corpo("addressId", novoEndereco(bia), "codigoCupom", valido),
+                bia.token()).esperar(201);
+    }
+
+    @Test
     void cupomComValidadeNoPassado() {
         post("/coupons", corpo("codigo", "VELHO" + unico(), "desconto", 10, "tipo", "PERCENTUAL",
                 "validade", "2020-01-01T00:00:00"), admin()).esperar(422);
+    }
+
+    @Test
+    void cupomComDescontoAbsurdo() {
+        post("/coupons", corpo("codigo", "HUGE" + unico(), "desconto", "1e30", "tipo", "FIXO",
+                "validade", VALIDADE_FUTURA), admin()).esperar(400);
     }
 
     @Test

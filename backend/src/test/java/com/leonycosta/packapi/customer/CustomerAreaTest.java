@@ -36,11 +36,23 @@ class CustomerAreaTest extends IntegrationTest {
     }
 
     @Test
-    void clienteComPedidosNaoApagaAConta() {
-        // os pedidos são histórico da loja: apagar o cliente quebraria esse histórico
+    void clienteComPedidosApagaAContaEFicaAnonimizado() {
+        // os pedidos são histórico da loja: ficam, mas os dados pessoais do cliente somem
         Pedido p = novoPedido(novaVariante(50, 5), 1);
+        Cliente c = p.cliente();
 
-        delete("/customers/" + p.cliente().id(), p.cliente().token()).esperar(409);
+        delete("/customers/" + c.id(), c.token()).esperar(204);
+
+        Resposta r = get("/customers/" + c.id(), admin()).esperar(200);
+        assertThat(r.str("$.nome")).isEqualTo("Cliente removido");
+        assertThat(r.str("$.email")).doesNotContain(c.email());
+        assertThat(get("/orders/" + p.id(), admin()).str("$.id")).isEqualTo(p.id());
+        // não entra mais, e o e-mail fica livre para um cadastro novo
+        post("/auth/login", corpo("email", c.email(), "senha", c.senha()), null).esperar(401);
+        post("/auth/register", corpo("nome", "Ana de novo", "email", c.email(), "telefone", "21999990000",
+                "senha", "senha-nova-123"), null).esperar(201);
+        // o token antigo não fecha pedido novo: o carrinho foi apagado
+        get(c.carrinho(), c.token()).esperar(404);
     }
 
     // ------------------------------------------------------------------ endereços

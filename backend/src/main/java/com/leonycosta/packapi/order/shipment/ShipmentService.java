@@ -50,7 +50,7 @@ public class ShipmentService {
         shipment.setCodigoRastreio(request.getCodigoRastreio());
         shipment.setStatus(ShipmentStatus.PREPARANDO);
 
-        orderService.updateStatus(orderId, OrderStatus.EM_SEPARACAO);
+        orderService.mudarStatus(orderId, OrderStatus.EM_SEPARACAO);
 
         return toResponse(shipmentRepository.save(shipment));
     }
@@ -59,17 +59,20 @@ public class ShipmentService {
     public ShipmentResponse updateStatus(UUID shipmentId, ShipmentStatus status) {
         Shipment shipment = shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Envio", shipmentId));
+        if (!shipment.getStatus().podeMudarPara(status)) {
+            throw new BusinessException(
+                    "Não é possível mudar o envio de " + shipment.getStatus() + " para " + status);
+        }
         shipment.setStatus(status);
 
-        // Espelha status do envio no pedido
+        // Espelha status do envio no pedido (DEVOLVIDO devolve o estoque e estorna o pagamento)
         OrderStatus novoStatusPedido = switch (status) {
             case DESPACHADO -> OrderStatus.ENVIADO;
             case ENTREGUE   -> OrderStatus.ENTREGUE;
-            default         -> null;
+            case DEVOLVIDO  -> OrderStatus.DEVOLVIDO;
+            case PREPARANDO -> throw new IllegalStateException("PREPARANDO nunca é destino de uma mudança");
         };
-        if (novoStatusPedido != null) {
-            orderService.updateStatus(shipment.getOrder().getId(), novoStatusPedido);
-        }
+        orderService.mudarStatus(shipment.getOrder().getId(), novoStatusPedido);
 
         return toResponse(shipmentRepository.save(shipment));
     }

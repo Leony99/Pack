@@ -9,16 +9,22 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 // Limite de tentativas no login e no cadastro, contra adivinhação de senha e contra quem tenta
 // gastar a CPU (o BCrypt é lento de propósito) até o disjuntor de custos tirar a API do ar.
+// Também limita os códigos de cupom errados no checkout, contra quem tenta adivinhar um código.
 //
-// Dois contadores, ao mesmo tempo; vale o que estourar primeiro:
+// No login, dois contadores ao mesmo tempo; vale o que estourar primeiro:
 //   - e-mail + IP: 5 senhas erradas daquele e-mail, vindas daquele IP → bloqueia esse par por 15 min
 //   - IP:         20 falhas de login (qualquer e-mail) ou cadastros → bloqueia o IP inteiro por 15 min
 // Bloqueado, a resposta é 429 com o cabeçalho Retry-After (segundos que faltam), antes de rodar o BCrypt.
 // Um login certo zera só o contador do par: quem tem uma conta válida não "limpa" o contador do IP.
+//
+// No checkout: 5 cupons errados (inexistentes ou vencidos) do mesmo cliente → esse cliente fica 15 min sem
+// poder usar cupom (429). O contador é por cliente, porque o checkout exige login. Acertar um cupom não zera:
+// senão bastaria intercalar um código válido conhecido entre os chutes.
 //
 // Fica na memória da aplicação: basta porque o Cloud Run roda no máximo 1 instância.
 // Se a instância reinicia, os contadores recomeçam do zero.
@@ -30,6 +36,7 @@ public class LimiteDeTentativas {
 
     private final int maxPorEmailEIp;
     private final int maxPorIp;
+    private final int maxCuponsErrados;
     private final Duration janela;
     private final Clock relogio;
     private final Map<String, Contador> contadores = new ConcurrentHashMap<>();
@@ -41,14 +48,16 @@ public class LimiteDeTentativas {
     @Autowired
     public LimiteDeTentativas(@Value("${app.login.max-falhas-email-ip}") int maxPorEmailEIp,
                               @Value("${app.login.max-falhas-ip}") int maxPorIp,
+                              @Value("${app.cupom.max-erros}") int maxCuponsErrados,
                               @Value("${app.login.bloqueio-minutos}") long minutos) {
-        this(maxPorEmailEIp, maxPorIp, Duration.ofMinutes(minutos), Clock.systemUTC());
+        this(maxPorEmailEIp, maxPorIp, maxCuponsErrados, Duration.ofMinutes(minutos), Clock.systemUTC());
     }
 
     // usado nos testes, com um relógio que dá para avançar
-    LimiteDeTentativas(int maxPorEmailEIp, int maxPorIp, Duration janela, Clock relogio) {
+    LimiteDeTentativas(int maxPorEmailEIp, int maxPorIp, int maxCuponsErrados, Duration janela, Clock relogio) {
         this.maxPorEmailEIp = maxPorEmailEIp;
         this.maxPorIp = maxPorIp;
+        this.maxCuponsErrados = maxCuponsErrados;
         this.janela = janela;
         this.relogio = relogio;
     }
@@ -74,6 +83,17 @@ public class LimiteDeTentativas {
     public void verificarECadastrar(String ip) {
         verificar(chaveIp(ip));
         contar(chaveIp(ip), maxPorIp);
+    }
+
+    // ------------------------------------------------------------------ chamado pelo OrderService
+
+    // Antes de procurar o cupom: lança 429 se o cliente errou cupons demais
+    public void verificarCupom(UUID clienteId) {
+        verificar(chaveCupom(clienteId));
+    }
+
+    public void cupomErrado(UUID clienteId) {
+        contar(chaveCupom(clienteId), maxCuponsErrados);
     }
 
     // ------------------------------------------------------------------ contadores
@@ -111,6 +131,10 @@ public class LimiteDeTentativas {
 
     private static String chaveIp(String ip) {
         return "ip:" + ip;
+    }
+
+    private static String chaveCupom(UUID clienteId) {
+        return "cupom:" + clienteId;
     }
 
     private static String chavePar(String ip, String email) {

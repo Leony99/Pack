@@ -125,7 +125,61 @@ class CatalogTest extends IntegrationTest {
                 "sku", "neg-" + unico(), "quant", -3), admin()).esperar(400);
     }
 
+    @Test
+    void varianteComPrecoNegativoZeroOuAbsurdo() {
+        // antes, -100 era aceito e o checkout criava um pedido de -R$ 100
+        String produto = novoProduto(100);
+        for (String preco : new String[]{"-100", "0", "1000000.01", "10.123"}) {
+            post("/products/" + produto + "/variants", corpo("sizeId", novoTamanho(), "colorId", novaCor(),
+                    "sku", "p-" + unico(), "preco", preco, "quant", 1), admin()).esperar(400);
+        }
+        post("/products", corpo("nome", "Caro " + unico(), "preco", "1e30"), admin()).esperar(400);
+    }
+
+    @Test
+    void editarAVarianteNaoMexeNoEstoque() {
+        // o estoque só muda por movimento: com permissão de estoque, com trava e com registro no histórico
+        Variante v = novaVariante(100, 10);
+        Resposta atual = get("/variants/" + v.id(), null).esperar(200);
+
+        put("/variants/" + v.id(), corpo("sizeId", atual.str("$.size.id"), "colorId", atual.str("$.color.id"),
+                "sku", v.sku(), "preco", 150, "quant", 9999), admin()).esperar(200);
+
+        assertThat(estoque(v)).isEqualTo(10);
+        assertThat(get("/variants/" + v.id(), null).decimal("$.precoEfetivo")).isEqualByComparingTo("150");
+    }
+
+    @Test
+    void apagarVarianteTiraElaDosCarrinhos() {
+        // antes, bastava um cliente deixar a variante no carrinho para ela não poder mais ser apagada (409)
+        Variante v = novaVariante(100, 10);
+        Cliente ana = novoCliente();
+        colocarNoCarrinho(ana, v, 1);
+
+        delete("/variants/" + v.id(), admin()).esperar(204);
+
+        assertThat(get(ana.carrinho(), ana.token()).tamanho("$.itens")).isZero();
+    }
+
+    @Test
+    void varianteJaVendidaNaoPodeSerApagada() {
+        Variante v = novaVariante(100, 10);
+        novoPedido(v, 1);
+
+        delete("/variants/" + v.id(), admin()).esperar(409);
+        assertThat(estoque(v)).isEqualTo(9);
+    }
+
     // ------------------------------------------------------------------ imagens
+
+    @Test
+    void imagemSoComHttps() {
+        String produto = novoProduto(100);
+        for (String url : new String[]{"javascript:alert(document.cookie)", "http://cdn.teste/1.jpg",
+                "data:text/html,<script>alert(1)</script>", "https://cdn.teste/com espaco.jpg"}) {
+            post("/products/" + produto + "/images", corpo("url", url, "ordem", 0), admin()).esperar(400);
+        }
+    }
 
     @Test
     void imagensVoltamNaOrdemDeExibicao() {
@@ -208,6 +262,16 @@ class CatalogTest extends IntegrationTest {
 
         assertThat(r.inteiro("$.tamanho")).isEqualTo(100);
         assertThat(r.inteiro("$.pagina")).isZero();
+    }
+
+    @Test
+    void paginaEnormeVoltaVaziaSemErro() {
+        // antes dava 500: o deslocamento (página × tamanho) passava do maior int
+        for (String tamanho : new String[]{"1", "20", "100"}) {
+            Resposta r = executar(MockMvcRequestBuilders.get("/api/v1/products")
+                    .param("pagina", "2147483647").param("tamanho", tamanho)).esperar(200);
+            assertThat(r.tamanho("$.itens")).isZero();
+        }
     }
 
     @Test

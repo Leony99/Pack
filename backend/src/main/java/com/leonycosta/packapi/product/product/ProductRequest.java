@@ -16,6 +16,8 @@ public class ProductRequest {
 
     @NotNull(message = "Preço é obrigatório")
     @DecimalMin(value = "0.01", message = "Preço deve ser maior que zero")
+    @DecimalMax(value = "1000000.00", message = "Preço deve ser no máximo 1.000.000,00")
+    @Digits(integer = 7, fraction = 2, message = "Preço deve ter no máximo 2 casas decimais")
     private BigDecimal preco;
 
     // Opcional — se não enviado o Service gera automaticamente a partir do nome

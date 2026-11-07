@@ -2,6 +2,7 @@ package com.leonycosta.packapi.order.order;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Pageable;
+import com.leonycosta.packapi.auth.LimiteDeTentativas;
 import com.leonycosta.packapi.config.Pagina;
 import com.leonycosta.packapi.customer.address.Address;
 import com.leonycosta.packapi.customer.address.AddressService;
@@ -15,6 +16,8 @@ import com.leonycosta.packapi.customer.customer.CustomerResponse;
 import com.leonycosta.packapi.customer.customer.CustomerService;
 import com.leonycosta.packapi.enums.CouponTipo;
 import com.leonycosta.packapi.enums.OrderStatus;
+import com.leonycosta.packapi.enums.PaymentStatus;
+import com.leonycosta.packapi.order.payment.Payment;
 import com.leonycosta.packapi.exception.BusinessException;
 import com.leonycosta.packapi.exception.ResourceNotFoundException;
 import com.leonycosta.packapi.product.inventory.InventoryMovementService;
@@ -45,6 +48,7 @@ public class OrderService {
     private final CartService cartService;
     private final CouponService couponService;
     private final InventoryMovementService inventoryService;
+    private final LimiteDeTentativas limite;
 
     public Pagina<OrderResponse> findByCustomer(UUID customerId, int pagina, int tamanho) {
         Pageable pedido = Pagina.pedido(pagina, tamanho, Sort.by(Sort.Order.desc("criadoEm"), Sort.Order.asc("id")));
@@ -61,7 +65,8 @@ public class OrderService {
         customerService.findEntityById(customerId);
 
         // 2. Busca carrinho e valida que não está vazio
-        Cart cart = cartService.findCartOrThrow(customerId);
+        // (travado: um segundo checkout ao mesmo tempo espera este terminar e encontra o carrinho já vazio)
+        Cart cart = cartService.travarCarrinho(customerId);
         if (cart.getItens().isEmpty()) {
             throw new BusinessException("O carrinho está vazio");
         }
@@ -72,6 +77,11 @@ public class OrderService {
         // 4. Valida estoque de todos os itens antes de alterar qualquer coisa
         for (CartItem cartItem : cart.getItens()) {
             ProductVariant variant = cartItem.getVariant();
+            // Defesa extra: o carrinho já recusa, mas um item com quantidade zero ou negativa
+            // "devolveria" estoque e baixaria o total do pedido
+            if (cartItem.getQuantidade() <= 0) {
+                throw new BusinessException("Quantidade inválida no carrinho para o SKU " + variant.getSku());
+            }
             if (variant.getQuant() < cartItem.getQuantidade()) {
                 throw new BusinessException(
                         "Estoque insuficiente para o SKU " + variant.getSku()
@@ -95,7 +105,14 @@ public class OrderService {
         Coupon coupon = null;
         BigDecimal total = subtotalBruto;
         if (request.getCodigoCupom() != null && !request.getCodigoCupom().isBlank()) {
-            coupon = couponService.findValidByCodigo(request.getCodigoCupom());
+            // 5 cupons errados bloqueiam o cliente por 15 min (contra quem tenta adivinhar códigos)
+            limite.verificarCupom(customerId);
+            try {
+                coupon = couponService.findValidByCodigo(request.getCodigoCupom());
+            } catch (ResourceNotFoundException | BusinessException e) {
+                limite.cupomErrado(customerId);
+                throw e;
+            }
             total = aplicarDesconto(subtotalBruto, coupon);
         }
 
@@ -104,7 +121,9 @@ public class OrderService {
         order.setCustomer(customerService.findEntityById(customerId));
         order.setCoupon(coupon);
         order.setTotal(total.setScale(2, RoundingMode.HALF_UP));
-        order.setStatus(OrderStatus.AGUARDANDO_PAGAMENTO);
+        // Total zero (um cupom cobriu tudo): não há o que receber, e um pagamento exige no mínimo R$ 0,01.
+        // Sem isso o pedido ficava parado em AGUARDANDO_PAGAMENTO para sempre.
+        order.setStatus(order.getTotal().signum() == 0 ? OrderStatus.PAGO : OrderStatus.AGUARDANDO_PAGAMENTO);
         order.setEnderecoCep(address.getCep());
         order.setEnderecoRua(address.getRua());
         order.setEnderecoNumero(address.getNumero());
@@ -146,25 +165,54 @@ public class OrderService {
         return toResponse(order);
     }
 
+    // Mudança pelo funcionário (PATCH /orders/{id}/status): só CANCELADO.
+    // Os outros status vêm de um registro que prova a mudança: PAGO da aprovação do pagamento
+    // (quanto e como foi recebido) e EM_SEPARACAO, ENVIADO, ENTREGUE e DEVOLVIDO do envio (transportadora e rastreio).
     @Transactional
     public OrderResponse updateStatus(UUID id, OrderStatus status) {
-        Order order = findOrThrow(id);
+        if (status == OrderStatus.PAGO) {
+            throw new BusinessException("O pedido só fica PAGO pela aprovação do pagamento. Recebeu por fora? "
+                    + "Registre o pagamento com o método OUTRO e aprove-o");
+        }
+        if (status != OrderStatus.CANCELADO) {
+            throw new BusinessException("O status " + status + " vem do envio do pedido: "
+                    + "crie o envio e mude o status dele");
+        }
+        return toResponse(orderRepository.save(aplicarStatus(findOrThrow(id), status)));
+    }
+
+    // Mudança vinda do pagamento ou do envio (PaymentService e ShipmentService), que já cuidam do próprio status
+    @Transactional
+    public void mudarStatus(UUID id, OrderStatus status) {
+        orderRepository.save(aplicarStatus(findOrThrow(id), status));
+    }
+
+    // Confere se o fluxo permite a mudança. Cancelado ou devolvido, o produto volta para o estoque
+    // e o pagamento é acertado: já recebido → estornado; ainda não recebido → recusado (não pode mais ser aprovado)
+    private Order aplicarStatus(Order order, OrderStatus status) {
         if (!order.getStatus().podeMudarPara(status)) {
             throw new BusinessException(
                     "Não é possível mudar o pedido de " + order.getStatus() + " para " + status);
         }
-        if (status == OrderStatus.CANCELADO) {
+        if (status == OrderStatus.CANCELADO || status == OrderStatus.DEVOLVIDO) {
+            Payment payment = order.getPayment();
+            if (payment != null && payment.getStatus() == PaymentStatus.APROVADO) {
+                payment.setStatus(PaymentStatus.ESTORNADO);
+            } else if (payment != null && payment.getStatus() == PaymentStatus.PENDENTE) {
+                payment.setStatus(PaymentStatus.RECUSADO);
+            }
+            String motivo = (status == OrderStatus.CANCELADO ? "Cancelamento" : "Devolução") + " do pedido ";
             // mesma ordem do checkout, para as travas de estoque não se cruzarem
             List<OrderItem> itensEmOrdem = order.getItens().stream()
                     .sorted(Comparator.comparing(item -> item.getVariant().getId()))
                     .toList();
             for (OrderItem item : itensEmOrdem) {
                 inventoryService.registerDevolucao(item.getVariant(), item.getQuantidade(),
-                        "Cancelamento do pedido " + order.getId());
+                        motivo + order.getId());
             }
         }
         order.setStatus(status);
-        return toResponse(orderRepository.save(order));
+        return order;
     }
 
     private BigDecimal aplicarDesconto(BigDecimal subtotal, Coupon coupon) {

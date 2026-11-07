@@ -37,16 +37,23 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 ## O que a API faz
 
 - **Catálogo:** produtos com slug automático, variantes com SKU, preço próprio e estoque, imagens, tags, tamanhos e cores. A busca por nome ignora acentos e maiúsculas.
-- **Estoque:** entradas, saídas e ajustes ficam registrados como movimentos, e há uma consulta de estoque baixo.
+- **Estoque:** só muda por movimento (entrada, saída ou ajuste), que fica registrado no histórico; editar a variante não mexe no estoque. Cada movimento vai até 100.000 unidades, o ajuste pode zerar o estoque, e há uma consulta de estoque baixo.
 - **Carrinho e checkout:**
   - o pedido guarda o preço e o endereço do momento da compra, como um *snapshot*;
   - cupons podem ser fixos ou percentuais;
   - se o estoque acabar no meio do checkout, nada é gravado (rollback);
-  - compras simultâneas não vendem a mesma unidade duas vezes: o estoque de cada variante é travado no banco (`SELECT ... FOR UPDATE`) enquanto o pedido é gravado.
+  - compras simultâneas não vendem a mesma unidade duas vezes: o estoque de cada variante é travado no banco (`SELECT ... FOR UPDATE`) enquanto o pedido é gravado;
+  - o carrinho também é travado enquanto é alterado ou vira pedido: um duplo clique não cria linhas repetidas nem dois pedidos;
+  - um pedido de total zero (cupom que cobre tudo) já nasce pago.
 - **Pedido:**
   - o status só avança na ordem: aguardando pagamento → pago → em separação → enviado → entregue;
-  - o pedido pode ser cancelado antes do envio, e o cancelamento devolve o estoque;
-  - o pagamento precisa ter o valor exato do pedido, e o envio só é aceito depois do pagamento aprovado.
+  - o pedido pode ser cancelado antes do envio: o cancelamento devolve o estoque, estorna o pagamento aprovado e recusa o pendente;
+  - o pedido só fica pago pela aprovação de um pagamento, que precisa ter o valor exato do pedido. Pagamentos recebidos por fora são registrados por um funcionário, com o método `OUTRO`;
+  - o pagamento segue PENDENTE → APROVADO → ESTORNADO, ou PENDENTE → RECUSADO, sem voltar atrás;
+  - o envio só é aceito depois do pagamento aprovado e segue PREPARANDO → DESPACHADO → ENTREGUE. Quando o pacote volta para a loja (a transportadora não entregou ou o cliente devolveu), o envio vira DEVOLVIDO: o pedido fica devolvido, o estoque volta e o pagamento é estornado;
+  - o funcionário muda o status do pedido direto só para cancelar. Os outros status vêm do pagamento e do envio, que registram como foi pago e por onde foi entregue;
+- **Banco:** na partida, a API atualiza as regras do banco que limitam os valores de cada enum. O Hibernate cria essas regras com a tabela, mas não as atualiza depois, então um valor novo seria recusado num banco já existente. Esta solução é provisória: ver [Próximos passos](#próximos-passos).
+- **Conta do cliente:** sem pedidos, apagar a conta apaga o cadastro. Com pedidos, os dados pessoais são anonimizados e os pedidos ficam como histórico.
 - **Listagens paginadas:** produtos, clientes, funcionários, cupons, pedidos e movimentos de estoque vêm em páginas (`?pagina=0&tamanho=20`, no máximo 100 por página), com os totais para montar a navegação:
 
   ```json
@@ -73,7 +80,11 @@ Clientes e funcionários fazem login e recebem um token JWT, que vai no cabeçal
 - 5 senhas erradas do mesmo e-mail, vindas do mesmo IP, bloqueiam esse par por 15 min;
 - 20 falhas ou cadastros vindos do mesmo IP bloqueiam o IP por 15 min.
 
-Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos que faltam), sem nem conferir a senha. Isso também protege a cota grátis: cada conferência de senha (BCrypt) gasta CPU de propósito.
+O mesmo vale para os **cupons**, contra quem tenta adivinhar um código: 5 códigos errados (inexistentes ou vencidos) no checkout deixam o cliente 15 min sem poder usar cupom. A compra sem cupom continua liberada.
+
+Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos que faltam), sem nem conferir a senha ou o cupom. Isso também protege a cota grátis: cada conferência de senha (BCrypt) gasta CPU de propósito.
+
+**Carrinho:** no máximo 99 unidades de cada item, contando o que já está nele. Sem esse teto, uma soma enorme "dava a volta" no `int` e virava um número negativo, que o checkout usava para baixar o estoque.
 
 Todas as regras de acesso ficam em um só lugar: [`SecurityConfig`](backend/src/main/java/com/leonycosta/packapi/config/SecurityConfig.java).
 
@@ -179,7 +190,7 @@ curl localhost:8080/api/v1/auth/me -H "Authorization: Bearer <token>"
 
 ## Testes
 
-São 196 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
+São 237 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
 
 ```bash
 cd backend
@@ -224,6 +235,26 @@ Diagramas em [`backend/docs/`](backend/docs/), gerados a partir do próprio cód
 - [x] CI/CD com GitHub Actions
 - [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
 - [ ] Frontend (React / Next.js)
+- [ ] Migrações do banco com Flyway, no lugar do `ddl-auto=update`
+
+### Por que trocar para o Flyway
+
+Hoje o schema do banco é mantido pelo Hibernate com `spring.jpa.hibernate.ddl-auto=update`. Ele cria o que falta, mas não evolui direito um banco que já existe, como o de produção no Neon:
+
+- **Não atualiza as regras CHECK dos enums.** Um valor novo, como o método de pagamento `OUTRO` ou o status `DEVOLVIDO`, seria recusado pelo banco de produção. A correção atual (`config/RestricoesDosEnums`) recria essas regras a cada partida. Ela funciona, mas é um remendo: cobre só os enums, roda DDL em toda subida e depende de uma lista mantida à mão.
+- **Não renomeia nem apaga.** Renomear um campo cria uma coluna nova vazia e deixa a antiga com os dados. Mudar o tipo de uma coluna ou preencher dados de uma coluna nova também não acontece.
+- **Não deixa registro.** Uma mudança no banco de produção não aparece no git, então não dá para revisar nem repetir em outro banco.
+
+Com o Flyway, cada mudança vira um arquivo SQL numerado (`V1__inicial.sql`, `V2__...sql`). Esses arquivos ficam no repositório e passam pelo PR como qualquer código. Na partida, o Flyway roda só os que aquele banco ainda não recebeu.
+
+Plano da troca:
+
+1. Gerar o `V1__inicial.sql` a partir do schema atual.
+2. Marcar o banco do Neon como "já está no V1" (`spring.flyway.baseline-on-migrate`), sem recriar nada.
+3. Trocar para `ddl-auto=validate`: a API não sobe se as entidades e o banco não baterem.
+4. Apagar o `RestricoesDosEnums`: um enum novo passa a ser uma migração.
+
+Antes de ir para a produção, testar com uma cópia do schema atual no banco local.
 
 ## Autor
 

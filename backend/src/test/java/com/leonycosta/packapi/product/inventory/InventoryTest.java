@@ -1,6 +1,7 @@
 package com.leonycosta.packapi.product.inventory;
 
 import com.leonycosta.packapi.enums.MovimentoTipo;
+import com.leonycosta.packapi.product.product_variant.ProductVariantRepository;
 import com.leonycosta.packapi.support.AoMesmoTempo;
 import com.leonycosta.packapi.support.IntegrationTest;
 import com.leonycosta.packapi.support.Resposta;
@@ -18,6 +19,9 @@ class InventoryTest extends IntegrationTest {
 
     @Autowired
     InventoryMovementService inventoryService;
+
+    @Autowired
+    ProductVariantRepository variantRepository;
 
     @Test
     void entradaSomaAoEstoque() {
@@ -98,6 +102,44 @@ class InventoryTest extends IntegrationTest {
         AoMesmoTempo.executar(entradas);
 
         assertThat(estoque(v)).isEqualTo(5 + 3 + 4 + 6);
+    }
+
+    @Test
+    void ajustePodeZerarOEstoque() {
+        Variante v = novaVariante(50, 5);
+
+        movimentar(v, "AJUSTE", 0, "Produto descontinuado").esperar(201);
+
+        assertThat(estoque(v)).isZero();
+    }
+
+    @Test
+    void entradaESaidaDeZeroSaoRecusadas() {
+        Variante v = novaVariante(50, 5);
+
+        movimentar(v, "ENTRADA", 0, null).esperar(422);
+        movimentar(v, "SAIDA", 0, null).esperar(422);
+    }
+
+    @Test
+    void movimentoAcimaDoTetoEhRecusado() {
+        Variante v = novaVariante(50, 5);
+
+        movimentar(v, "ENTRADA", 100_001, null).esperar(400);
+        movimentar(v, "ENTRADA", 100_000, null).esperar(201);
+    }
+
+    @Test
+    void entradaQueEstourariaOIntEhRecusada() {
+        // antes, 2147483647 + 10 "dava a volta" e o estoque ficava negativo
+        Variante v = novaVariante(50, 5);
+        var variante = variantRepository.findById(UUID.fromString(v.id())).orElseThrow();
+        variante.setQuant(Integer.MAX_VALUE - 5);
+        variantRepository.save(variante);
+
+        movimentar(v, "ENTRADA", 10, null).esperar(422);
+
+        assertThat(estoque(v)).isEqualTo(Integer.MAX_VALUE - 5);
     }
 
     private Resposta movimentar(Variante v, String tipo, int quantidade, String motivo) {
