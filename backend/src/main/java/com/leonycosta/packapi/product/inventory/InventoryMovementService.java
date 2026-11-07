@@ -38,6 +38,9 @@ public class InventoryMovementService {
         if (request.getTipoMovimentacao() == MovimentoTipo.AJUSTE && isBlank(request.getMotivo())) {
             throw new BusinessException("Motivo é obrigatório para movimentos do tipo AJUSTE");
         }
+        if (request.getTipoMovimentacao() != MovimentoTipo.AJUSTE && request.getQuantidade() < 1) {
+            throw new BusinessException("Quantidade deve ser pelo menos 1 (só o AJUSTE aceita 0, para zerar o estoque)");
+        }
 
         travarEstoque(variant);
         applyToStock(variant, request.getTipoMovimentacao(), request.getQuantidade());
@@ -60,7 +63,7 @@ public class InventoryMovementService {
     @Transactional
     public void registerDevolucao(ProductVariant variant, int quantidade, String motivo) {
         travarEstoque(variant);
-        variant.setQuant(variant.getQuant() + quantidade);
+        somarAoEstoque(variant, quantidade);
         variantRepository.save(variant);
         saveMovement(variant, MovimentoTipo.DEVOLUCAO, quantidade, motivo);
     }
@@ -85,12 +88,22 @@ public class InventoryMovementService {
 
     private void applyToStock(ProductVariant variant, MovimentoTipo tipo, int quantidade) {
         switch (tipo) {
-            case ENTRADA, DEVOLUCAO -> variant.setQuant(variant.getQuant() + quantidade);
+            case ENTRADA, DEVOLUCAO -> somarAoEstoque(variant, quantidade);
             case SAIDA -> {
                 variantService.validarEstoque(variant, quantidade);
                 variant.setQuant(variant.getQuant() - quantidade);
             }
             case AJUSTE -> variant.setQuant(quantidade); // define absoluto
+        }
+    }
+
+    // Math.addExact faz a mesma soma, mas lança ArithmeticException se o resultado passar do maior int
+    // (2.147.483.647), em vez de "dar a volta" e virar um número negativo
+    private void somarAoEstoque(ProductVariant variant, int quantidade) {
+        try {
+            variant.setQuant(Math.addExact(variant.getQuant(), quantidade));
+        } catch (ArithmeticException estourou) {
+            throw new BusinessException("O estoque do SKU " + variant.getSku() + " passaria do máximo permitido");
         }
     }
 

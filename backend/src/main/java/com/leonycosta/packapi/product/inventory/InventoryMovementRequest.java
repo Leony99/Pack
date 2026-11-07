@@ -15,8 +15,13 @@ public class InventoryMovementRequest {
     @NotNull(message = "Tipo é obrigatório")
     private MovimentoTipo tipoMovimentacao;
 
+    // 0 só vale para o AJUSTE (zerar o estoque) — validado no Service.
+    // O teto pega erro de digitação ("10000000" em vez de "100")
+    public static final int MAXIMO_POR_MOVIMENTO = 100_000;
+
     @NotNull(message = "Quantidade é obrigatória")
-    @Min(value = 1, message = "Quantidade deve ser pelo menos 1")
+    @Min(value = 0, message = "Quantidade não pode ser negativa")
+    @Max(value = MAXIMO_POR_MOVIMENTO, message = "Quantidade deve ser no máximo " + MAXIMO_POR_MOVIMENTO + " por movimento")
     private Integer quantidade;
 
     // Obrigatório só para AJUSTE — validado no Service
