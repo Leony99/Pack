@@ -173,6 +173,15 @@ class CatalogTest extends IntegrationTest {
     // ------------------------------------------------------------------ imagens
 
     @Test
+    void imagemSoComHttps() {
+        String produto = novoProduto(100);
+        for (String url : new String[]{"javascript:alert(document.cookie)", "http://cdn.teste/1.jpg",
+                "data:text/html,<script>alert(1)</script>", "https://cdn.teste/com espaco.jpg"}) {
+            post("/products/" + produto + "/images", corpo("url", url, "ordem", 0), admin()).esperar(400);
+        }
+    }
+
+    @Test
     void imagensVoltamNaOrdemDeExibicao() {
         String produto = novoProduto(100);
         post("/products/" + produto + "/images", corpo("url", "https://cdn.teste/2.jpg", "ordem", 2), admin()).esperar(201);

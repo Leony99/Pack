@@ -15,6 +15,8 @@ public class CouponRequest {
 
     @NotNull(message = "Desconto é obrigatório")
     @DecimalMin(value = "0.01", message = "Desconto deve ser maior que zero")
+    @DecimalMax(value = "1000000.00", message = "Desconto deve ser no máximo 1.000.000,00")
+    @Digits(integer = 7, fraction = 2, message = "Desconto deve ter no máximo 2 casas decimais")
     private BigDecimal desconto;
 
     @NotNull(message = "Tipo é obrigatório")

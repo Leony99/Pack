@@ -312,6 +312,12 @@ class CheckoutTest extends IntegrationTest {
     }
 
     @Test
+    void cupomComDescontoAbsurdo() {
+        post("/coupons", corpo("codigo", "HUGE" + unico(), "desconto", "1e30", "tipo", "FIXO",
+                "validade", VALIDADE_FUTURA), admin()).esperar(400);
+    }
+
+    @Test
     void cupomPercentualAcimaDe100() {
         post("/coupons", corpo("codigo", "MAIS" + unico(), "desconto", 150, "tipo", "PERCENTUAL",
                 "validade", VALIDADE_FUTURA), admin()).esperar(422);
