@@ -1,5 +1,6 @@
 package com.leonycosta.packapi.product.product_variant;
 
+import com.leonycosta.packapi.cart.cart_item.CartItemRepository;
 import com.leonycosta.packapi.product.color.Color;
 import com.leonycosta.packapi.product.color.ColorRepository;
 import com.leonycosta.packapi.product.color.ColorResponse;
@@ -13,6 +14,7 @@ import com.leonycosta.packapi.product.size.SizeRepository;
 import com.leonycosta.packapi.product.size.SizeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +27,7 @@ public class ProductVariantService {
     private final ProductService productService;
     private final SizeRepository sizeRepository;
     private final ColorRepository colorRepository;
+    private final CartItemRepository cartItemRepository;
 
     public List<ProductVariantResponse> findByProduct(UUID productId) {
         return variantRepository.findByProductId(productId).stream()
@@ -67,7 +70,7 @@ public class ProductVariantService {
         return toResponse(variantRepository.save(variant));
     }
 
-    public ProductVariantResponse update(UUID id, ProductVariantRequest request) {
+    public ProductVariantResponse update(UUID id, ProductVariantUpdateRequest request) {
         ProductVariant variant = findOrThrow(id);
         String sku = request.getSku().toUpperCase();
 
@@ -85,14 +88,18 @@ public class ProductVariantService {
         variant.setSize(size);
         variant.setColor(color);
         variant.setPreco(request.getPreco());
-        variant.setQuant(request.getQuant());
 
         return toResponse(variantRepository.save(variant));
     }
 
+    // Tira a variante dos carrinhos antes de apagar: senão bastava um cliente deixá-la no carrinho para
+    // ela não poder mais ser apagada. Se já foi vendida, o banco recusa (order_items) → 409, e nada muda.
+    @Transactional
     public void delete(UUID id) {
         findOrThrow(id);
+        cartItemRepository.deleteByVariantId(id);
         variantRepository.deleteById(id);
+        variantRepository.flush();
     }
 
     // Usado pelo OrderService e CartService: retorna a entidade e valida estoque

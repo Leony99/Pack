@@ -45,13 +45,13 @@ public class ProductVariantController {
         return variantService.findById(id);
     }
 
-    @Operation(summary = "Atualiza uma variante")
+    @Operation(summary = "Atualiza uma variante (o estoque não muda aqui: só por movimento de estoque)")
     @PutMapping("/variants/{id}")
-    public ProductVariantResponse update(@PathVariable UUID id, @Valid @RequestBody ProductVariantRequest request) {
+    public ProductVariantResponse update(@PathVariable UUID id, @Valid @RequestBody ProductVariantUpdateRequest request) {
         return variantService.update(id, request);
     }
 
-    @Operation(summary = "Apaga uma variante")
+    @Operation(summary = "Apaga uma variante (sai também dos carrinhos; se já foi vendida, 409)")
     @DeleteMapping("/variants/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {
