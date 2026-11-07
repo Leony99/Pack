@@ -31,7 +31,7 @@ class RestricoesDosEnumsTest extends IntegrationTest {
         var noBanco = jdbc.queryForList("""
                 select conname from pg_constraint
                 where contype = 'c' and connamespace = 'public'::regnamespace""", String.class);
-        var naLista = RestricoesDosEnums.COLUNAS.stream().map(RestricoesDosEnums.ColunaDeEnum::restricao).toList();
+        var naLista = RestricoesDosEnums.COLUNAS.stream().map(coluna -> coluna.restricao()).toList();
 
         assertThat(noBanco).containsExactlyInAnyOrderElementsOf(naLista);
     }
