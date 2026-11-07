@@ -37,16 +37,21 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 ## O que a API faz
 
 - **Catálogo:** produtos com slug automático, variantes com SKU, preço próprio e estoque, imagens, tags, tamanhos e cores. A busca por nome ignora acentos e maiúsculas.
-- **Estoque:** entradas, saídas e ajustes ficam registrados como movimentos, e há uma consulta de estoque baixo.
+- **Estoque:** só muda por movimento (entrada, saída ou ajuste), que fica registrado no histórico; editar a variante não mexe no estoque. Cada movimento vai até 100.000 unidades, o ajuste pode zerar o estoque, e há uma consulta de estoque baixo.
 - **Carrinho e checkout:**
   - o pedido guarda o preço e o endereço do momento da compra, como um *snapshot*;
   - cupons podem ser fixos ou percentuais;
   - se o estoque acabar no meio do checkout, nada é gravado (rollback);
-  - compras simultâneas não vendem a mesma unidade duas vezes: o estoque de cada variante é travado no banco (`SELECT ... FOR UPDATE`) enquanto o pedido é gravado.
+  - compras simultâneas não vendem a mesma unidade duas vezes: o estoque de cada variante é travado no banco (`SELECT ... FOR UPDATE`) enquanto o pedido é gravado;
+  - o carrinho também é travado enquanto é alterado ou vira pedido: um duplo clique não cria linhas repetidas nem dois pedidos;
+  - um pedido de total zero (cupom que cobre tudo) já nasce pago.
 - **Pedido:**
   - o status só avança na ordem: aguardando pagamento → pago → em separação → enviado → entregue;
-  - o pedido pode ser cancelado antes do envio, e o cancelamento devolve o estoque;
-  - o pagamento precisa ter o valor exato do pedido, e o envio só é aceito depois do pagamento aprovado.
+  - o pedido pode ser cancelado antes do envio: o cancelamento devolve o estoque, estorna o pagamento aprovado e recusa o pendente;
+  - o pedido só fica pago pela aprovação de um pagamento, que precisa ter o valor exato do pedido. Pagamentos recebidos por fora são registrados por um funcionário, com o método `OUTRO`;
+  - o pagamento segue PENDENTE → APROVADO → ESTORNADO, ou PENDENTE → RECUSADO, sem voltar atrás;
+  - o envio só é aceito depois do pagamento aprovado.
+- **Conta do cliente:** sem pedidos, apagar a conta apaga o cadastro. Com pedidos, os dados pessoais são anonimizados e os pedidos ficam como histórico.
 - **Listagens paginadas:** produtos, clientes, funcionários, cupons, pedidos e movimentos de estoque vêm em páginas (`?pagina=0&tamanho=20`, no máximo 100 por página), com os totais para montar a navegação:
 
   ```json
@@ -183,7 +188,7 @@ curl localhost:8080/api/v1/auth/me -H "Authorization: Bearer <token>"
 
 ## Testes
 
-São 201 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
+São 225 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
 
 ```bash
 cd backend
