@@ -15,9 +15,10 @@ class RestricoesDosEnumsTest extends IntegrationTest {
     @Test
     void bancoAntigoPassaAAceitarOValorNovoDoEnum() {
         // como a produção estava: a regra criada antes de o método OUTRO existir
+        // (NOT VALID: outros testes podem já ter gravado pagamentos OUTRO no banco compartilhado)
         jdbc.execute("ALTER TABLE payments DROP CONSTRAINT payments_metodo_check");
         jdbc.execute("ALTER TABLE payments ADD CONSTRAINT payments_metodo_check "
-                + "CHECK (metodo IN ('PIX', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'BOLETO'))");
+                + "CHECK (metodo IN ('PIX', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'BOLETO')) NOT VALID");
 
         restricoes.sincronizar();
 
