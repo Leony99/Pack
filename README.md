@@ -52,7 +52,7 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
   - o pagamento segue PENDENTE → APROVADO → ESTORNADO, ou PENDENTE → RECUSADO, sem voltar atrás;
   - o envio só é aceito depois do pagamento aprovado e segue PREPARANDO → DESPACHADO → ENTREGUE. Quando o pacote volta para a loja (a transportadora não entregou ou o cliente devolveu), o envio vira DEVOLVIDO: o pedido fica devolvido, o estoque volta e o pagamento é estornado;
   - o funcionário muda o status do pedido direto só para cancelar. Os outros status vêm do pagamento e do envio, que registram como foi pago e por onde foi entregue;
-- **Banco:** na partida, a API atualiza as regras do banco que limitam os valores de cada enum. O Hibernate cria essas regras com a tabela, mas não as atualiza depois, então um valor novo seria recusado num banco já existente.
+- **Banco:** na partida, a API atualiza as regras do banco que limitam os valores de cada enum. O Hibernate cria essas regras com a tabela, mas não as atualiza depois, então um valor novo seria recusado num banco já existente. Esta solução é provisória: ver [Próximos passos](#próximos-passos).
 - **Conta do cliente:** sem pedidos, apagar a conta apaga o cadastro. Com pedidos, os dados pessoais são anonimizados e os pedidos ficam como histórico.
 - **Listagens paginadas:** produtos, clientes, funcionários, cupons, pedidos e movimentos de estoque vêm em páginas (`?pagina=0&tamanho=20`, no máximo 100 por página), com os totais para montar a navegação:
 
@@ -235,6 +235,26 @@ Diagramas em [`backend/docs/`](backend/docs/), gerados a partir do próprio cód
 - [x] CI/CD com GitHub Actions
 - [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
 - [ ] Frontend (React / Next.js)
+- [ ] Migrações do banco com Flyway, no lugar do `ddl-auto=update`
+
+### Por que trocar para o Flyway
+
+Hoje o schema do banco é mantido pelo Hibernate com `spring.jpa.hibernate.ddl-auto=update`. Ele cria o que falta, mas não evolui direito um banco que já existe, como o de produção no Neon:
+
+- **Não atualiza as regras CHECK dos enums.** Um valor novo, como o método de pagamento `OUTRO` ou o status `DEVOLVIDO`, seria recusado pelo banco de produção. A correção atual (`config/RestricoesDosEnums`) recria essas regras a cada partida. Ela funciona, mas é um remendo: cobre só os enums, roda DDL em toda subida e depende de uma lista mantida à mão.
+- **Não renomeia nem apaga.** Renomear um campo cria uma coluna nova vazia e deixa a antiga com os dados. Mudar o tipo de uma coluna ou preencher dados de uma coluna nova também não acontece.
+- **Não deixa registro.** Uma mudança no banco de produção não aparece no git, então não dá para revisar nem repetir em outro banco.
+
+Com o Flyway, cada mudança vira um arquivo SQL numerado (`V1__inicial.sql`, `V2__...sql`). Esses arquivos ficam no repositório e passam pelo PR como qualquer código. Na partida, o Flyway roda só os que aquele banco ainda não recebeu.
+
+Plano da troca:
+
+1. Gerar o `V1__inicial.sql` a partir do schema atual.
+2. Marcar o banco do Neon como "já está no V1" (`spring.flyway.baseline-on-migrate`), sem recriar nada.
+3. Trocar para `ddl-auto=validate`: a API não sobe se as entidades e o banco não baterem.
+4. Apagar o `RestricoesDosEnums`: um enum novo passa a ser uma migração.
+
+Antes de ir para a produção, testar com uma cópia do schema atual no banco local.
 
 ## Autor
 

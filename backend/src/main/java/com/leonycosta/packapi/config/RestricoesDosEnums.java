@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 // a atualiza: um valor novo no enum (PaymentMetodo.OUTRO, OrderStatus.DEVOLVIDO) seria recusado pelo banco
 // de produção, que já existia. Roda na partida, depois do Hibernate e antes de a API receber requisições.
 // Coluna nova com @Enumerated? Inclua aqui; o RestricoesDosEnumsTest avisa se faltar.
+// PROVISÓRIO: sai quando o banco passar a usar migrações do Flyway (ver "Próximos passos" no README).
 // o @DependsOn faz este bean nascer depois de o Hibernate criar/atualizar as tabelas
 @Component
 @DependsOn("entityManagerFactory")
