@@ -11,6 +11,27 @@ E-commerce de roupas. O repositório é um monorepo:
 | [`ci-cd/`](ci-cd/) | Pipeline de CI/CD no GitHub Actions: testes e publicação automáticos ([explicação](ci-cd/README.md)) |
 | [`producao/`](producao/) | Como a API roda em produção: Google Cloud Run, banco no Neon, limitadores e disjuntor de custos ([explicação](producao/README.md)) |
 
+## Sumário
+
+- [Backend: Pack API](#backend-pack-api)
+- [Stack](#stack)
+- [O que a API faz](#o-que-a-api-faz)
+- [Segurança](#segurança)
+- [Organização do código](#organização-do-código)
+- [Como rodar](#como-rodar)
+  - [1. Configuração](#1-configuração)
+  - [2A. Com Docker](#2a-com-docker-só-precisa-do-docker)
+  - [2B. Pelo Maven](#2b-pelo-maven-para-programar-precisa-de-java-21-e-docker)
+  - [Testando pelo navegador (Swagger)](#testando-pelo-navegador-swagger)
+  - [Exemplo rápido](#exemplo-rápido)
+- [Testes](#testes)
+- [CI/CD](#cicd)
+- [Documentação](#documentação)
+- [Próximos passos](#próximos-passos)
+  - [Por que trocar para o Flyway](#por-que-trocar-para-o-flyway)
+  - [Por que usar o Cloud Armor](#por-que-usar-o-cloud-armor)
+- [Autor](#autor)
+
 ## Backend: Pack API
 
 API REST de um e-commerce de roupas, feita com **Spring Boot 4** e **Java 21**. Cobre o fluxo completo de uma loja: catálogo com variantes (tamanho e cor), estoque, carrinho, cupons, checkout, pagamento e envio. Tem login com JWT e controle de acesso por permissão.
@@ -83,6 +104,12 @@ Clientes e funcionários fazem login e recebem um token JWT, que vai no cabeçal
 O mesmo vale para os **cupons**, contra quem tenta adivinhar um código: 5 códigos errados (inexistentes ou vencidos) no checkout deixam o cliente 15 min sem poder usar cupom. A compra sem cupom continua liberada.
 
 Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos que faltam), sem nem conferir a senha ou o cupom. Isso também protege a cota grátis: cada conferência de senha (BCrypt) gasta CPU de propósito.
+
+**Limite geral por IP**, em todas as rotas: no máximo 120 requisições por minuto do mesmo IP. Para IPv6, conta o bloco /64 inteiro, porque cada casa recebe um bloco e poderia trocar de endereço à vontade. Passou disso, a API responde 429 com `Retry-After` até o minuto acabar.
+- O filtro ([`LimitePorIp`](backend/src/main/java/com/leonycosta/packapi/config/LimitePorIp.java)) roda antes da segurança e dos controllers: uma requisição recusada não confere token nem consulta o banco.
+- Sem ele, um único IP poderia disparar buscas no catálogo, que é público e lê a tabela a cada busca, até gastar a cota grátis de CPU e o [disjuntor de custos](producao/README.md#disjuntor-de-custos) tirar a API do ar.
+- **O que ele não resolve:** o Cloud Run conta cada requisição antes de ela chegar à API, então um ataque grande ou vindo de muitos IPs ainda gasta a cota de requisições. Barrar antes exige o [Cloud Armor](#por-que-usar-o-cloud-armor).
+- **Cuidado com o frontend:** se ele chamar a API pelo próprio servidor (renderização no servidor do Next.js), todos os visitantes chegam com o IP desse servidor. Nesse caso, esse IP precisa de um limite próprio.
 
 **Carrinho:** no máximo 99 unidades de cada item, contando o que já está nele. Sem esse teto, uma soma enorme "dava a volta" no `int` e virava um número negativo, que o checkout usava para baixar o estoque.
 
@@ -190,7 +217,7 @@ curl localhost:8080/api/v1/auth/me -H "Authorization: Bearer <token>"
 
 ## Testes
 
-São 237 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
+São 242 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
 
 ```bash
 cd backend
@@ -236,6 +263,7 @@ Diagramas em [`backend/docs/`](backend/docs/), gerados a partir do próprio cód
 - [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
 - [ ] Frontend (React / Next.js)
 - [ ] Migrações do banco com Flyway, no lugar do `ddl-auto=update`
+- [ ] Cloud Armor na frente da API, para barrar ataques de volume antes do Cloud Run
 
 ### Por que trocar para o Flyway
 
@@ -255,6 +283,36 @@ Plano da troca:
 4. Apagar o `RestricoesDosEnums`: um enum novo passa a ser uma migração.
 
 Antes de ir para a produção, testar com uma cópia do schema atual no banco local.
+
+### Por que usar o Cloud Armor
+
+O limite geral por IP roda **dentro** da API. Quando ele recusa uma requisição, o Cloud Run já a recebeu e já a contou na cota grátis, que é de 2 milhões de requisições por mês:
+
+```
+hoje:         atacante ──► Cloud Run (conta a requisição) ──► LimitePorIp ──► 429
+                                 └─ cota grátis gasta → o disjuntor tira a API do ar
+
+com o Armor:  atacante ──► balanceador + Cloud Armor ──► 429   (não chega ao Cloud Run)
+              visitante ──► balanceador + Cloud Armor ──► Cloud Run ──► API
+```
+
+Hoje, um IP insistente consegue gastar a cota em alguns dias, e muitos IPs juntos em poucas horas. A API não fica mais cara, porque o disjuntor a desliga antes. Mas fica fora do ar: o ataque troca a conta por indisponibilidade.
+
+O **Cloud Armor** é o firewall do Google. Ele fica num balanceador de carga na frente do Cloud Run e barra a requisição ali, antes de ela chegar à API e antes de ela contar na cota.
+
+O que ele traz:
+- **limite por IP na borda**, com bloqueio temporário de quem insiste (*rate-based ban*);
+- **regras prontas contra ataques conhecidos**, como injeção de SQL e XSS;
+- **bloqueio por país ou por lista de IPs**.
+
+Plano:
+1. Criar um **balanceador de carga externo** (Application Load Balancer) com um *serverless NEG* apontando para o serviço `pack-api`. Ele precisa de um certificado HTTPS, então de um domínio próprio.
+2. Mudar o acesso ao Cloud Run (*ingress*) para `internal-and-cloud-load-balancing`. Assim o endereço `run.app` deixa de aceitar acesso direto, e ninguém dá a volta no Armor.
+3. Criar uma política do Cloud Armor com a regra de limite por IP e as regras prontas, e ligá-la ao balanceador.
+4. Manter o `LimitePorIp` como segunda camada.
+5. Ajustar o disjuntor e o orçamento, que passam a ter um custo fixo.
+
+**Por que não está feito:** custa dinheiro todo mês. O balanceador custa por volta de US$ 18 por mês, e o Cloud Armor cobra por política, por regra e por milhão de requisições (valores aproximados: conferir a tabela de preços do Google). Isso não cabe na proposta de custo zero do projeto. Vale fazer quando a API tiver uso real.
 
 ## Autor
 

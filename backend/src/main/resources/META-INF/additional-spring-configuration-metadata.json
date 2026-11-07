@@ -31,6 +31,16 @@
       "description": "Códigos de cupom errados (inexistentes ou vencidos) do mesmo cliente no checkout até bloquear o uso de cupom por ele (429)."
     },
     {
+      "name": "app.limite-ip.max-requisicoes",
+      "type": "java.lang.Integer",
+      "description": "Requisições aceitas do mesmo IP (IPv6: do mesmo bloco /64) a cada janela; acima disso, 429 até a janela acabar."
+    },
+    {
+      "name": "app.limite-ip.janela-segundos",
+      "type": "java.lang.Long",
+      "description": "Tamanho da janela do limite geral por IP, em segundos."
+    },
+    {
       "name": "app.admin.email",
       "type": "java.lang.String",
       "description": "E-mail do admin criado na primeira vez que a aplicação sobe (variável ADMIN_EMAIL)."
