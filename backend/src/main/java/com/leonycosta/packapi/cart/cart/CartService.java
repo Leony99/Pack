@@ -90,12 +90,15 @@ public class CartService {
     }
 
     // Para quem vai alterar o carrinho (e para o checkout): trava a linha do carrinho no banco
-    // (SELECT ... FOR UPDATE) até o fim da transação e relê os itens. Duas requisições do mesmo cliente
-    // ao mesmo tempo (um duplo clique, por exemplo) passam a esperar a vez: sem a trava, as duas viam
-    // "esse produto não está no carrinho" e criavam duas linhas, ou fechavam dois pedidos com o mesmo carrinho.
+    // (SELECT ... FOR UPDATE) até o fim da transação. Duas requisições do mesmo cliente ao mesmo tempo
+    // (um duplo clique, por exemplo) passam a esperar a vez: sem a trava, as duas viam "esse produto não
+    // está no carrinho" e criavam duas linhas, ou fechavam dois pedidos com o mesmo carrinho.
+    // Os itens só são lidos depois da trava, então já vêm com o que a outra requisição gravou.
+    // (lock, e não refresh com trava: o refresh se propagaria aos itens e às variantes, e a trava do
+    // estoque no checkout deixaria de ser feita, porque a variante já constaria como travada.)
     public Cart travarCarrinho(UUID customerId) {
         Cart cart = findCartOrThrow(customerId);
-        entityManager.refresh(cart, LockModeType.PESSIMISTIC_WRITE);
+        entityManager.lock(cart, LockModeType.PESSIMISTIC_WRITE);
         return cart;
     }
 
