@@ -12,6 +12,8 @@ import com.leonycosta.packapi.product.product_variant.ProductVariant;
 import com.leonycosta.packapi.product.product_variant.ProductVariantResponse;
 import com.leonycosta.packapi.product.product_variant.ProductVariantService;
 import com.leonycosta.packapi.product.size.SizeResponse;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,7 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final CustomerService customerService;
     private final ProductVariantService variantService;
+    private final EntityManager entityManager;
 
     public CartResponse findByCustomer(UUID customerId) {
         return toResponse(findCartOrThrow(customerId));
@@ -36,12 +39,13 @@ public class CartService {
 
     @Transactional
     public CartResponse addItem(UUID customerId, CartItemRequest request) {
-        Cart cart = findCartOrThrow(customerId);
+        Cart cart = travarCarrinho(customerId);
         ProductVariant variant = variantService.findEntityById(request.getVariantId());
 
         // Se o item já existe no carrinho, soma a quantidade
-        CartItem item = cartItemRepository
-                .findByCartIdAndVariantId(cart.getId(), variant.getId())
+        CartItem item = cart.getItens().stream()
+                .filter(i -> i.getVariant().getId().equals(variant.getId()))
+                .findFirst()
                 .orElse(null);
 
         // As duas parcelas vão no máximo até 99, então a soma nunca estoura o int (que vai até 2.147.483.647)
@@ -66,7 +70,7 @@ public class CartService {
 
     @Transactional
     public CartResponse removeItem(UUID customerId, UUID itemId) {
-        Cart cart = findCartOrThrow(customerId);
+        Cart cart = travarCarrinho(customerId);
         CartItem item = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Item do carrinho", itemId));
         if (!item.getCart().getId().equals(cart.getId())) {
@@ -79,13 +83,22 @@ public class CartService {
 
     @Transactional
     public void clear(UUID customerId) {
-        Cart cart = findCartOrThrow(customerId);
+        Cart cart = travarCarrinho(customerId);
         cart.getItens().clear();  // orphanRemoval apaga do banco
         cart.setAtualizadoEm(LocalDateTime.now());
         cartRepository.save(cart);
     }
 
-    // Usado pelo OrderService no checkout
+    // Para quem vai alterar o carrinho (e para o checkout): trava a linha do carrinho no banco
+    // (SELECT ... FOR UPDATE) até o fim da transação e relê os itens. Duas requisições do mesmo cliente
+    // ao mesmo tempo (um duplo clique, por exemplo) passam a esperar a vez: sem a trava, as duas viam
+    // "esse produto não está no carrinho" e criavam duas linhas, ou fechavam dois pedidos com o mesmo carrinho.
+    public Cart travarCarrinho(UUID customerId) {
+        Cart cart = findCartOrThrow(customerId);
+        entityManager.refresh(cart, LockModeType.PESSIMISTIC_WRITE);
+        return cart;
+    }
+
     public Cart findCartOrThrow(UUID customerId) {
         customerService.findEntityById(customerId); // valida que o cliente existe
         return cartRepository.findByCustomerId(customerId)

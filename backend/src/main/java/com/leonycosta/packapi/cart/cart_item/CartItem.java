@@ -8,7 +8,9 @@ import com.leonycosta.packapi.cart.cart.Cart;
 import com.leonycosta.packapi.product.product_variant.ProductVariant;
 
 @Entity
-@Table(name = "cart_items")
+// Uma linha por produto em cada carrinho: adicionar de novo soma na linha que já existe (ver CartService)
+@Table(name = "cart_items", uniqueConstraints = @UniqueConstraint(name = "uk_cart_items_carrinho_variante",
+        columnNames = {"cart_id", "variant_id"}))
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class CartItem {
 

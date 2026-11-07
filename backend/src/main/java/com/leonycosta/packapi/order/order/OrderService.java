@@ -63,7 +63,8 @@ public class OrderService {
         customerService.findEntityById(customerId);
 
         // 2. Busca carrinho e valida que não está vazio
-        Cart cart = cartService.findCartOrThrow(customerId);
+        // (travado: um segundo checkout ao mesmo tempo espera este terminar e encontra o carrinho já vazio)
+        Cart cart = cartService.travarCarrinho(customerId);
         if (cart.getItens().isEmpty()) {
             throw new BusinessException("O carrinho está vazio");
         }

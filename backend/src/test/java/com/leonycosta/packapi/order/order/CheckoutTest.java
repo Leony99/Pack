@@ -207,6 +207,26 @@ class CheckoutTest extends IntegrationTest {
         assertThat(estoque(b)).isEqualTo(8);
     }
 
+    // Duplo clique em "finalizar": o mesmo carrinho não pode virar dois pedidos, e ninguém recebe 500.
+    // O segundo checkout espera a trava do carrinho e o encontra vazio (BusinessException → 422).
+    @RepeatedTest(value = 3, name = "rodada {currentRepetition} de {totalRepetitions}")
+    void cincoCheckoutsDoMesmoCarrinhoAoMesmoTempoViramUmPedido() throws Exception {
+        Variante v = novaVariante(50, 10);
+        Cliente ana = novoCliente();
+        String endereco = novoEndereco(ana);
+        colocarNoCarrinho(ana, v, 2);
+        List<Callable<Boolean>> cliques = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            cliques.add(() -> tentarCheckout(ana, endereco));
+        }
+
+        List<Boolean> resultados = AoMesmoTempo.executar(cliques);
+
+        assertThat(resultados).containsOnlyOnce(true);
+        assertThat(estoque(v)).isEqualTo(8);
+        assertThat(get("/customers/" + ana.id() + "/orders", ana.token()).tamanho("$.itens")).isEqualTo(1);
+    }
+
     private boolean tentarCheckout(Cliente c, String enderecoId) {
         try {
             orderService.checkout(UUID.fromString(c.id()), new OrderRequest(UUID.fromString(enderecoId), null));

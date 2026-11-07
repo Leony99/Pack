@@ -1,13 +1,47 @@
 package com.leonycosta.packapi.cart;
 
+import com.leonycosta.packapi.cart.cart.CartService;
+import com.leonycosta.packapi.cart.cart_item.CartItemRequest;
+import com.leonycosta.packapi.support.AoMesmoTempo;
 import com.leonycosta.packapi.support.IntegrationTest;
 import com.leonycosta.packapi.support.Resposta;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 // Carrinho: adicionar, somar, remover, esvaziar e preço sempre atual.
 class CartTest extends IntegrationTest {
+
+    @Autowired
+    CartService cartService;
+
+    // Várias adições do mesmo produto no mesmo instante (cliques repetidos): todas entram, numa linha só.
+    // Antes, cada uma via "não está no carrinho" e criava a própria linha, e o carrinho passava a dar 500.
+    @RepeatedTest(value = 3, name = "rodada {currentRepetition} de {totalRepetitions}")
+    void adicoesAoMesmoTempoSomamNaMesmaLinha() throws Exception {
+        Cliente ana = novoCliente();
+        Variante v = novaVariante(50, 100);
+        List<Callable<Boolean>> cliques = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            cliques.add(() -> {
+                cartService.addItem(UUID.fromString(ana.id()), new CartItemRequest(UUID.fromString(v.id()), 1));
+                return true;
+            });
+        }
+
+        AoMesmoTempo.executar(cliques);
+
+        Resposta r = get(ana.carrinho(), ana.token()).esperar(200);
+        assertThat(r.tamanho("$.itens")).isEqualTo(1);
+        assertThat(r.inteiro("$.itens[0].quantidade")).isEqualTo(8);
+    }
 
     @Test
     void mesmoItemDuasVezesSomaAQuantidade() {
