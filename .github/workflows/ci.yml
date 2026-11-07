@@ -2,7 +2,8 @@
 # Os passos de cada etapa ficam em ci-cd/ (o GitHub só lê workflows desta pasta,
 # mas aceita ações locais em qualquer lugar do repositório). Explicação: ci-cd/README.md
 #
-#   CI (todo push e pull request para a main): testes da API + imagem Docker  → ci-cd/ci-backend
+#   CI (todo push e pull request para a main): testes da API + imagem Docker + Trivy → ci-cd/ci-backend
+#   CodeQL (junto com o CI): procura falhas de segurança no código                → ci-cd/codeql
 #   CD (só push na main, e só se o CI passar): publica no Google Cloud Run     → ci-cd/deploy
 
 name: CI/CD
@@ -24,6 +25,19 @@ jobs:
 
       - name: CI do backend
         uses: ./ci-cd/ci-backend
+
+  codeql:
+    name: CodeQL (falhas de segurança no código)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write            # envia os alertas para a aba Security do repositório
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+
+      - name: CodeQL do backend
+        uses: ./ci-cd/codeql
 
   deploy:
     name: Deploy no Cloud Run

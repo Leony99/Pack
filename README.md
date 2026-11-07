@@ -242,7 +242,7 @@ Eles também rodam sozinhos a cada envio ao GitHub (ver [CI/CD](#cicd)).
 
 ## CI/CD
 
-A cada envio ao GitHub, o **GitHub Actions** roda os testes e monta a imagem Docker (CI). Se tudo passa e o envio é para a `main`, ele publica a versão nova no Google Cloud Run (CD). Se um teste falha, nada é publicado.
+A cada envio ao GitHub, o **GitHub Actions** roda os testes, monta a imagem Docker e procura falhas de segurança no código (CodeQL) e na imagem (Trivy). Se tudo passa e o envio é para a `main`, ele publica a versão nova no Google Cloud Run (CD). Se um teste falha, nada é publicado.
 
 Como o pipeline funciona, passo a passo, está em **[`ci-cd/README.md`](ci-cd/README.md)**.
 

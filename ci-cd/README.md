@@ -1,6 +1,6 @@
 # CI/CD
 
-Como cada mudança na Pack é testada (CI) e publicada (CD) automaticamente pelo **GitHub Actions**.
+Como cada mudança na Pack é testada (CI), verificada em segurança (CodeQL e Trivy) e publicada (CD) automaticamente pelo **GitHub Actions**.
 - O desenvolvimento local e os testes estão no [README principal](../README.md).
 - Onde a API roda e como o custo fica em zero está em [`producao/`](../producao/README.md).
 
@@ -12,7 +12,8 @@ O GitHub só lê workflows de `.github/workflows/`, mas aceita **ações locais*
 .github/workflows/ci.yml     ← porta de entrada: QUANDO rodar e EM QUE ORDEM
 ci-cd/
 ├── README.md                ← este arquivo
-├── ci-backend/action.yml    ← os passos do CI do backend
+├── ci-backend/action.yml    ← os passos do CI do backend (inclui o Trivy)
+├── codeql/action.yml        ← a análise de segurança do código (CodeQL)
 └── deploy/action.yml        ← os passos do CD (publicação no Google Cloud Run)
 ```
 
@@ -40,7 +41,12 @@ GitHub lê .github/workflows/ci.yml
 │ 1. instala o Java 21 (com cache)         │            (relatórios dos testes ficam
 │ 2. ./mvnw test   (242 testes)            │             para download)
 │ 3. docker build  (confere a imagem)      │
+│ 4. Trivy         (CVEs na imagem)        │
 └────────────────┬─────────────────────────┘
+                 │       ao mesmo tempo, em outra máquina:
+                 │       ┌─ job "codeql" ── ci-cd/codeql ───────────┐
+                 │       │ compila e analisa o código Java          │──► alertas na aba Security
+                 │       └──────────────────────────────────────────┘
                  │ passou, e é push na main?
                  ▼
 ┌─ job "deploy" (CD) ── ci-cd/deploy ──────┐
@@ -66,6 +72,7 @@ O resultado aparece:
    - O Testcontainers sobe um PostgreSQL 18 descartável no Docker, que já vem instalado na máquina do GitHub.
    - Não há segredo envolvido: os testes definem a própria configuração e não dependem de `.env`.
 3. **Monta a imagem Docker**, só para conferir que o [`Dockerfile`](../backend/Dockerfile) continua funcionando.
+4. **Varre a imagem com o Trivy** e reprova se ela tiver uma vulnerabilidade conhecida CRÍTICA ou ALTA que já tenha correção (ver [Segurança no CI](#segurança-no-ci-codeql-e-trivy)).
 
 **Se algo falha:**
 - a execução para ali, e o commit fica marcado com ✗;
@@ -74,6 +81,66 @@ O resultado aparece:
 - o GitHub avisa por e-mail.
 
 Pull requests passam pelo CI, mas nunca seguem para o CD.
+
+## Segurança no CI: CodeQL e Trivy
+
+As duas ferramentas rodam nas máquinas do GitHub, a cada pull request e a cada envio para a `main`. Nada é instalado no computador de quem desenvolve.
+
+```
+                        ┌─ CodeQL ── o código que escrevemos ──► falhas no nosso código
+pull request / push ────┤
+                        └─ Trivy ─── a imagem Docker pronta ───► falhas no que usamos de terceiros
+```
+
+### CodeQL: o nosso código
+
+**O que é:** a análise estática do GitHub, gratuita em repositório público.
+
+**Como funciona:**
+1. O CodeQL acompanha a compilação da API (`./mvnw package`).
+2. Ele transforma o código num banco de dados: classes, métodos, de onde vem cada valor e para onde ele vai.
+3. Roda consultas que procuram caminhos perigosos. Exemplos: um texto que vem da requisição e chega a uma consulta SQL ou a um log sem tratamento; uma comparação de segredo vulnerável a medição de tempo; uma configuração de segurança desligada.
+
+**Onde está:**
+- os passos estão em [`codeql/action.yml`](codeql/action.yml);
+- ele roda num job próprio (`codeql`), em paralelo com o CI;
+- usa o conjunto `security-extended`, o mais amplo só de segurança.
+
+**Resultado:**
+- os alertas aparecem na aba **Security → Code scanning** do repositório, com o trecho do código e o caminho do dado;
+- num pull request, os alertas novos aparecem como comentários nas linhas alteradas;
+- o job não reprova o PR, mas o alerta fica aberto até ser corrigido ou dispensado com uma justificativa.
+
+O job precisa da permissão `security-events: write` para enviar os alertas, e só ela.
+
+### Trivy: o que vem de terceiros
+
+**O que é:** o scanner de vulnerabilidades da Aqua Security, de código aberto.
+
+**Como funciona:** ele abre a imagem Docker gerada no CI, lista cada pacote que existe nela e compara as versões com as bases públicas de vulnerabilidades conhecidas (CVEs). Na imagem da API, isso cobre:
+- o sistema da imagem base (Alpine);
+- o Java (o JRE do `eclipse-temurin`);
+- as bibliotecas dentro do `app.jar`, como o Spring, o Hibernate e o driver do PostgreSQL.
+
+**Regra:** reprova o CI só quando há uma CVE **CRÍTICA ou ALTA com correção disponível** (`ignore-unfixed`). Uma vulnerabilidade sem correção não tem o que fazer além de esperar, e travaria todo PR. A lista aparece no log do passo, com o pacote, a versão atual e a versão corrigida.
+
+**Cuidado:** uma CVE publicada hoje pode reprovar um PR que não mexeu em nada. A correção costuma ser atualizar a imagem base no [`Dockerfile`](../backend/Dockerfile) ou a dependência no `pom.xml`.
+
+### Ações fixadas pelo SHA
+
+As ações do CodeQL e do Trivy são referenciadas pelo **SHA do commit**, e não pela tag (`@v4`):
+
+```yaml
+uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+```
+
+**Por quê:** a tag é só um apelido, e quem controla o repositório da ação pode apontá-la para outro código. Isso já aconteceu: em março de 2026, o próprio `trivy-action` sofreu um ataque à cadeia de suprimentos, e quem usava as tags afetadas rodou no CI um código que não era o publicado. Depois disso, o projeto recriou as tags com o prefixo `v`; a v0.36.0 usada aqui é posterior.
+
+O SHA identifica um código exato e não pode ser trocado. A versão do binário do Trivy também é fixa (`version: v0.76.1`).
+
+**Para atualizar:** pegar o SHA da versão nova na página de releases da ação e trocar os dois (o SHA e o comentário). Prefira versões com algumas semanas de lançamento.
+
+As outras ações (`checkout`, `setup-java`, as do Google) ainda usam a tag. Fixá-las pelo SHA também é um próximo passo.
 
 ## CD: publicação contínua
 
@@ -112,6 +179,8 @@ O workflow lê 4 **variáveis** do repositório (*Settings → Secrets and varia
 | `actions/checkout@v7` | workflow | Baixa o código, incluindo as ações locais desta pasta |
 | `actions/setup-java@v6` | CI | Instala o Java 21 e guarda o cache do Maven |
 | `actions/upload-artifact@v7` | CI | Guarda os relatórios dos testes quando algo falha |
+| `aquasecurity/trivy-action` (v0.36.0, pelo SHA) | CI | Instala o Trivy v0.76.1 na máquina do GitHub, só durante a execução, e varre a imagem |
+| `github/codeql-action/init` e `/analyze` (v4.39.1, pelo SHA) | CodeQL | Prepara o CodeQL, analisa o código e envia os alertas para a aba Security |
 | `google-github-actions/auth@v3` | CD | Login no Google Cloud com Workload Identity Federation |
 | `google-github-actions/setup-gcloud@v3` | CD | Instala o gcloud na máquina do GitHub, só durante a execução |
 | `google-github-actions/deploy-cloudrun@v3` | CD | Publica a imagem nova no serviço do Cloud Run |

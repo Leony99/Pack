@@ -1,8 +1,8 @@
-# CI do backend: testa a API e confere se a imagem Docker monta.
+# CI do backend: testa a API, confere se a imagem Docker monta e procura vulnerabilidades nela.
 # Chamado pelo .github/workflows/ci.yml (o código já precisa estar baixado com actions/checkout).
 
 name: CI do backend
-description: Instala o Java 21, roda os testes da API e monta a imagem Docker
+description: Instala o Java 21, roda os testes da API, monta a imagem Docker e a varre com o Trivy
 
 runs:
   using: composite
@@ -33,3 +33,17 @@ runs:
       shell: bash
       working-directory: backend
       run: docker build -t pack-api .
+
+    # Trivy: compara cada pacote da imagem (o Alpine, o Java e as bibliotecas dentro do app.jar) com as bases de
+    # vulnerabilidades conhecidas (CVEs). Reprova só as CRÍTICAS e ALTAS que já têm correção: essas dá para resolver
+    # atualizando a imagem base ou a dependência. Uma CVE nova pode reprovar um PR mesmo sem mudança no código.
+    # Ação fixada pelo SHA do commit, e a versão do Trivy também é fixa.
+    - name: Procurar vulnerabilidades na imagem (Trivy)
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+      with:
+        image-ref: pack-api
+        version: v0.76.1
+        severity: CRITICAL,HIGH
+        ignore-unfixed: true
+        exit-code: '1'
+        format: table
