@@ -7,7 +7,7 @@ E-commerce de roupas. O repositório é um monorepo:
 | Pasta | O que tem |
 |---|---|
 | [`backend/`](backend/) | API REST em Spring Boot (descrita abaixo) |
-| `frontend/` | Loja em React / Next.js (em desenvolvimento) |
+| [`frontend/`](frontend/) | Loja em TanStack Start (React 19), com dados de demonstração e ainda não ligada à API ([explicação](frontend/README.md)) |
 | [`ci-cd/`](ci-cd/) | Pipeline de CI/CD no GitHub Actions: testes e publicação automáticos ([explicação](ci-cd/README.md)) |
 | [`producao/`](producao/) | Como a API roda em produção: Google Cloud Run, banco no Neon, limitadores e disjuntor de custos ([explicação](producao/README.md)) |
 
@@ -110,7 +110,7 @@ Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos qu
 - O filtro ([`LimitePorIp`](backend/src/main/java/com/leonycosta/packapi/config/LimitePorIp.java)) roda antes da segurança e dos controllers: uma requisição recusada não confere token nem consulta o banco.
 - Sem ele, um único IP poderia disparar buscas no catálogo, que é público e fazia cada busca ler a tabela inteira (agora tem índice), até gastar a cota grátis de CPU e o [disjuntor de custos](producao/README.md#disjuntor-de-custos) tirar a API do ar.
 - **O que ele não resolve:** o Cloud Run conta cada requisição antes de ela chegar à API, então um ataque grande ou vindo de muitos IPs ainda gasta a cota de requisições. Barrar antes exige o [Cloud Armor](#por-que-usar-o-cloud-armor).
-- **Cuidado com o frontend:** se ele chamar a API pelo próprio servidor (renderização no servidor do Next.js), todos os visitantes chegam com o IP desse servidor. Nesse caso, esse IP precisa de um limite próprio.
+- **Cuidado com o frontend:** se ele chamar a API pelo próprio servidor (renderização no servidor do TanStack Start), todos os visitantes chegam com o IP desse servidor. Nesse caso, esse IP precisa de um limite próprio.
 
 **Carrinho:** no máximo 99 unidades de cada item, contando o que já está nele. Sem esse teto, uma soma enorme "dava a volta" no `int` e virava um número negativo, que o checkout usava para baixar o estoque.
 
@@ -249,7 +249,9 @@ Como o pipeline funciona, passo a passo, está em **[`ci-cd/README.md`](ci-cd/RE
 
 ## Documentação
 
-Diagramas em [`backend/docs/`](backend/docs/), gerados a partir do próprio código:
+O frontend tem a própria documentação no [`frontend/README.md`](frontend/README.md), com os diagramas em [`frontend/docs/`](frontend/docs/): estrutura de pastas, rotas e o fluxo do código de uma compra.
+
+Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do próprio código:
 
 - [`erd.svg`](backend/docs/erd.svg): diagrama entidade-relacionamento.
 - [`estrutura-pacotes.svg`](backend/docs/estrutura-pacotes.svg) e [`estrutura-pastas.svg`](backend/docs/estrutura-pastas.svg): organização do código.
@@ -262,7 +264,8 @@ Diagramas em [`backend/docs/`](backend/docs/), gerados a partir do próprio cód
 - [x] Docker e Docker Compose
 - [x] CI/CD com GitHub Actions
 - [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
-- [ ] Frontend (React / Next.js)
+- [x] Frontend (TanStack Start / React 19), com dados de demonstração
+- [ ] Ligar o frontend à API (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
 - [ ] Migrações do banco com Flyway, no lugar do `ddl-auto=update`
 - [ ] Cloud Armor na frente da API, para barrar ataques de volume antes do Cloud Run
 
