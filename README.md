@@ -253,7 +253,7 @@ Diagramas em [`backend/docs/`](backend/docs/), gerados a partir do próprio cód
 
 - [`erd.svg`](backend/docs/erd.svg): diagrama entidade-relacionamento.
 - [`estrutura-pacotes.svg`](backend/docs/estrutura-pacotes.svg) e [`estrutura-pastas.svg`](backend/docs/estrutura-pastas.svg): organização do código.
-- `fluxo.html`: página interativa com o caminho de cada requisição, passando pela segurança, pelo controller, pelo service e pelo repository, com o código real. Baixe o arquivo e abra no navegador.
+- [`fluxo.svg`](backend/docs/fluxo.svg): como o código funciona, seguindo uma requisição real (adicionar um item ao carrinho) pelo código de cada etapa: limite por IP, segurança, controller, service, repository e a resposta, com os erros possíveis em cada uma.
 
 ## Próximos passos
 

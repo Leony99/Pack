@@ -89,7 +89,7 @@
 <text x="28" y="558" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   │   │   │   ├── </text>
 <text x="184.4" y="558" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">product/</text>
 <text x="356.4" y="558" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="558" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Produto (Product*.java, slug automatico)</text>
+<text x="372.1" y="558" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Produto (Product*.java, slug, indice da busca)</text>
 <text x="28" y="580" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   │   │   │   ├── </text>
 <text x="184.4" y="580" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">color/</text>
 <text x="356.4" y="580" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
@@ -121,11 +121,11 @@
 <text x="28" y="734" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   │   │   ├── </text>
 <text x="153.1" y="734" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">auth/</text>
 <text x="356.4" y="734" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="734" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Login, cadastro, token JWT e regras de dono</text>
+<text x="372.1" y="734" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Login, cadastro, JWT, dono e limite de tentativas</text>
 <text x="28" y="756" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   │   │   ├── </text>
 <text x="153.1" y="756" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">config/</text>
 <text x="356.4" y="756" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="756" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Regras de acesso, JWT e Swagger (OpenApiConfig)</text>
+<text x="372.1" y="756" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Acesso, JWT, Swagger, limite por IP, paginacao</text>
 <text x="28" y="778" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   │   │   ├── </text>
 <text x="153.1" y="778" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">enums/</text>
 <text x="356.4" y="778" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
@@ -181,7 +181,7 @@
 <text x="28" y="1086" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│           ├── </text>
 <text x="153.1" y="1086" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">config/</text>
 <text x="356.4" y="1086" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="1086" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Regras de acesso: 401 e 403 por papel</text>
+<text x="372.1" y="1086" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">401/403 por papel, limite por IP, regras CHECK</text>
 <text x="28" y="1108" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│           ├── </text>
 <text x="153.1" y="1108" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">staff/</text>
 <text x="356.4" y="1108" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
@@ -197,7 +197,7 @@
 <text x="28" y="1174" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│           ├── </text>
 <text x="153.1" y="1174" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">product/</text>
 <text x="356.4" y="1174" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="1174" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Catalogo e movimentos de estoque</text>
+<text x="372.1" y="1174" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Catalogo, indice da busca e estoque</text>
 <text x="28" y="1196" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│           └── </text>
 <text x="153.1" y="1196" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#7ee787">enums/</text>
 <text x="356.4" y="1196" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
@@ -219,9 +219,9 @@
 <text x="356.4" y="1284" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
 <text x="372.1" y="1284" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Este arquivo</text>
 <text x="28" y="1306" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">│   └── </text>
-<text x="90.6" y="1306" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">fluxo.html</text>
+<text x="90.6" y="1306" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">fluxo.svg</text>
 <text x="356.4" y="1306" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
-<text x="372.1" y="1306" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Fluxo em partes com menus</text>
+<text x="372.1" y="1306" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#6e8b6e">Fluxo do codigo: uma requisicao, etapa por etapa</text>
 <text x="28" y="1328" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#2e4a2e">├── </text>
 <text x="59.3" y="1328" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#c9d1d9">.dockerignore</text>
 <text x="356.4" y="1328" font-family="JetBrains Mono, Fira Code, monospace" font-size="13" fill="#3d5c3d">#</text>
