@@ -11,17 +11,18 @@ import java.util.UUID;
 public interface ProductRepository extends JpaRepository<Product, UUID> {
     Optional<Product> findBySlug(String slug);
     boolean existsBySlug(String slug);
-    // Ignora maiúsculas e acentos dos dois lados: "basica" encontra "Camiseta Básica"
-    @Query(value = """
-            SELECT * FROM products
-            WHERE translate(lower(nome), 'áàâãäéèêëíìîïóòôõöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')
-                  LIKE '%' || translate(lower(:nome), 'áàâãäéèêëíìîïóòôõöúùûüç', 'aaaaaeeeeiiiiooooouuuuc') || '%'
-            ORDER BY nome, id
-            """, countQuery = """
-            SELECT count(*) FROM products
-            WHERE translate(lower(nome), 'áàâãäéèêëíìîïóòôõöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')
-                  LIKE '%' || translate(lower(:nome), 'áàâãäéèêëíìîïóòôõöúùûüç', 'aaaaaeeeeiiiiooooouuuuc') || '%'
-            """, nativeQuery = true)
+    // Busca por nome: ignora maiúsculas e acentos dos dois lados ("basica" encontra "Camiseta Básica").
+    // A expressão fica em constantes porque o índice da busca (IndiceDaBuscaPorNome) precisa ser dela,
+    // letra por letra: se as duas forem diferentes, o banco ignora o índice sem avisar e lê a tabela inteira.
+    // O IndiceDaBuscaPorNomeTest confere que a consulta abaixo usa o índice.
+    String SEM_ACENTO_ANTES = "translate(lower(";
+    String SEM_ACENTO_DEPOIS = "), 'áàâãäéèêëíìîïóòôõöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')";
+    String NOME_SEM_ACENTO = SEM_ACENTO_ANTES + "nome" + SEM_ACENTO_DEPOIS;
+    String FILTRO_POR_NOME = " WHERE " + NOME_SEM_ACENTO
+            + " LIKE '%' || " + SEM_ACENTO_ANTES + ":nome" + SEM_ACENTO_DEPOIS + " || '%'";
+    String BUSCA_POR_NOME = "SELECT * FROM products" + FILTRO_POR_NOME + " ORDER BY nome, id";
+
+    @Query(value = BUSCA_POR_NOME, countQuery = "SELECT count(*) FROM products" + FILTRO_POR_NOME, nativeQuery = true)
     Page<Product> searchByNome(String nome, Pageable pedido);
 
     @Query("SELECT DISTINCT p FROM Product p JOIN p.tags tl WHERE tl.tag.tag = :tag")

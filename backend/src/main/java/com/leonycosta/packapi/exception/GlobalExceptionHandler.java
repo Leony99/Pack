@@ -92,6 +92,12 @@ public class GlobalExceptionHandler {
         return build(400, "Bad Request", message, req.getRequestURI());
     }
 
+    // Parâmetro com valor que não serve (ex.: busca curta demais) → 400
+    @ExceptionHandler(ParametroInvalidoException.class)
+    public ResponseEntity<ApiError> handleParametro(ParametroInvalidoException ex, HttpServletRequest req) {
+        return build(400, "Bad Request", ex.getMessage(), req.getRequestURI());
+    }
+
     // Rota inexistente → 404
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiError> handleNoRoute(NoResourceFoundException ex, HttpServletRequest req) {

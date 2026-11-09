@@ -75,6 +75,19 @@ class CatalogTest extends IntegrationTest {
         assertThat(r.tamanho("$.itens")).isEqualTo(1);
     }
 
+    @ParameterizedTest(name = "buscar \"{0}\" é recusado")
+    @ValueSource(strings = {"a", "ab", "  ab  "})
+    void buscaComMenosDe3LetrasEhRecusada(String termo) {
+        Resposta r = executar(MockMvcRequestBuilders.get("/api/v1/products").param("nome", termo)).esperar(400);
+
+        assertThat(r.str("$.message")).contains("pelo menos 3 letras");
+    }
+
+    @Test
+    void buscaComTresLetrasFunciona() {
+        executar(MockMvcRequestBuilders.get("/api/v1/products").param("nome", "abc")).esperar(200);
+    }
+
     @Test
     void buscarProdutoPeloSlug() {
         String sufixo = unico();

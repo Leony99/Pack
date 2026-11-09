@@ -4,6 +4,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Pageable;
 import com.leonycosta.packapi.config.Pagina;
 import com.leonycosta.packapi.exception.ConflictException;
+import com.leonycosta.packapi.exception.ParametroInvalidoException;
 import com.leonycosta.packapi.exception.ResourceNotFoundException;
 import com.leonycosta.packapi.product.product_image.ProductImageResponse;
 import com.leonycosta.packapi.product.product_tag.ProductTag;
@@ -35,10 +36,18 @@ public class ProductService {
         return Pagina.de(productRepository.findAll(Pagina.pedido(pagina, tamanho, ORDEM)).map(this::toResponse));
     }
 
+    // O índice da busca trabalha com pedaços de 3 letras: com menos, o banco teria de ler a tabela inteira
+    public static final int MINIMO_DA_BUSCA = 3;
+
     public Pagina<ProductResponse> search(String nome, int pagina, int tamanho) {
+        String termo = nome.strip();
+        if (termo.length() < MINIMO_DA_BUSCA) {
+            throw new ParametroInvalidoException(
+                    "A busca por nome precisa de pelo menos " + MINIMO_DA_BUSCA + " letras");
+        }
         // a ordem já está escrita na consulta (SQL nativo)
         Pageable pedido = Pagina.pedido(pagina, tamanho, Sort.unsorted());
-        return Pagina.de(productRepository.searchByNome(nome, pedido).map(this::toResponse));
+        return Pagina.de(productRepository.searchByNome(termo, pedido).map(this::toResponse));
     }
 
     public Pagina<ProductResponse> findByTag(String tag, int pagina, int tamanho) {

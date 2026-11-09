@@ -57,7 +57,8 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 
 ## O que a API faz
 
-- **Catálogo:** produtos com slug automático, variantes com SKU, preço próprio e estoque, imagens, tags, tamanhos e cores. A busca por nome ignora acentos e maiúsculas.
+- **Catálogo:** produtos com slug automático, variantes com SKU, preço próprio e estoque, imagens, tags, tamanhos e cores. A busca por nome ignora acentos e maiúsculas e exige pelo menos 3 letras (com menos, responde 400).
+- **Busca com índice:** a busca acha o termo em qualquer posição do nome (`LIKE '%termo%'`), e um índice comum não ajuda nisso. Por isso, a API cria na partida um índice trigrama (extensão `pg_trgm`), que guarda os pedaços de 3 letras de cada nome. Quem decide usá-lo é o próprio PostgreSQL: com poucos produtos ele lê a tabela, que é mais barato, e passa a usar o índice sozinho quando ela cresce. A expressão da busca e a do índice vêm da mesma constante, e um teste confere que a busca usa o índice.
 - **Estoque:** só muda por movimento (entrada, saída ou ajuste), que fica registrado no histórico; editar a variante não mexe no estoque. Cada movimento vai até 100.000 unidades, o ajuste pode zerar o estoque, e há uma consulta de estoque baixo.
 - **Carrinho e checkout:**
   - o pedido guarda o preço e o endereço do momento da compra, como um *snapshot*;
@@ -107,7 +108,7 @@ Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos qu
 
 **Limite geral por IP**, em todas as rotas: no máximo 120 requisições por minuto do mesmo IP. Para IPv6, conta o bloco /64 inteiro, porque cada casa recebe um bloco e poderia trocar de endereço à vontade. Passou disso, a API responde 429 com `Retry-After` até o minuto acabar.
 - O filtro ([`LimitePorIp`](backend/src/main/java/com/leonycosta/packapi/config/LimitePorIp.java)) roda antes da segurança e dos controllers: uma requisição recusada não confere token nem consulta o banco.
-- Sem ele, um único IP poderia disparar buscas no catálogo, que é público e lê a tabela a cada busca, até gastar a cota grátis de CPU e o [disjuntor de custos](producao/README.md#disjuntor-de-custos) tirar a API do ar.
+- Sem ele, um único IP poderia disparar buscas no catálogo, que é público e fazia cada busca ler a tabela inteira (agora tem índice), até gastar a cota grátis de CPU e o [disjuntor de custos](producao/README.md#disjuntor-de-custos) tirar a API do ar.
 - **O que ele não resolve:** o Cloud Run conta cada requisição antes de ela chegar à API, então um ataque grande ou vindo de muitos IPs ainda gasta a cota de requisições. Barrar antes exige o [Cloud Armor](#por-que-usar-o-cloud-armor).
 - **Cuidado com o frontend:** se ele chamar a API pelo próprio servidor (renderização no servidor do Next.js), todos os visitantes chegam com o IP desse servidor. Nesse caso, esse IP precisa de um limite próprio.
 
@@ -217,7 +218,7 @@ curl localhost:8080/api/v1/auth/me -H "Authorization: Bearer <token>"
 
 ## Testes
 
-São 242 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
+São 249 testes, que rodam com um comando. É preciso ter o Docker ligado, mas não precisa de `.env` nem do banco de desenvolvimento:
 
 ```bash
 cd backend
@@ -281,6 +282,7 @@ Plano da troca:
 2. Marcar o banco do Neon como "já está no V1" (`spring.flyway.baseline-on-migrate`), sem recriar nada.
 3. Trocar para `ddl-auto=validate`: a API não sobe se as entidades e o banco não baterem.
 4. Apagar o `RestricoesDosEnums`: um enum novo passa a ser uma migração.
+5. Passar o índice da busca (`IndiceDaBuscaPorNome`, criado hoje na partida) para uma migração.
 
 Antes de ir para a produção, testar com uma cópia do schema atual no banco local.
 
