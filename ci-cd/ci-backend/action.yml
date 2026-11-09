@@ -8,7 +8,7 @@ runs:
   using: composite
   steps:
     - name: Instalar o Java 21
-      uses: actions/setup-java@v6
+      uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
       with:
         distribution: temurin
         java-version: 21
@@ -24,7 +24,7 @@ runs:
     # Se algum teste falhar, guarda os relatórios para baixar na página da execução
     - name: Guardar relatórios dos testes
       if: failure()
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: relatorios-testes
         path: backend/target/surefire-reports/

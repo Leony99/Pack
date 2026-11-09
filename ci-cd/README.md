@@ -20,8 +20,8 @@ ci-cd/
 O workflow só baixa o código e chama as ações desta pasta:
 
 ```yaml
-- uses: actions/checkout@v7       # baixa o código (as ações locais estão nele)
-- uses: ./ci-cd/ci-backend        # roda os passos do CI
+- uses: actions/checkout@3d3c42e5... # v7.0.1   baixa o código (as ações locais estão nele)
+- uses: ./ci-cd/ci-backend                    # roda os passos do CI
 ```
 
 Quando o frontend chegar, ele ganha a sua ação (`ci-cd/ci-frontend/`) e um job a mais no workflow.
@@ -128,7 +128,7 @@ O job precisa da permissão `security-events: write` para enviar os alertas, e s
 
 ### Ações fixadas pelo SHA
 
-As ações do CodeQL e do Trivy são referenciadas pelo **SHA do commit**, e não pela tag (`@v4`):
+Todas as ações de fora do repositório são referenciadas pelo **SHA do commit**, e não pela tag (`@v4`):
 
 ```yaml
 uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
@@ -140,7 +140,7 @@ O SHA identifica um código exato e não pode ser trocado. A versão do binário
 
 **Para atualizar:** pegar o SHA da versão nova na página de releases da ação e trocar os dois (o SHA e o comentário). Prefira versões com algumas semanas de lançamento.
 
-As outras ações (`checkout`, `setup-java`, as do Google) ainda usam a tag. Fixá-las pelo SHA também é um próximo passo.
+O risco vem do repositório **da ação**, e não do Pack: mesmo que só uma pessoa tenha acesso ao Pack, quem controla a ação pode mudar o que a tag aponta. O cuidado maior é com as ações do job de deploy, que tem permissão para publicar no Cloud Run.
 
 ## CD: publicação contínua
 
@@ -174,13 +174,15 @@ O workflow lê 4 **variáveis** do repositório (*Settings → Secrets and varia
 
 ## Ações usadas
 
-| Ação | Onde | Para quê |
-|---|---|---|
-| `actions/checkout@v7` | workflow | Baixa o código, incluindo as ações locais desta pasta |
-| `actions/setup-java@v6` | CI | Instala o Java 21 e guarda o cache do Maven |
-| `actions/upload-artifact@v7` | CI | Guarda os relatórios dos testes quando algo falha |
-| `aquasecurity/trivy-action` (v0.36.0, pelo SHA) | CI | Instala o Trivy v0.76.1 na máquina do GitHub, só durante a execução, e varre a imagem |
-| `github/codeql-action/init` e `/analyze` (v4.39.1, pelo SHA) | CodeQL | Prepara o CodeQL, analisa o código e envia os alertas para a aba Security |
-| `google-github-actions/auth@v3` | CD | Login no Google Cloud com Workload Identity Federation |
-| `google-github-actions/setup-gcloud@v3` | CD | Instala o gcloud na máquina do GitHub, só durante a execução |
-| `google-github-actions/deploy-cloudrun@v3` | CD | Publica a imagem nova no serviço do Cloud Run |
+| Ação | Versão | Onde | Para quê |
+|---|---|---|---|
+| `actions/checkout` | v7.0.1 | workflow | Baixa o código, incluindo as ações locais desta pasta |
+| `actions/setup-java` | v6.1.0 | CI e CodeQL | Instala o Java 21 e guarda o cache do Maven |
+| `actions/upload-artifact` | v7.0.2 | CI | Guarda os relatórios dos testes quando algo falha |
+| `aquasecurity/trivy-action` | v0.36.0 | CI | Instala o Trivy v0.76.1 na máquina do GitHub, só durante a execução, e varre a imagem |
+| `github/codeql-action/init` e `/analyze` | v4.39.1 | CodeQL | Prepara o CodeQL, analisa o código e envia os alertas para a aba Security |
+| `google-github-actions/auth` | v3.0.0 | CD | Login no Google Cloud com Workload Identity Federation |
+| `google-github-actions/setup-gcloud` | v3.0.1 | CD | Instala o gcloud na máquina do GitHub, só durante a execução |
+| `google-github-actions/deploy-cloudrun` | v3.0.1 | CD | Publica a imagem nova no serviço do Cloud Run |
+
+Todas fixadas pelo SHA do commit (ver [Ações fixadas pelo SHA](#ações-fixadas-pelo-sha)); a versão fica no comentário ao lado.

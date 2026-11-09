@@ -21,7 +21,7 @@ jobs:
     steps:
       # ações locais só existem depois que o código é baixado
       - name: Baixar o código
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: CI do backend
         uses: ./ci-cd/ci-backend
@@ -34,7 +34,7 @@ jobs:
       security-events: write            # envia os alertas para a aba Security do repositório
     steps:
       - name: Baixar o código
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: CodeQL do backend
         uses: ./ci-cd/codeql
@@ -51,7 +51,7 @@ jobs:
       id-token: write                   # permite pedir o token OIDC que o Google aceita no lugar de uma senha
     steps:
       - name: Baixar o código
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Deploy no Cloud Run
         uses: ./ci-cd/deploy
