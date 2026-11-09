@@ -10,19 +10,27 @@ target/
 !**/src/test/**/target/
 HELP.md
 
-### Frontend (Node / Next.js) ###
+### Frontend (Node / TanStack Start) ###
 node_modules/
-.next/
-out/
+# saídas do build (Vite, Nitro e TanStack Start)
 dist/
+dist-ssr/
+.output/
+.nitro/
+.tanstack/
+.vinxi/
 coverage/
 *.tsbuildinfo
-next-env.d.ts
-.vercel/
+# arquivos de ambiente locais do Vite (.env.local, .env.development.local...)
+*.local
+# Cloudflare (destino padrão do build)
+.wrangler/
+.dev.vars
 
 ### Logs ###
 *.log
 logs/
+npm-debug.log*
 
 ### Python ###
 __pycache__/
@@ -60,9 +68,16 @@ build/
 ### VS Code ###
 .vscode/
 
+### Visual Studio e Vim ###
+*.suo
+*.sln
+*.sw?
+
 ### Claude Code (configurações locais) ###
 .claude/
 
 ### Só de desenvolvimento (local) ###
 # scripts que geram os diagramas de backend/docs
 backend/docs/geradores/
+# scripts que geram os diagramas de frontend/docs
+frontend/docs/geradores/
