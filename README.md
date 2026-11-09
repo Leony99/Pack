@@ -255,6 +255,7 @@ Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do pr
 
 - [`erd.svg`](backend/docs/erd.svg): diagrama entidade-relacionamento.
 - [`estrutura-pacotes.svg`](backend/docs/estrutura-pacotes.svg) e [`estrutura-pastas.svg`](backend/docs/estrutura-pastas.svg): organização do código.
+- [`rotas.svg`](backend/docs/rotas.svg): cada endpoint da API, com quem pode acessar (público, dono ou a permissão do papel) e o que faz.
 - [`fluxo.svg`](backend/docs/fluxo.svg): como o código funciona, seguindo uma requisição real (adicionar um item ao carrinho) pelo código de cada etapa: limite por IP, segurança, controller, service, repository e a resposta, com os erros possíveis em cada uma.
 
 ## Próximos passos
