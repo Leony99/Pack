@@ -1,5 +1,6 @@
 import { pageHead } from "@/lib/metadata";
 import { createFileRoute } from "@tanstack/react-router";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 export const Route = createFileRoute("/politicas/envio")({
   head: () =>
@@ -9,11 +10,9 @@ export const Route = createFileRoute("/politicas/envio")({
 
 function Page() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-3xl px-6 py-20">
-        <p className="text-xs font-medium tracking-[0.3em] text-muted-foreground">POLÍTICAS</p>
-        <h1 className="mt-4 font-display text-5xl md:text-7xl leading-none">ENVIO</h1>
-        <div className="mt-10 space-y-6 text-sm leading-relaxed text-muted-foreground">
+    <PageLayout title="ENVIO" eyebrow="POLÍTICAS / ENVIO">
+      <div>
+        <div className="mx-auto max-w-3xl space-y-6 text-sm leading-relaxed text-muted-foreground">
           <p>
             Enviamos para todo o Brasil via Correios e transportadoras parceiras. O prazo começa a
             contar após a confirmação do pagamento.
@@ -33,11 +32,11 @@ function Page() {
             ))}
           </div>
           <p>
-            <strong className="text-foreground">Frete grátis</strong> para pedidos acima de R$ 350
+            <strong className="text-foreground">Frete grátis</strong> para pedidos acima de R$ 200
             em todo o país. Todos os pedidos incluem código de rastreio.
           </p>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

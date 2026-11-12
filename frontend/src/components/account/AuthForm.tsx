@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LockKeyhole, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import manga from "@/assets/product-longsleeve.jpg";
+import { CardAviso, PaginaTopo, ROTULO } from "@/components/layout/PaginaTopo";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/common/FormField";
 import { enterDemo, loginCustomer, registerCustomer, loginStaff } from "@/lib/api";
@@ -42,66 +44,82 @@ export function AuthForm({ kind }: { kind: "customer" | "staff" }) {
     });
   }
   return (
-    <main className="mx-auto min-h-[70svh] max-w-md px-6 py-16">
-      <p className="mb-5 text-xs text-muted-foreground">
-        PACK / {kind === "staff" ? "ACESSO DE COLABORADORES" : "CONTA"}
-      </p>
-      {kind === "staff" && <LockKeyhole className="mb-4" />}
-      <h1 className="text-5xl">
-        {kind === "staff" ? "PAINEL PACK" : mode === "login" ? "ENTRAR" : "CRIAR CONTA"}
-      </h1>
-      <p className="my-6 border-y border-border py-4 text-xs leading-6">
-        AMBIENTE DEMONSTRATIVO — sem autenticação real. Não use sua senha pessoal. Contas e
-        alterações são apagadas ao recarregar.
-      </p>
-      <form onSubmit={submit} className="space-y-5">
-        {mode === "signup" && kind === "customer" && (
-          <FormField label="Nome completo" name="name" autoComplete="name" required />
-        )}
-        <FormField label="E-mail" name="email" type="email" autoComplete="email" required />
-        <FormField
-          label="Senha de demonstração"
-          name="password"
-          type="password"
-          autoComplete="off"
-          minLength={mode === "signup" ? 6 : 1}
-          required
-        />
-        {error && (
-          <p role="alert" className="text-sm">
-            {error}
+    <main className="min-h-[70svh]">
+      <PaginaTopo
+        caminho={kind === "staff" ? "PACK / ACESSO DE COLABORADORES" : "PACK / ÁREA DO CLIENTE"}
+        titulo={kind === "staff" ? "PAINEL PACK" : mode === "login" ? "ENTRAR" : "CRIAR CONTA"}
+        imagem={manga}
+        texto="Ambiente demonstrativo — sem autenticação real. Não use sua senha pessoal. Contas e alterações são apagadas ao recarregar."
+        lado={
+          <>
+            <CardAviso rotulo="PEDIDOS" valor="HISTÓRICO" texto="acompanhe as suas compras" />
+            <CardAviso escuro rotulo="AMBIENTE" valor="DEMO" texto="sem cobranças ou envios" />
+          </>
+        }
+      />
+      <div className="px-4 py-10 md:px-6 md:py-14">
+        <div className="mx-auto max-w-md border border-ink/10 p-6 md:p-8">
+          <p className={`${ROTULO} mb-6 flex items-center gap-2`}>
+            <span className="h-1.5 w-1.5 bg-destaque" />{" "}
+            {kind === "staff"
+              ? "[ COLABORADOR ]"
+              : mode === "login"
+                ? "[ JÁ TENHO CONTA ]"
+                : "[ NOVA CONTA ]"}
           </p>
-        )}
-        <Button disabled={busy} className="h-12 w-full rounded-none">
-          {busy ? "AGUARDE..." : mode === "signup" ? "CRIAR CONTA" : "ENTRAR"}
-          <ArrowRight />
-        </Button>
-      </form>
-      <Button
-        variant="outline"
-        disabled={busy}
-        className="mt-4 h-12 w-full rounded-none"
-        onClick={() => void complete(() => enterDemo(kind))}
-      >
-        ACESSAR DEMONSTRAÇÃO
-      </Button>
-      {kind === "customer" && (
-        <div className="mt-6 flex justify-between text-xs">
+          <form onSubmit={submit} className="space-y-5">
+            {mode === "signup" && kind === "customer" && (
+              <FormField label="Nome completo" name="name" autoComplete="name" required />
+            )}
+            <FormField label="E-mail" name="email" type="email" autoComplete="email" required />
+            <FormField
+              label="Senha de demonstração"
+              name="password"
+              type="password"
+              autoComplete="off"
+              minLength={mode === "signup" ? 6 : 1}
+              required
+            />
+            {error && (
+              <p role="alert" className="text-sm">
+                {error}
+              </p>
+            )}
+            <Button
+              disabled={busy}
+              className="h-12 w-full rounded-none text-[11px] tracking-[0.2em]"
+            >
+              {busy ? "AGUARDE..." : mode === "signup" ? "CRIAR CONTA" : "ENTRAR"}
+              <ArrowRight />
+            </Button>
+          </form>
           <Button
-            variant="link"
-            className="px-0"
-            onClick={() => {
-              setMode(mode === "login" ? "signup" : "login");
-              setError("");
-            }}
+            variant="outline"
+            disabled={busy}
+            className="mt-3 h-12 w-full rounded-none text-[11px] tracking-[0.2em]"
+            onClick={() => void complete(() => enterDemo(kind))}
           >
-            {mode === "login" ? "Criar conta" : "Já tenho conta"}
+            ACESSAR DEMONSTRAÇÃO
           </Button>
-          <Button variant="link" asChild className="px-0">
-            <Link to="/login/recuperar">Esqueci minha senha</Link>
-          </Button>
+          {kind === "customer" && (
+            <div className="mt-6 flex justify-between text-xs">
+              <Button
+                variant="link"
+                className="px-0"
+                onClick={() => {
+                  setMode(mode === "login" ? "signup" : "login");
+                  setError("");
+                }}
+              >
+                {mode === "login" ? "Criar conta" : "Já tenho conta"}
+              </Button>
+              <Button variant="link" asChild className="px-0">
+                <Link to="/login/recuperar">Esqueci minha senha</Link>
+              </Button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </main>
   );
 }

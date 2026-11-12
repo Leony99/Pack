@@ -1,5 +1,6 @@
 import { pageHead } from "@/lib/metadata";
 import { createFileRoute } from "@tanstack/react-router";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 export const Route = createFileRoute("/politicas/privacidade")({
   head: () =>
@@ -12,11 +13,9 @@ export const Route = createFileRoute("/politicas/privacidade")({
 
 function Page() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-3xl px-6 py-20">
-        <p className="text-xs font-medium tracking-[0.3em] text-muted-foreground">POLÍTICAS</p>
-        <h1 className="mt-4 font-display text-5xl md:text-7xl leading-none">PRIVACIDADE</h1>
-        <div className="mt-10 space-y-6 text-sm leading-relaxed text-muted-foreground">
+    <PageLayout title="PRIVACIDADE" eyebrow="POLÍTICAS / PRIVACIDADE">
+      <div>
+        <div className="mx-auto max-w-3xl space-y-6 text-sm leading-relaxed text-muted-foreground">
           <p>
             Respeitamos sua privacidade. Coletamos apenas os dados necessários para processar
             pedidos, entregar produtos e melhorar sua experiência.
@@ -43,6 +42,6 @@ function Page() {
           </p>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

@@ -65,7 +65,7 @@ export function AccountPanel({ view, orderId }: { view: AccountView; orderId?: s
   return (
     <DashboardLayout kind="customer" title={titles[view]}>
       {message && (
-        <p role="status" className="mb-6 bg-secondary p-4 text-sm">
+        <p role="status" className="mb-6 border border-ink/10 p-4 text-sm">
           {message}
         </p>
       )}

@@ -25,7 +25,7 @@ export function OverviewScreen({ data }: { data: AdminData }) {
 
   return (
     <>
-      <div className="grid gap-6 bg-secondary px-5 py-6 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-px border border-ink/10 bg-ink/10 sm:grid-cols-2 xl:grid-cols-4">
         <Metric label="TOTAL SIMULADO" value={money(totalSimulado)} />
         <Metric label="PEDIDOS" value={String(data.orders.length)} />
         <Metric label="EM ANDAMENTO" value={String(emAndamento)} />

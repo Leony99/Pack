@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1420" height="1448" viewBox="0 0 1420 1448">
+<svg xmlns="http://www.w3.org/2000/svg" width="1420" height="1424" viewBox="0 0 1420 1424">
 <defs><style>@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&amp;display=swap");text{font-family:JetBrains Mono, Fira Code, monospace;font-variant-ligatures:none;}</style></defs>
-<rect width="1420" height="1448" fill="#0d1117"/>
+<rect width="1420" height="1424" fill="#0d1117"/>
 <text x="30" y="50" font-size="24" font-weight="700" fill="#e6edf3">Pack frontend: rotas</text>
 <text x="30" y="78" font-size="13" font-weight="400" fill="#8b949e">Cada página do site: a URL, o arquivo em src/routes, o que ela mostra e as funções de src/lib/api que buscam os dados.</text>
 <text x="30" y="98" font-size="13" font-weight="400" fill="#8b949e">O nome do arquivo vira a URL: ponto = barra, $ = parâmetro, e o _ no fim (conta_, admin_) não entra na URL.</text>
@@ -13,12 +13,12 @@
 <text x="60" y="176" font-size="12" font-weight="700" fill="#58a6ff">LOJA</text>
 <text x="60" y="202" font-size="12" font-weight="400" fill="#79c0ff">/</text>
 <text x="440" y="202" font-size="11" font-weight="400" fill="#ffa657">index.tsx</text>
-<text x="700" y="202" font-size="11" font-weight="400" fill="#c9d1d9">Home: destaque, estilos, destaques, novo drop, newsletter</text>
+<text x="700" y="202" font-size="11" font-weight="400" fill="#c9d1d9">Home [01]: abertura, topo com cards e notícias, drop</text>
 <text x="1140" y="202" font-size="11" font-weight="400" fill="#3bca6d">getSection</text>
 <rect x="40" y="210" width="1340" height="24" fill="#0d1117" opacity="0.5"/>
 <text x="60" y="226" font-size="12" font-weight="400" fill="#79c0ff">/catalogo</text>
 <text x="440" y="226" font-size="11" font-weight="400" fill="#ffa657">catalogo.index.tsx</text>
-<text x="700" y="226" font-size="11" font-weight="400" fill="#c9d1d9">CatalogView com filtros e ordenação na URL</text>
+<text x="700" y="226" font-size="11" font-weight="400" fill="#c9d1d9">[02] CatalogView com filtros e ordenação na URL</text>
 <text x="1140" y="226" font-size="11" font-weight="400" fill="#3bca6d">getProducts</text>
 <text x="60" y="250" font-size="12" font-weight="400" fill="#79c0ff">/catalogo/$style/$type</text>
 <text x="440" y="250" font-size="11" font-weight="400" fill="#ffa657">catalogo.$style.$type.tsx</text>
@@ -59,7 +59,7 @@
 <text x="60" y="532" font-size="12" font-weight="700" fill="#3bca6d">CONTA DO CLIENTE</text>
 <text x="60" y="558" font-size="12" font-weight="400" fill="#79c0ff">/login</text>
 <text x="440" y="558" font-size="11" font-weight="400" fill="#ffa657">login.tsx</text>
-<text x="700" y="558" font-size="11" font-weight="400" fill="#c9d1d9">AuthForm do cliente (entrar ou criar conta)</text>
+<text x="700" y="558" font-size="11" font-weight="400" fill="#c9d1d9">[06] AuthForm do cliente (entrar ou criar conta)</text>
 <text x="1140" y="558" font-size="11" font-weight="400" fill="#3bca6d">loginCustomer, registerCustomer</text>
 <rect x="40" y="566" width="1340" height="24" fill="#0d1117" opacity="0.5"/>
 <text x="60" y="582" font-size="12" font-weight="400" fill="#79c0ff">/login/recuperar</text>
@@ -73,7 +73,7 @@
 <rect x="40" y="614" width="1340" height="24" fill="#0d1117" opacity="0.5"/>
 <text x="60" y="630" font-size="12" font-weight="400" fill="#79c0ff">/conta</text>
 <text x="440" y="630" font-size="11" font-weight="400" fill="#ffa657">conta.tsx</text>
-<text x="700" y="630" font-size="11" font-weight="400" fill="#c9d1d9">AccountPanel: visão geral</text>
+<text x="700" y="630" font-size="11" font-weight="400" fill="#c9d1d9">[06] AccountPanel: visão geral</text>
 <text x="1140" y="630" font-size="11" font-weight="400" fill="#3bca6d">getAccountData</text>
 <text x="60" y="654" font-size="12" font-weight="400" fill="#79c0ff">/conta/pedidos</text>
 <text x="440" y="654" font-size="11" font-weight="400" fill="#ffa657">conta_.pedidos.tsx</text>
@@ -154,39 +154,35 @@
 <text x="440" y="1108" font-size="11" font-weight="400" fill="#ffa657">admin_.trocas.tsx</text>
 <text x="700" y="1108" font-size="11" font-weight="400" fill="#c9d1d9">AdminPanel: trocas e devoluções</text>
 <text x="1140" y="1108" font-size="11" font-weight="400" fill="#3bca6d">saveAdminRecord</text>
-<rect x="30" y="1150" width="1360" height="218" rx="8" fill="#161b22" stroke="#30363d"/>
-<rect x="30" y="1150" width="4" height="218" rx="2" fill="#e3b341"/>
+<rect x="30" y="1150" width="1360" height="194" rx="8" fill="#161b22" stroke="#30363d"/>
+<rect x="30" y="1150" width="4" height="194" rx="2" fill="#e3b341"/>
 <text x="60" y="1176" font-size="12" font-weight="700" fill="#e3b341">SUPORTE E CONTEÚDO</text>
-<text x="60" y="1202" font-size="12" font-weight="400" fill="#79c0ff">/sobre</text>
-<text x="440" y="1202" font-size="11" font-weight="400" fill="#ffa657">sobre.tsx</text>
-<text x="700" y="1202" font-size="11" font-weight="400" fill="#c9d1d9">Manifesto da marca</text>
-<text x="1140" y="1202" font-size="11" font-weight="400" fill="#3bca6d">getContent</text>
+<text x="60" y="1202" font-size="12" font-weight="400" fill="#79c0ff">/suporte/contato</text>
+<text x="440" y="1202" font-size="11" font-weight="400" fill="#ffa657">suporte.contato.tsx</text>
+<text x="700" y="1202" font-size="11" font-weight="400" fill="#c9d1d9">[03] Formulário de contato</text>
+<text x="1140" y="1202" font-size="11" font-weight="400" fill="#3bca6d">sendContact</text>
 <rect x="40" y="1210" width="1340" height="24" fill="#0d1117" opacity="0.5"/>
-<text x="60" y="1226" font-size="12" font-weight="400" fill="#79c0ff">/suporte/contato</text>
-<text x="440" y="1226" font-size="11" font-weight="400" fill="#ffa657">suporte.contato.tsx</text>
-<text x="700" y="1226" font-size="11" font-weight="400" fill="#c9d1d9">Formulário de contato</text>
-<text x="1140" y="1226" font-size="11" font-weight="400" fill="#3bca6d">sendContact</text>
-<text x="60" y="1250" font-size="12" font-weight="400" fill="#79c0ff">/suporte/faq</text>
-<text x="440" y="1250" font-size="11" font-weight="400" fill="#ffa657">suporte.faq.tsx</text>
-<text x="700" y="1250" font-size="11" font-weight="400" fill="#c9d1d9">Perguntas frequentes</text>
-<text x="1140" y="1250" font-size="11" font-weight="400" fill="#3bca6d">getContent</text>
+<text x="60" y="1226" font-size="12" font-weight="400" fill="#79c0ff">/suporte/faq</text>
+<text x="440" y="1226" font-size="11" font-weight="400" fill="#ffa657">suporte.faq.tsx</text>
+<text x="700" y="1226" font-size="11" font-weight="400" fill="#c9d1d9">[05] Perguntas frequentes</text>
+<text x="1140" y="1226" font-size="11" font-weight="400" fill="#3bca6d">getContent</text>
+<text x="60" y="1250" font-size="12" font-weight="400" fill="#79c0ff">/suporte/tamanhos</text>
+<text x="440" y="1250" font-size="11" font-weight="400" fill="#ffa657">suporte.tamanhos.tsx</text>
+<text x="700" y="1250" font-size="11" font-weight="400" fill="#c9d1d9">[04] Tabela de medidas e como medir</text>
+<text x="1140" y="1250" font-size="11" font-weight="400" fill="#3bca6d">getSizeChart</text>
 <rect x="40" y="1258" width="1340" height="24" fill="#0d1117" opacity="0.5"/>
-<text x="60" y="1274" font-size="12" font-weight="400" fill="#79c0ff">/suporte/tamanhos</text>
-<text x="440" y="1274" font-size="11" font-weight="400" fill="#ffa657">suporte.tamanhos.tsx</text>
-<text x="700" y="1274" font-size="11" font-weight="400" fill="#c9d1d9">Tabela de medidas</text>
-<text x="1140" y="1274" font-size="11" font-weight="400" fill="#3bca6d">getSizeChart</text>
-<text x="60" y="1298" font-size="12" font-weight="400" fill="#79c0ff">/politicas/troca · envio · privacidade · termos</text>
-<text x="440" y="1298" font-size="11" font-weight="400" fill="#ffa657">politicas.*.tsx</text>
-<text x="700" y="1298" font-size="11" font-weight="400" fill="#c9d1d9">Textos das políticas</text>
-<text x="1140" y="1298" font-size="11" font-weight="400" fill="#3bca6d">getContent (termos)</text>
+<text x="60" y="1274" font-size="12" font-weight="400" fill="#79c0ff">/politicas/troca · envio · privacidade · termos</text>
+<text x="440" y="1274" font-size="11" font-weight="400" fill="#ffa657">politicas.*.tsx</text>
+<text x="700" y="1274" font-size="11" font-weight="400" fill="#c9d1d9">Textos das políticas</text>
+<text x="1140" y="1274" font-size="11" font-weight="400" fill="#3bca6d">getContent (termos)</text>
+<text x="60" y="1298" font-size="12" font-weight="400" fill="#79c0ff">/newsletter</text>
+<text x="440" y="1298" font-size="11" font-weight="400" fill="#ffa657">newsletter.tsx</text>
+<text x="700" y="1298" font-size="11" font-weight="400" fill="#c9d1d9">Inscrição e confirmação</text>
+<text x="1140" y="1298" font-size="11" font-weight="400" fill="#3bca6d">subscribeNewsletter</text>
 <rect x="40" y="1306" width="1340" height="24" fill="#0d1117" opacity="0.5"/>
-<text x="60" y="1322" font-size="12" font-weight="400" fill="#79c0ff">/newsletter</text>
-<text x="440" y="1322" font-size="11" font-weight="400" fill="#ffa657">newsletter.tsx</text>
-<text x="700" y="1322" font-size="11" font-weight="400" fill="#c9d1d9">Inscrição e confirmação</text>
-<text x="1140" y="1322" font-size="11" font-weight="400" fill="#3bca6d">subscribeNewsletter</text>
-<text x="60" y="1346" font-size="12" font-weight="400" fill="#79c0ff">/404 e qualquer URL que não existe</text>
-<text x="440" y="1346" font-size="11" font-weight="400" fill="#ffa657">404.tsx</text>
-<text x="700" y="1346" font-size="11" font-weight="400" fill="#c9d1d9">NotFoundPage</text>
-<text x="1140" y="1346" font-size="11" font-weight="400" fill="#3bca6d">—</text>
-<text x="30" y="1418" font-size="12" font-weight="400" fill="#8b949e">Toda página fica dentro de __root.tsx: cabeçalho (SiteHeader), a página da rota e o rodapé (SiteFooter).</text>
+<text x="60" y="1322" font-size="12" font-weight="400" fill="#79c0ff">/404 e qualquer URL que não existe</text>
+<text x="440" y="1322" font-size="11" font-weight="400" fill="#ffa657">404.tsx</text>
+<text x="700" y="1322" font-size="11" font-weight="400" fill="#c9d1d9">NotFoundPage</text>
+<text x="1140" y="1322" font-size="11" font-weight="400" fill="#3bca6d">—</text>
+<text x="30" y="1394" font-size="12" font-weight="400" fill="#8b949e">Toda página fica dentro de __root.tsx: o menu solto (MenuFlutuante), a página da rota e o rodapé (SiteFooter). [01]–[06]: as páginas lado a lado, na ordem em que a tela arrasta.</text>
 </svg>

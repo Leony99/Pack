@@ -1,11 +1,18 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { Outlet, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import {
+  Outlet,
+  createRootRouteWithContext,
+  HeadContent,
+  Scripts,
+  useRouterState,
+} from "@tanstack/react-router";
+import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { abertura } from "@/lib/abertura";
 import { SessionProvider } from "@/lib/session";
 import { CartProvider } from "@/lib/cart";
-import { SiteHeader } from "@/components/layout/SiteHeader";
+import { MenuFlutuante } from "@/components/layout/MenuFlutuante";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { NotFoundPage, RouteError } from "@/components/layout/RouteBoundary";
 
@@ -57,12 +64,26 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-/** Moldura de todas as páginas: sessão, carrinho, cabeçalho, a página da rota e o rodapé. */
+/**
+ * Moldura de todas as páginas: sessão, carrinho, o menu solto por cima, a página da rota e o rodapé.
+ * Um espaço no topo deixa o começo de cada página abaixo do menu; o topo da home sobe por cima
+ * dele (margem negativa), e o menu fica sobre a foto. O espaço não depende da rota: assim a página
+ * que sai no arrasto (home ↔ catálogo) não pula antes de sair.
+ */
 function RootComponent() {
+  // a abertura da home só roda quando a visita começa pela home: entrando por outra página,
+  // ela é dada como feita e a home já aparece pronta ao chegar lá
+  const caminho = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => {
+    if (caminho !== "/") abertura.concluir();
+  }, [caminho]);
+
   return (
     <SessionProvider>
       <CartProvider>
-        <SiteHeader />
+        <MenuFlutuante />
+        {/* espaço do menu no começo de cada página (o topo da home sobe por cima dele) */}
+        <div aria-hidden className="h-[74px] md:h-[98px]" />
         <Outlet />
         <SiteFooter />
       </CartProvider>

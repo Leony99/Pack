@@ -16,7 +16,7 @@ export function AccountOverview({ data }: { data: AccountData }) {
   return (
     <>
       <h2 className="mb-6 text-3xl">OLÁ, {primeiroNome}.</h2>
-      <div className="grid gap-6 bg-secondary px-5 py-6 sm:grid-cols-3">
+      <div className="grid gap-px border border-ink/10 bg-ink/10 sm:grid-cols-3">
         <Metric label="PEDIDOS" value={String(data.orders.length)} />
         <Metric label="EM ANDAMENTO" value={String(emAndamento)} />
         <Metric label="ENDEREÇOS" value={String(data.addresses.length)} />
@@ -30,7 +30,7 @@ export function AccountOverview({ data }: { data: AccountData }) {
         </Button>
       </div>
       <OrderList orders={data.orders.slice(-3).reverse()} />
-      <div className="mt-8 bg-secondary p-5">
+      <div className="mt-8 border border-ink/10 p-5">
         <h2 className="mb-4 text-2xl">ENDEREÇO PRINCIPAL</h2>
         {principal ? (
           <AddressText address={principal} />

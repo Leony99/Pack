@@ -1,11 +1,11 @@
 // Conteúdo institucional, newsletter e contato.
-import { faq, manifesto, terms } from "@/data";
+import { faq, terms } from "@/data";
 import { emailValido, novoId, simularLatencia, state } from "./simulacao";
 
-/** GET /content/:page — manifesto, FAQ e termos */
-export async function getContent(_page: "manifesto" | "faq" | "terms") {
-  // BACKEND: return apiFetch<{ manifesto: typeof manifesto; faq: typeof faq; terms: typeof terms }>(`/content/${_page}`);
-  return { manifesto, faq, terms };
+/** GET /content/:page — FAQ e termos */
+export async function getContent(_page: "faq" | "terms") {
+  // BACKEND: return apiFetch<{ faq: typeof faq; terms: typeof terms }>(`/content/${_page}`);
+  return { faq, terms };
 }
 
 /** POST /newsletter { email } — na simulação, só guarda na memória */

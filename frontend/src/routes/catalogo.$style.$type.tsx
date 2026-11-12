@@ -1,7 +1,9 @@
 import { pageHead } from "@/lib/metadata";
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import type { ItemType, Style } from "@/data/types";
 import { CatalogView } from "@/components/catalog/CatalogView";
+import { CardAviso, PaginaTopo } from "@/components/layout/PaginaTopo";
+import { freeShippingFrom } from "@/data/shipping";
 
 const VALID_STYLES: Style[] = ["casual", "treino"];
 const VALID_TYPES: ItemType[] = ["camisetas", "bermudas", "conjuntos"];
@@ -33,18 +35,20 @@ function CatalogPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Breadcrumb / banner */}
-      <section className="border-b border-border bg-secondary">
-        <div className="mx-auto max-w-[1400px] px-6 py-10 md:py-14">
-          <p className="mb-4 text-xs text-muted-foreground">
-            <Link to="/" className="cursor-pointer hover:text-foreground">
-              PACK
-            </Link>{" "}
-            / {s.toUpperCase()} / {t.toUpperCase()}
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl">{t.toUpperCase()}</h1>
-        </div>
-      </section>
+      <PaginaTopo
+        caminho={`CATÁLOGO / ${s.toUpperCase()} / ${t.toUpperCase()}`}
+        titulo={t}
+        lado={
+          <>
+            <CardAviso
+              rotulo="FRETE GRÁTIS"
+              valor={`R$ ${freeShippingFrom}+`}
+              texto="em compras acima desse valor"
+            />
+            <CardAviso escuro rotulo="TROCAS" valor="30 DIAS" texto="para trocar ou devolver" />
+          </>
+        }
+      />
 
       <CatalogView
         locked

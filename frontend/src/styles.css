@@ -28,6 +28,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-destaque: var(--destaque);
+  --color-destaque-foreground: var(--destaque-foreground);
   --color-ink: oklch(0.13 0 0);
   --color-paper: oklch(1 0 0);
   --font-display: "Anton", "Bebas Neue", system-ui, sans-serif;
@@ -55,6 +57,9 @@
   --border: oklch(0.13 0 0);
   --input: oklch(0.88 0 0);
   --ring: oklch(0.13 0 0);
+  /* laranja dos detalhes (selo NOVO, botão de compra, contador da sacola...); texto preto por cima */
+  --destaque: oklch(0.7 0.19 45);
+  --destaque-foreground: oklch(0.13 0 0);
 }
 
 .dark {
@@ -77,6 +82,8 @@
   --border: oklch(1 0 0);
   --input: oklch(0.3 0 0);
   --ring: oklch(1 0 0);
+  --destaque: oklch(0.72 0.19 45);
+  --destaque-foreground: oklch(0.13 0 0);
 }
 
 @layer base {
@@ -117,4 +124,66 @@
 @utility text-outline-light {
   color: transparent;
   -webkit-text-stroke: 1.5px var(--color-paper);
+}
+
+/*
+ * Navegação entre as páginas do menu (home, catálogo, tamanhos, contato, FAQ, área do cliente): a
+ * página "arrasta" para o lado, para a esquerda indo em frente e para a direita voltando (o tipo da
+ * transição vem do router.tsx). Nas outras navegações, e nos navegadores sem tipos de transição, a troca é
+ * instantânea, sem o esmaecer padrão.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+html:active-view-transition-type(para-frente)::view-transition-old(root) {
+  animation: arrastar-para-esquerda 0.9s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+html:active-view-transition-type(para-frente)::view-transition-new(root) {
+  animation: chegar-da-direita 0.9s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+html:active-view-transition-type(para-tras)::view-transition-old(root) {
+  animation: arrastar-para-direita 0.9s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+html:active-view-transition-type(para-tras)::view-transition-new(root) {
+  animation: chegar-da-esquerda 0.9s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+/*
+ * O menu solto (MenuFlutuante) tem o próprio nome de transição: fica fora da página que arrasta,
+ * parado na frente dela, e troca o item marcado na hora.
+ */
+::view-transition-group(menu-flutuante) {
+  animation: none;
+}
+::view-transition-old(menu-flutuante) {
+  display: none;
+}
+::view-transition-new(menu-flutuante) {
+  animation: none;
+}
+@keyframes arrastar-para-esquerda {
+  to {
+    transform: translateX(-100%);
+  }
+}
+@keyframes chegar-da-direita {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes arrastar-para-direita {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes chegar-da-esquerda {
+  from {
+    transform: translateX(-100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html::view-transition-old(root),
+  html::view-transition-new(root) {
+    animation: none !important;
+  }
 }

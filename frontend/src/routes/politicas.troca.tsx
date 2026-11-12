@@ -1,5 +1,6 @@
 import { pageHead } from "@/lib/metadata";
 import { createFileRoute } from "@tanstack/react-router";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 export const Route = createFileRoute("/politicas/troca")({
   head: () =>
@@ -12,11 +13,9 @@ export const Route = createFileRoute("/politicas/troca")({
 
 function Page() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-3xl px-6 py-20">
-        <p className="text-xs font-medium tracking-[0.3em] text-muted-foreground">POLÍTICAS</p>
-        <h1 className="mt-4 font-display text-5xl md:text-7xl leading-none">TROCA</h1>
-        <div className="mt-10 space-y-6 text-sm leading-relaxed text-muted-foreground">
+    <PageLayout title="TROCA" eyebrow="POLÍTICAS / TROCA">
+      <div>
+        <div className="mx-auto max-w-3xl space-y-6 text-sm leading-relaxed text-muted-foreground">
           <p>
             Você tem <strong className="text-foreground">30 dias</strong> a partir do recebimento
             para solicitar troca ou devolução. A peça deve estar sem uso, com etiquetas originais e
@@ -39,6 +38,6 @@ function Page() {
           </p>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

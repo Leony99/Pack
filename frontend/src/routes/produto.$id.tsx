@@ -56,8 +56,8 @@ function ProductPage() {
         </p>
 
         <div className="grid gap-8 md:grid-cols-[80px_1fr_1fr] md:gap-10">
-          <ProductGallery key={product.id} product={product} />
-          <ProductInfo key={product.id} product={product} />
+          <ProductGallery key={`galeria-${product.id}`} product={product} />
+          <ProductInfo key={`compra-${product.id}`} product={product} />
         </div>
       </div>
 

@@ -17,27 +17,23 @@ const COLUNAS = [
 const TITULO_DA_COLUNA = "text-xs font-medium tracking-[0.3em] text-muted-foreground";
 const LINK = "cursor-pointer hover:opacity-60";
 
-/** Rodapé: marca, manifesto e newsletter, as categorias de cada estilo, suporte e políticas. */
+/** Rodapé: marca e newsletter, as categorias de cada estilo, suporte e políticas. */
 export function SiteFooter() {
   return (
     <footer className="border-t border-border">
-      <div className="mx-auto max-w-[1400px] px-6 py-16">
+      <div className="px-4 py-16 md:px-6">
         <div className="grid gap-10 md:grid-cols-5">
           <div>
-            <p className="font-display text-2xl tracking-[0.3em]">PACK</p>
-            <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-              Apparel built for the work that nobody sees.
-            </p>
-            <Link to="/sobre" className="mt-4 block text-sm hover:opacity-60">
-              Manifesto
-            </Link>
-            <Link
-              to="/newsletter"
-              search={{ confirmed: false }}
-              className="mt-2 block text-sm hover:opacity-60"
-            >
-              Newsletter
-            </Link>
+            {/* o nome na altura de uma linha de título, para os links ficarem na mesma linha dos
+                das outras colunas */}
+            <p className="font-display text-2xl leading-4 tracking-[0.3em]">PACK</p>
+            <ul className="mt-4 space-y-2 text-sm">
+              <li>
+                <Link to="/newsletter" search={{ confirmed: false }} className={LINK}>
+                  Newsletter
+                </Link>
+              </li>
+            </ul>
           </div>
           {MENU_ESTILOS.map((estilo) => (
             <div key={estilo.style}>

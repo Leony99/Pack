@@ -52,6 +52,12 @@ export function ProductCard({ p }: { p: Product }) {
           ))}
         </Link>
 
+        {p.section === "novo-drop" && (
+          <span className="pointer-events-none absolute left-3 top-3 bg-destaque px-2 py-1 text-[10px] font-semibold tracking-[0.2em] text-destaque-foreground">
+            NOVO
+          </span>
+        )}
+
         {imgs.length > 1 && (
           <>
             <Button
@@ -74,7 +80,7 @@ export function ProductCard({ p }: { p: Product }) {
               {imgs.map((_, i) => (
                 <span
                   key={i}
-                  className={`h-1 w-4 transition ${i === idx ? "bg-foreground" : "bg-foreground/30"}`}
+                  className={`h-1 w-4 transition ${i === idx ? "bg-destaque" : "bg-foreground/30"}`}
                 />
               ))}
             </div>

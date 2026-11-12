@@ -33,7 +33,9 @@ function Confirmation() {
   return (
     <PageLayout title="PEDIDO RECEBIDO." eyebrow="CONFIRMAÇÃO">
       <div className="mb-10 flex items-start gap-4">
-        <Check className="h-8 w-8 shrink-0" />
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-destaque text-destaque-foreground">
+          <Check className="h-6 w-6" />
+        </span>
         <div>
           <p className="text-sm">Obrigado, {order.customer.name}.</p>
           <p className="mt-2 text-xs text-muted-foreground">

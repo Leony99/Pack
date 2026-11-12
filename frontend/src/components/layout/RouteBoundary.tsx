@@ -1,23 +1,25 @@
 import { Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { ArrowRight, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PaginaTopo } from "./PaginaTopo";
 export function NotFoundPage() {
   return (
-    <main className="mx-auto flex min-h-[65svh] max-w-[1400px] flex-col items-start justify-center px-6 py-16">
-      <p className="text-xs text-muted-foreground">PACK / PÁGINA NÃO ENCONTRADA</p>
-      <h1 className="mt-6 font-display text-8xl md:text-9xl">404</h1>
-      <h2 className="mt-4 font-display text-3xl">FORA DO CAMINHO.</h2>
-      <p className="mt-4 max-w-md text-sm text-muted-foreground">
-        A página que você procura não existe ou não está mais disponível.
-      </p>
-      <Button asChild className="mt-8 h-12">
-        <Link to="/catalogo">
-          VOLTAR AO CATÁLOGO <ArrowRight />
+    <main className="min-h-[65svh]">
+      <PaginaTopo
+        caminho="PACK / PÁGINA NÃO ENCONTRADA"
+        titulo="404"
+        texto="Fora do caminho. A página que você procura não existe ou não está mais disponível."
+      />
+      <div className="flex flex-col items-start px-4 py-10 md:px-6">
+        <Button asChild className="h-12 rounded-none text-[11px] tracking-[0.2em]">
+          <Link to="/catalogo">
+            VOLTAR AO CATÁLOGO <ArrowRight />
+          </Link>
+        </Button>
+        <Link to="/" className="mt-4 text-sm underline">
+          Página inicial
         </Link>
-      </Button>
-      <Link to="/" className="mt-4 text-sm underline">
-        Página inicial
-      </Link>
+      </div>
     </main>
   );
 }

@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions } from "@tanstack/react-query";
 import { CatalogView } from "@/components/catalog/CatalogView";
+import { CardAviso, PaginaTopo } from "@/components/layout/PaginaTopo";
+import { freeShippingFrom } from "@/data/shipping";
 import { catalogFilters, parseCatalogSearch } from "@/components/catalog/filtros";
 import { getProducts } from "@/lib/api";
 import { pageHead } from "@/lib/metadata";
@@ -20,12 +22,21 @@ function Page() {
   const navigate = Route.useNavigate();
   return (
     <main>
-      <section className="border-b border-border bg-secondary">
-        <div className="mx-auto max-w-[1400px] px-6 py-10 md:py-14">
-          <p className="mb-4 text-xs text-muted-foreground">PACK / CATÁLOGO</p>
-          <h1 className="text-4xl md:text-5xl">CATÁLOGO</h1>
-        </div>
-      </section>
+      <PaginaTopo
+        caminho="PACK / CATÁLOGO"
+        titulo="CATÁLOGO"
+        texto="Casual e treino, em preto e branco. Filtre por estilo, categoria, curadoria e coleção."
+        lado={
+          <>
+            <CardAviso
+              rotulo="FRETE GRÁTIS"
+              valor={`R$ ${freeShippingFrom}+`}
+              texto="em compras acima desse valor"
+            />
+            <CardAviso escuro rotulo="TROCAS" valor="30 DIAS" texto="para trocar ou devolver" />
+          </>
+        }
+      />
       <CatalogView
         search={search}
         onChange={(patch) => void navigate({ search: (prev) => ({ ...prev, ...patch }) })}

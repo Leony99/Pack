@@ -12,7 +12,7 @@ const COLECOES_COM_LINK = ["drop-02", "essentials"];
 const PARCELAS = 6;
 
 const VANTAGENS = [
-  ["Frete grátis", "Acima de R$ 350"],
+  ["Frete grátis", "Acima de R$ 200"],
   ["Trocas", "30 dias"],
   ["Parcele", "Até 6x"],
 ];
@@ -86,7 +86,7 @@ export function ProductInfo({ product }: { product: Product }) {
         <Button
           disabled={!disponivel}
           onClick={() => addToCart(product, size)}
-          className="h-12 rounded-none cursor-pointer border border-foreground bg-background py-4 text-sm font-medium tracking-wider text-foreground transition hover:bg-secondary"
+          className="h-12 rounded-none cursor-pointer bg-destaque py-4 text-sm font-semibold tracking-wider text-destaque-foreground transition hover:bg-destaque/90"
         >
           {disponivel ? "ADICIONAR AO CARRINHO" : "TAMANHO ESGOTADO"}
         </Button>

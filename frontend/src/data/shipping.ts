@@ -5,7 +5,7 @@
 import type { ShippingOption } from "./types";
 
 /** Acima deste valor (R$) o frete padrão é grátis. */
-export const freeShippingFrom = 350;
+export const freeShippingFrom = 200;
 
 export const shippingOptions: ShippingOption[] = [
   { label: "PAC", days: "5–8 dias úteis", price: 24.9 },

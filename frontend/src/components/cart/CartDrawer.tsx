@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { usePresenca } from "@/hooks/usePresenca";
 import { Link } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { CouponField } from "@/components/cart/CouponField";
@@ -10,40 +11,41 @@ import { useCart } from "@/lib/cart";
 const ANIMACAO_MS = 300;
 
 /**
- * Gaveta lateral do carrinho. Para animar também ao fechar, ela fica montada até a animação
- * terminar: "montada" controla se existe na página, "visivel" controla a posição e a opacidade.
+ * Gaveta lateral do carrinho: entra pela direita e o fundo escurece; ao fechar, sai pelo mesmo
+ * lado. Fica montada até a animação de saída terminar (usePresenca). Os itens entram em sequência.
  */
 export function CartDrawer() {
   const { cart, cartCount, cartOpen, setCartOpen, updateQty, removeItem } = useCart();
-  const [montada, setMontada] = useState(false);
-  const [visivel, setVisivel] = useState(false);
+  const { montado, saindo } = usePresenca(cartOpen, ANIMACAO_MS);
 
+  // Esc fecha a gaveta
   useEffect(() => {
-    if (cartOpen) {
-      setMontada(true);
-      // no quadro seguinte, para o navegador desenhar a posição inicial antes de animar
-      requestAnimationFrame(() => setVisivel(true));
-    } else if (montada) {
-      setVisivel(false);
-      const timer = setTimeout(() => setMontada(false), ANIMACAO_MS);
-      return () => clearTimeout(timer);
-    }
-  }, [cartOpen, montada]);
+    if (!cartOpen) return;
+    const esc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setCartOpen(false);
+    };
+    document.addEventListener("keydown", esc);
+    return () => document.removeEventListener("keydown", esc);
+  }, [cartOpen, setCartOpen]);
 
-  if (!montada) return null;
+  if (!montado) return null;
   const fechar = () => setCartOpen(false);
 
   return (
     <div className="fixed inset-0 z-50">
       <div
-        className={`absolute inset-0 bg-background/70 backdrop-blur-sm transition-opacity duration-300 ${
-          visivel ? "opacity-100" : "opacity-0"
+        className={`absolute inset-0 bg-ink/40 backdrop-blur-sm duration-300 ${
+          saindo ? "animate-out fade-out fill-mode-forwards" : "animate-in fade-in"
         }`}
         onClick={fechar}
       />
       <aside
-        className={`absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-border bg-background shadow-2xl transition-transform duration-300 ease-out ${
-          visivel ? "translate-x-0" : "translate-x-full"
+        role="dialog"
+        aria-label="Carrinho"
+        className={`absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-border bg-background shadow-2xl duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+          saindo
+            ? "animate-out slide-out-to-right fill-mode-forwards"
+            : "animate-in slide-in-from-right"
         }`}
       >
         <div className="flex items-center justify-between border-b border-border px-6 py-5">
@@ -60,8 +62,12 @@ export function CartDrawer() {
             </div>
           ) : (
             <ul>
-              {cart.map((i) => (
-                <li key={i.id + i.size} className="flex gap-4 border-b border-border p-6">
+              {cart.map((i, n) => (
+                <li
+                  key={i.id + i.size}
+                  style={{ animationDelay: `${150 + n * 60}ms` }}
+                  className="flex gap-4 border-b border-border p-6 duration-500 fill-mode-both animate-in fade-in slide-in-from-right-8 motion-reduce:animate-none"
+                >
                   <img src={i.image} alt={i.name} className="h-28 w-24 object-cover" />
                   <div className="flex flex-1 flex-col">
                     <div className="flex justify-between">
@@ -110,7 +116,10 @@ export function CartDrawer() {
             <CouponField />
             <OrderSummary />
             <p className="mt-1 text-xs text-muted-foreground">Frete calculado no checkout.</p>
-            <Button asChild className="mt-5 h-12 w-full">
+            <Button
+              asChild
+              className="mt-5 h-12 w-full font-semibold bg-destaque text-destaque-foreground hover:bg-destaque/90"
+            >
               <Link to="/checkout" onClick={fechar}>
                 FINALIZAR COMPRA
               </Link>

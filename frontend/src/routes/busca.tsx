@@ -37,7 +37,7 @@ function SearchPage() {
   }
   return (
     <PageLayout title={q ? "RESULTADOS DE BUSCA" : "ENCONTRE SUAS PEÇAS"} eyebrow="BUSCA">
-      <form onSubmit={submit} className="mb-8 flex max-w-2xl border border-border">
+      <form onSubmit={submit} className="mx-auto mb-8 flex max-w-2xl border border-border">
         <input
           type="search"
           aria-label="Buscar produtos"

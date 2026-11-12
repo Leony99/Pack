@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import heroRetrato from "@/assets/hero.jpg";
 import hero from "@/assets/pack-hero-athlete.png";
 import { SectionRow } from "@/components/catalog/SectionRow";
 import { NewsletterForm } from "@/components/common/NewsletterForm";
+import { DropHorizontal } from "@/components/home/DropHorizontal";
 import { HeroSection } from "@/components/home/HeroSection";
+import { PreLoader } from "@/components/home/PreLoader";
 import { StyleCards } from "@/components/home/StyleCards";
-import { WordsMarquee } from "@/components/home/WordsMarquee";
 import { getSection } from "@/lib/api";
 import { pageHead } from "@/lib/metadata";
 
@@ -13,7 +15,7 @@ const sectionsQuery = queryOptions({
   queryKey: ["products", "home"],
   queryFn: async () => ({
     destaques: await getSection("destaques"),
-    novoDrop: await getSection("novo-drop"),
+    novoDrop: await getSection("novo-drop", 8),
   }),
 });
 
@@ -33,7 +35,10 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-/** Home: destaque principal, faixa de palavras, estilos, destaques, novo drop e newsletter. */
+/**
+ * Home: abertura (pré-loader, só na primeira visita), o topo com menus nas laterais, estilos, destaques,
+ * o último drop em rolagem lateral e newsletter.
+ */
 function Index() {
   const {
     data: { destaques, novoDrop },
@@ -41,8 +46,8 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <HeroSection imageUrl={hero} />
-      <WordsMarquee />
+      <PreLoader imagem={hero} retrato={heroRetrato} />
+      <HeroSection imagem={hero} retrato={heroRetrato} drop={novoDrop} />
       <StyleCards />
 
       <SectionRow
@@ -51,12 +56,7 @@ function Index() {
         items={destaques}
         viewAllSearch={{ section: "destaques" }}
       />
-      <SectionRow
-        eyebrow="DROP 02 / SS26"
-        title="NOVO DROP"
-        items={novoDrop}
-        viewAllSearch={{ section: "novo-drop" }}
-      />
+      <DropHorizontal produtos={novoDrop} />
 
       <section className="border-t border-border bg-secondary">
         <div className="mx-auto max-w-[1400px] px-6 py-20 text-center">

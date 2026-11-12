@@ -55,7 +55,6 @@ vi.mock("@/data", () => ({
   sizeChart: [],
   demoOrders: [],
   paymentMethods: [],
-  manifesto: [],
   faq: [],
   terms: [],
   customers: [dados.customer],

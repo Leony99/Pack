@@ -17,7 +17,7 @@ function Newsletter() {
   const [done, setDone] = useState(confirmed);
   return (
     <PageLayout title={done ? "VOCÊ ESTÁ NO PACK." : "JOIN THE PACK"} eyebrow="NEWSLETTER">
-      <div className="max-w-xl">
+      <div className="mx-auto max-w-xl">
         {done ? (
           <>
             <Check className="mb-6 h-10 w-10" />

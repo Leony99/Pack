@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getCollection } from "@/lib/api";
+import { PaginaTopo } from "@/components/layout/PaginaTopo";
 import { CatalogView } from "@/components/catalog/CatalogView";
 import { pageHead } from "@/lib/metadata";
 const query = (slug: string) =>
@@ -31,14 +32,11 @@ function Page() {
   const navigate = Route.useNavigate();
   return (
     <main>
-      <section className="border-b border-border bg-secondary">
-        <div className="mx-auto max-w-[1400px] px-6 py-10 md:py-14">
-          <p className="mb-4 text-xs text-muted-foreground">
-            PACK / COLEÇÕES / {data.name.toUpperCase()}
-          </p>
-          <h1 className="text-4xl md:text-5xl">{data.name}</h1>
-        </div>
-      </section>
+      <PaginaTopo
+        caminho={`PACK / COLEÇÕES / ${data.name.toUpperCase()}`}
+        titulo={data.name}
+        texto={data.description}
+      />
       <CatalogView
         locked
         search={{ collection: slug, sort: search.sort }}

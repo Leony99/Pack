@@ -38,7 +38,10 @@ export function PasswordForm({ reset = false, token = "" }: { reset?: boolean; t
 
   return (
     <PageLayout title={reset ? "NOVA SENHA" : "RECUPERAR SENHA"} eyebrow="CONTA">
-      <form className="max-w-md space-y-5" onSubmit={enviar}>
+      <form
+        className="mx-auto max-w-md space-y-5 border border-ink/10 p-6 md:p-8"
+        onSubmit={enviar}
+      >
         <p className="text-xs text-muted-foreground">
           AMBIENTE DEMONSTRATIVO — não use uma senha pessoal.
         </p>

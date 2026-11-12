@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getContent } from "@/lib/api";
 import { pageHead } from "@/lib/metadata";
+import joggers from "@/assets/product-joggers.jpg";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { CardAviso } from "@/components/layout/PaginaTopo";
 import {
   Accordion,
   AccordionItem,
@@ -28,13 +30,41 @@ export const Route = createFileRoute("/suporte/faq")({
 function FAQ() {
   const { data } = useSuspenseQuery(contentQuery);
   return (
-    <PageLayout title="PERGUNTAS FREQUENTES" eyebrow="SUPORTE / FAQ">
-      <div className="max-w-3xl border-t border-border">
+    <PageLayout
+      title="FAQ"
+      eyebrow="SUPORTE / FAQ"
+      imagem={joggers}
+      texto="Tamanhos, entrega, cupons, pagamentos e pedidos."
+      lado={
+        <>
+          <CardAviso
+            rotulo="PERGUNTAS"
+            valor={String(data.faq.length).padStart(2, "0")}
+            texto="respostas rápidas"
+          />
+          <CardAviso
+            escuro
+            rotulo="AINDA COM DÚVIDA?"
+            valor="CONTATO"
+            texto="fale com a PACK"
+            to="/suporte/contato"
+          />
+        </>
+      }
+    >
+      <div className="mx-auto max-w-3xl border-t border-ink">
         <Accordion type="single" collapsible>
           {data.faq.map((item, i) => (
             <AccordionItem value={String(i)} key={item.question}>
-              <AccordionTrigger className="py-6">{item.question}</AccordionTrigger>
-              <AccordionContent className="max-w-2xl leading-relaxed text-muted-foreground">
+              <AccordionTrigger className="py-6 text-left">
+                <span className="flex items-baseline gap-4">
+                  <span className="text-[10px] tracking-[0.3em] text-muted-foreground">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  {item.question}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="max-w-2xl pl-9 leading-relaxed text-muted-foreground">
                 {item.answer}
               </AccordionContent>
             </AccordionItem>

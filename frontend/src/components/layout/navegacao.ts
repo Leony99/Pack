@@ -35,8 +35,53 @@ export const MENU_CATEGORIAS = [
   { type: "conjuntos", label: "Conjuntos" },
 ] as const;
 
+/** Na mesma ordem das páginas lado a lado (PAGINAS_EM_ORDEM). */
 export const MENU_SUPORTE = [
   { to: "/suporte/contato", label: "Contato" },
   { to: "/suporte/tamanhos", label: "Tamanhos" },
   { to: "/suporte/faq", label: "FAQ" },
 ] as const;
+
+/**
+ * As páginas do menu, na ordem em que ficam lado a lado: navegar para uma página mais à direita
+ * arrasta a tela para a esquerda, e o contrário arrasta para a direita (router.tsx). O número é o
+ * que aparece no topo de cada página ("[02]").
+ */
+export const PAGINAS_EM_ORDEM = [
+  { nome: "HOME", numero: "01", to: "/", confere: (c: string) => c === "/" },
+  {
+    nome: "CATÁLOGO",
+    numero: "02",
+    to: "/catalogo",
+    confere: (c: string) => c.startsWith("/catalogo"),
+  },
+  {
+    nome: "CONTATO",
+    numero: "03",
+    to: "/suporte/contato",
+    confere: (c: string) => c.startsWith("/suporte/contato"),
+  },
+  {
+    nome: "TAMANHOS",
+    numero: "04",
+    to: "/suporte/tamanhos",
+    confere: (c: string) => c.startsWith("/suporte/tamanhos"),
+  },
+  {
+    nome: "FAQ",
+    numero: "05",
+    to: "/suporte/faq",
+    confere: (c: string) => c.startsWith("/suporte/faq"),
+  },
+  {
+    nome: "ÁREA DO CLIENTE",
+    numero: "06",
+    to: "/conta",
+    confere: (c: string) => c.startsWith("/conta") || c.startsWith("/login"),
+  },
+] as const;
+
+/** Posição da página na fila (0 = home), ou -1 se ela não está no menu (busca, produto...). */
+export function posicaoDaPagina(caminho: string): number {
+  return PAGINAS_EM_ORDEM.findIndex((pagina) => pagina.confere(caminho));
+}

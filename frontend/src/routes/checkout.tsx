@@ -168,7 +168,11 @@ function Checkout() {
               {error}
             </p>
           )}
-          <Button type="submit" disabled={busy || quoting} className="mt-6 h-12 w-full">
+          <Button
+            type="submit"
+            disabled={busy || quoting}
+            className="mt-6 h-12 w-full font-semibold bg-destaque text-destaque-foreground hover:bg-destaque/90"
+          >
             {busy ? "CONCLUINDO..." : "CONCLUIR PEDIDO SIMULADO"}
             <ArrowRight />
           </Button>

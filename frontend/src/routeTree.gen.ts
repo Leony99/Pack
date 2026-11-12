@@ -18,7 +18,6 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as NewsletterRouteImport } from './routes/newsletter'
-import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as AdminClientesRouteImport } from './routes/admin_.clientes'
 import { Route as AdminColaboradoresRouteImport } from './routes/admin_.colaboradores'
 import { Route as AdminColecoesRouteImport } from './routes/admin_.colecoes'
@@ -93,11 +92,6 @@ const LoginRoute = LoginRouteImport.update({
 const NewsletterRoute = NewsletterRouteImport.update({
   id: '/newsletter',
   path: '/newsletter',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SobreRoute = SobreRouteImport.update({
-  id: '/sobre',
-  path: '/sobre',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminClientesRoute = AdminClientesRouteImport.update({
@@ -261,7 +255,6 @@ export interface FileRoutesByFullPath {
   '/conta': typeof ContaRoute
   '/login': typeof LoginRoute
   '/newsletter': typeof NewsletterRoute
-  '/sobre': typeof SobreRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/colaboradores': typeof AdminColaboradoresRoute
   '/admin/colecoes': typeof AdminColecoesRoute
@@ -303,7 +296,6 @@ export interface FileRoutesByTo {
   '/conta': typeof ContaRoute
   '/login': typeof LoginRoute
   '/newsletter': typeof NewsletterRoute
-  '/sobre': typeof SobreRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/colaboradores': typeof AdminColaboradoresRoute
   '/admin/colecoes': typeof AdminColecoesRoute
@@ -346,7 +338,6 @@ export interface FileRoutesById {
   '/conta': typeof ContaRoute
   '/login': typeof LoginRoute
   '/newsletter': typeof NewsletterRoute
-  '/sobre': typeof SobreRoute
   '/admin_/clientes': typeof AdminClientesRoute
   '/admin_/colaboradores': typeof AdminColaboradoresRoute
   '/admin_/colecoes': typeof AdminColecoesRoute
@@ -390,7 +381,6 @@ export interface FileRouteTypes {
     | '/conta'
     | '/login'
     | '/newsletter'
-    | '/sobre'
     | '/admin/clientes'
     | '/admin/colaboradores'
     | '/admin/colecoes'
@@ -432,7 +422,6 @@ export interface FileRouteTypes {
     | '/conta'
     | '/login'
     | '/newsletter'
-    | '/sobre'
     | '/admin/clientes'
     | '/admin/colaboradores'
     | '/admin/colecoes'
@@ -474,7 +463,6 @@ export interface FileRouteTypes {
     | '/conta'
     | '/login'
     | '/newsletter'
-    | '/sobre'
     | '/admin_/clientes'
     | '/admin_/colaboradores'
     | '/admin_/colecoes'
@@ -517,7 +505,6 @@ export interface RootRouteChildren {
   ContaRoute: typeof ContaRoute
   LoginRoute: typeof LoginRoute
   NewsletterRoute: typeof NewsletterRoute
-  SobreRoute: typeof SobreRoute
   AdminClientesRoute: typeof AdminClientesRoute
   AdminColaboradoresRoute: typeof AdminColaboradoresRoute
   AdminColecoesRoute: typeof AdminColecoesRoute
@@ -613,13 +600,6 @@ declare module '@tanstack/react-router' {
       path: '/newsletter'
       fullPath: '/newsletter'
       preLoaderRoute: typeof NewsletterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sobre': {
-      id: '/sobre'
-      path: '/sobre'
-      fullPath: '/sobre'
-      preLoaderRoute: typeof SobreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin_/clientes': {
@@ -845,7 +825,6 @@ const rootRouteChildren: RootRouteChildren = {
   ContaRoute: ContaRoute,
   LoginRoute: LoginRoute,
   NewsletterRoute: NewsletterRoute,
-  SobreRoute: SobreRoute,
   AdminClientesRoute: AdminClientesRoute,
   AdminColaboradoresRoute: AdminColaboradoresRoute,
   AdminColecoesRoute: AdminColecoesRoute,

@@ -55,7 +55,7 @@ export function AddressesScreen({ data, busy, run }: AccountScreenProps) {
       </Button>
       {editing && (
         <form
-          className="mb-8 bg-secondary p-6"
+          className="mb-8 border border-ink/10 p-6"
           onSubmit={(e) => {
             e.preventDefault();
             void run(async () => {
@@ -107,7 +107,7 @@ export function AddressesScreen({ data, busy, run }: AccountScreenProps) {
       )}
       <div className="grid gap-6 sm:grid-cols-2">
         {data.addresses.map((a) => (
-          <article key={a.id} className="bg-secondary p-5">
+          <article key={a.id} className="border border-ink/10 p-5">
             <div className="mb-4 flex justify-between">
               <h2 className="text-xl">{a.label.toUpperCase()}</h2>
               {a.primary && <span className="text-xs">PRINCIPAL</span>}

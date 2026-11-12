@@ -7,7 +7,7 @@ E-commerce de roupas. O repositório é um monorepo:
 | Pasta | O que tem |
 |---|---|
 | [`backend/`](backend/) | API REST em Spring Boot (descrita abaixo) |
-| [`frontend/`](frontend/) | Loja em TanStack Start (React 19), com dados de demonstração e ainda não ligada à API ([explicação](frontend/README.md)) |
+| [`frontend/`](frontend/) | Loja em TanStack Start (React 19): loja, área do cliente e painel administrativo, com dados de demonstração e ainda não ligada à API ([resumo](#frontend-loja-pack) e [explicação completa](frontend/README.md)) |
 | [`ci-cd/`](ci-cd/) | Pipeline de CI/CD no GitHub Actions: testes e publicação automáticos ([explicação](ci-cd/README.md)) |
 | [`producao/`](producao/) | Como a API roda em produção: Google Cloud Run, banco no Neon, limitadores e disjuntor de custos ([explicação](producao/README.md)) |
 
@@ -25,6 +25,7 @@ E-commerce de roupas. O repositório é um monorepo:
   - [Testando pelo navegador (Swagger)](#testando-pelo-navegador-swagger)
   - [Exemplo rápido](#exemplo-rápido)
 - [Testes](#testes)
+- [Frontend: loja PACK](#frontend-loja-pack)
 - [CI/CD](#cicd)
 - [Documentação](#documentação)
 - [Próximos passos](#próximos-passos)
@@ -241,6 +242,30 @@ Os testes ficam em [`backend/src/test/`](backend/src/test/java/com/leonycosta/pa
 
 Eles também rodam sozinhos a cada envio ao GitHub (ver [CI/CD](#cicd)).
 
+## Frontend: loja PACK
+
+A loja fica em [`frontend/`](frontend/), feita com **TanStack Start** (React 19 com renderização no servidor), TanStack Router e Query, Tailwind CSS 4 e GSAP. Tem a loja completa, a compra (carrinho, cupom e checkout), a área do cliente e o painel administrativo. Por enquanto, tudo funciona com dados de demonstração e ainda não está ligado à API.
+
+**Visual:** preto e branco, com Anton nos títulos e um laranja só nos detalhes.
+
+- **Abertura e topo da home:** a home abre com um pré-loader que termina na foto em tela cheia, com o nome PACK, os cards da coleção e do último drop, a data e as notícias nas laterais.
+- **Menu solto:** fica por cima de todas as páginas, some ao rolar para baixo e volta ao rolar para cima. O Suporte abre ao passar o mouse.
+- **Páginas lado a lado:** Home, Catálogo, Contato, Tamanhos, FAQ e Área do cliente ficam numa fila. Trocar de página arrasta a tela para o lado, e o menu fica parado na frente (View Transitions).
+- **Páginas internas:** todas seguem o mesmo topo escuro, com o título grande numerado e o conteúdo centralizado embaixo.
+- **Último drop:** as peças correm para o lado com a rolagem (GSAP ScrollTrigger).
+- **Carrinho, busca e Suporte:** abrem e fecham com animação.
+
+Para rodar (precisa do Node.js 22 ou mais novo):
+
+```bash
+cd frontend
+npm install
+npm run dev      # o endereço local aparece no terminal
+npm test         # 18 testes (Vitest)
+```
+
+Tudo sobre o frontend (páginas, visual, organização, como o código funciona e o que falta para ligar à API) está em **[`frontend/README.md`](frontend/README.md)**.
+
 ## CI/CD
 
 A cada envio ao GitHub, o **GitHub Actions** roda os testes, monta a imagem Docker e procura falhas de segurança no código (CodeQL) e na imagem (Trivy). Se tudo passa e o envio é para a `main`, ele publica a versão nova no Google Cloud Run (CD). Se um teste falha, nada é publicado.
@@ -249,7 +274,11 @@ Como o pipeline funciona, passo a passo, está em **[`ci-cd/README.md`](ci-cd/RE
 
 ## Documentação
 
-O frontend tem a própria documentação no [`frontend/README.md`](frontend/README.md), com os diagramas em [`frontend/docs/`](frontend/docs/): estrutura de pastas, rotas e o fluxo do código de uma compra.
+O frontend tem a própria documentação no [`frontend/README.md`](frontend/README.md), com os diagramas em [`frontend/docs/`](frontend/docs/), gerados a partir do próprio código:
+
+- [`estrutura-pastas.svg`](frontend/docs/estrutura-pastas.svg): as pastas e o que fica em cada uma.
+- [`rotas.svg`](frontend/docs/rotas.svg): cada página, com a URL, o arquivo, o que mostra e de onde vêm os dados.
+- [`fluxo.svg`](frontend/docs/fluxo.svg): o código de uma compra, etapa por etapa, com os erros possíveis.
 
 Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do próprio código:
 

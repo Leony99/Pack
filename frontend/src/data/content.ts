@@ -1,18 +1,4 @@
 // Conteúdo editorial provisório: validar textos e termos antes de publicar.
-export const manifesto = [
-  {
-    title: "O trabalho vem primeiro.",
-    text: "A PACK nasce do movimento. Da repetição que ninguém vê, do treino que vira rotina e da vontade de continuar. Não precisamos de ruído para dizer quem somos.",
-  },
-  {
-    title: "Menos excesso. Mais intenção.",
-    text: "Preto e branco. Cortes essenciais. Peças que acompanham o treino e seguem com você na rua. Nosso ponto de partida é simples: vestir o que faz sentido.",
-  },
-  {
-    title: "Não é sobre parecer. É sobre fazer.",
-    text: "Cada pessoa tem seu ritmo. A gente acredita em presença, constância e liberdade para construir o próprio caminho. No logos. Just work.",
-  },
-];
 export const faq = [
   {
     question: "Como encontro meu tamanho?",

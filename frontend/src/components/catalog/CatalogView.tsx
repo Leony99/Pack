@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { selectClass } from "@/components/common/classes";
+import { ROTULO } from "@/components/layout/PaginaTopo";
 import { Button } from "@/components/ui/button";
 import { getCollections, getProducts } from "@/lib/api";
 import { catalogFilters, type CatalogSearch } from "./filtros";
@@ -47,9 +48,9 @@ export function CatalogView({
   }
 
   return (
-    <section className="mx-auto max-w-[1400px] px-6 py-10">
+    <section className="px-4 py-10 md:px-6 md:py-12">
       <div
-        className={`grid gap-5 border-b border-border pb-7 sm:grid-cols-2 ${locked ? "lg:grid-cols-2" : "lg:grid-cols-4"}`}
+        className={`grid gap-px border border-ink/10 bg-ink/10 sm:grid-cols-2 ${locked ? "hidden" : "lg:grid-cols-4"}`}
       >
         {!locked && (
           <>
@@ -93,12 +94,16 @@ export function CatalogView({
           </>
         )}
       </div>
-      <div className="my-6 flex flex-wrap items-end justify-between gap-5">
+      <div className="my-8 flex flex-wrap items-end justify-between gap-5">
         <div>
-          <p className="mb-3 text-xs text-muted-foreground">{products.length} PEÇAS</p>
-          <label className="flex gap-2 text-xs">
+          <p className={`${ROTULO} mb-3 flex items-center gap-2`}>
+            <span className="h-1.5 w-1.5 bg-destaque" /> {String(products.length).padStart(2, "0")}{" "}
+            PEÇAS
+          </p>
+          <label className="flex cursor-pointer items-center gap-2 text-xs">
             <input
               type="checkbox"
+              className="h-4 w-4 accent-ink"
               checked={stockOnly}
               onChange={(e) => {
                 setStockOnly(e.target.checked);
@@ -110,6 +115,7 @@ export function CatalogView({
         </div>
         <div className="flex flex-wrap items-end gap-3">
           <Select
+            solto
             label="ORDENAR"
             value={search.sort ?? "recent"}
             options={[
@@ -122,7 +128,8 @@ export function CatalogView({
           />
           {!locked && (
             <Button
-              variant="ghost"
+              variant="outline"
+              className="h-11 rounded-none text-[11px] tracking-[0.2em]"
               onClick={() => {
                 setStockOnly(false);
                 onChange(SEM_FILTROS);
@@ -141,7 +148,7 @@ export function CatalogView({
         <p role="alert">Não foi possível carregar os produtos.</p>
       ) : !products.length ? (
         <div className="py-16 text-center">
-          <h2 className="text-3xl">NENHUMA PEÇA</h2>
+          <h2 className="font-display text-4xl">NENHUMA PEÇA</h2>
           <p className="mt-4 text-sm text-muted-foreground">Tente ajustar os filtros.</p>
         </div>
       ) : (
@@ -155,7 +162,7 @@ export function CatalogView({
             <div className="mt-10 text-center">
               <Button
                 variant="outline"
-                className="h-12 rounded-none"
+                className="h-12 rounded-none px-8 text-[11px] tracking-[0.2em]"
                 onClick={() => setLimit((n) => n + LOTE)}
               >
                 CARREGAR MAIS
@@ -168,21 +175,26 @@ export function CatalogView({
   );
 }
 
-/** Seletor com o rótulo em cima. Cada opção é [valor, texto]. */
+/**
+ * Seletor com o rótulo em cima. Na faixa de filtros, fica numa caixa branca; `solto` (a ordenação)
+ * fica sem a caixa. Cada opção é [valor, texto].
+ */
 function Select({
   label,
   value,
   options,
   onChange,
+  solto = false,
 }: {
   label: string;
   value: string;
   options: string[][];
   onChange: (value: string) => void;
+  solto?: boolean;
 }) {
   return (
-    <label className="block min-w-0">
-      <span className="mb-3 block text-xs text-muted-foreground">{label}</span>
+    <label className={`block min-w-0 ${solto ? "w-[200px]" : "bg-paper p-4"}`}>
+      <span className={`${ROTULO} mb-3 block text-ink/50`}>{label}</span>
       <select className={selectClass} value={value} onChange={(e) => onChange(e.target.value)}>
         {options.map(([v, texto]) => (
           <option key={v} value={v}>
