@@ -7,7 +7,7 @@ E-commerce de roupas. O repositório é um monorepo:
 | Pasta | O que tem |
 |---|---|
 | [`backend/`](backend/) | API REST em Spring Boot (descrita abaixo) |
-| `frontend/` | Loja em React / Next.js (em desenvolvimento) |
+| [`frontend/`](frontend/) | Loja em TanStack Start (React 19): loja, área do cliente e painel administrativo, com dados de demonstração e ainda não ligada à API ([resumo](#frontend-loja-pack) e [explicação completa](frontend/README.md)) |
 | [`ci-cd/`](ci-cd/) | Pipeline de CI/CD no GitHub Actions: testes e publicação automáticos ([explicação](ci-cd/README.md)) |
 | [`producao/`](producao/) | Como a API roda em produção: Google Cloud Run, banco no Neon, limitadores e disjuntor de custos ([explicação](producao/README.md)) |
 
@@ -25,6 +25,7 @@ E-commerce de roupas. O repositório é um monorepo:
   - [Testando pelo navegador (Swagger)](#testando-pelo-navegador-swagger)
   - [Exemplo rápido](#exemplo-rápido)
 - [Testes](#testes)
+- [Frontend: loja PACK](#frontend-loja-pack)
 - [CI/CD](#cicd)
 - [Documentação](#documentação)
 - [Próximos passos](#próximos-passos)
@@ -110,7 +111,7 @@ Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos qu
 - O filtro ([`LimitePorIp`](backend/src/main/java/com/leonycosta/packapi/config/LimitePorIp.java)) roda antes da segurança e dos controllers: uma requisição recusada não confere token nem consulta o banco.
 - Sem ele, um único IP poderia disparar buscas no catálogo, que é público e fazia cada busca ler a tabela inteira (agora tem índice), até gastar a cota grátis de CPU e o [disjuntor de custos](producao/README.md#disjuntor-de-custos) tirar a API do ar.
 - **O que ele não resolve:** o Cloud Run conta cada requisição antes de ela chegar à API, então um ataque grande ou vindo de muitos IPs ainda gasta a cota de requisições. Barrar antes exige o [Cloud Armor](#por-que-usar-o-cloud-armor).
-- **Cuidado com o frontend:** se ele chamar a API pelo próprio servidor (renderização no servidor do Next.js), todos os visitantes chegam com o IP desse servidor. Nesse caso, esse IP precisa de um limite próprio.
+- **Cuidado com o frontend:** se ele chamar a API pelo próprio servidor (renderização no servidor do TanStack Start), todos os visitantes chegam com o IP desse servidor. Nesse caso, esse IP precisa de um limite próprio.
 
 **Carrinho:** no máximo 99 unidades de cada item, contando o que já está nele. Sem esse teto, uma soma enorme "dava a volta" no `int` e virava um número negativo, que o checkout usava para baixar o estoque.
 
@@ -241,6 +242,30 @@ Os testes ficam em [`backend/src/test/`](backend/src/test/java/com/leonycosta/pa
 
 Eles também rodam sozinhos a cada envio ao GitHub (ver [CI/CD](#cicd)).
 
+## Frontend: loja PACK
+
+A loja fica em [`frontend/`](frontend/), feita com **TanStack Start** (React 19 com renderização no servidor), TanStack Router e Query, Tailwind CSS 4 e GSAP. Tem a loja completa, a compra (carrinho, cupom e checkout), a área do cliente e o painel administrativo. Por enquanto, tudo funciona com dados de demonstração e ainda não está ligado à API.
+
+**Visual:** preto e branco, com Anton nos títulos e um laranja só nos detalhes.
+
+- **Abertura e topo da home:** a home abre com um pré-loader que termina na foto em tela cheia, com o nome PACK, os cards da coleção e do último drop, a data e as notícias nas laterais.
+- **Menu solto:** fica por cima de todas as páginas, some ao rolar para baixo e volta ao rolar para cima. O Suporte abre ao passar o mouse.
+- **Páginas lado a lado:** Home, Catálogo, Contato, Tamanhos, FAQ e Área do cliente ficam numa fila. Trocar de página arrasta a tela para o lado, e o menu fica parado na frente (View Transitions).
+- **Páginas internas:** todas seguem o mesmo topo escuro, com o título grande numerado e o conteúdo centralizado embaixo.
+- **Último drop:** as peças correm para o lado com a rolagem (GSAP ScrollTrigger).
+- **Carrinho, busca e Suporte:** abrem e fecham com animação.
+
+Para rodar (precisa do Node.js 22 ou mais novo):
+
+```bash
+cd frontend
+npm install
+npm run dev      # o endereço local aparece no terminal
+npm test         # 18 testes (Vitest)
+```
+
+Tudo sobre o frontend (páginas, visual, organização, como o código funciona e o que falta para ligar à API) está em **[`frontend/README.md`](frontend/README.md)**.
+
 ## CI/CD
 
 A cada envio ao GitHub, o **GitHub Actions** roda os testes, monta a imagem Docker e procura falhas de segurança no código (CodeQL) e na imagem (Trivy). Se tudo passa e o envio é para a `main`, ele publica a versão nova no Google Cloud Run (CD). Se um teste falha, nada é publicado.
@@ -249,10 +274,17 @@ Como o pipeline funciona, passo a passo, está em **[`ci-cd/README.md`](ci-cd/RE
 
 ## Documentação
 
-Diagramas em [`backend/docs/`](backend/docs/), gerados a partir do próprio código:
+O frontend tem a própria documentação no [`frontend/README.md`](frontend/README.md), com os diagramas em [`frontend/docs/`](frontend/docs/), gerados a partir do próprio código:
+
+- [`estrutura-pastas.svg`](frontend/docs/estrutura-pastas.svg): as pastas e o que fica em cada uma.
+- [`rotas.svg`](frontend/docs/rotas.svg): cada página, com a URL, o arquivo, o que mostra e de onde vêm os dados.
+- [`fluxo.svg`](frontend/docs/fluxo.svg): o código de uma compra, etapa por etapa, com os erros possíveis.
+
+Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do próprio código:
 
 - [`erd.svg`](backend/docs/erd.svg): diagrama entidade-relacionamento.
 - [`estrutura-pacotes.svg`](backend/docs/estrutura-pacotes.svg) e [`estrutura-pastas.svg`](backend/docs/estrutura-pastas.svg): organização do código.
+- [`rotas.svg`](backend/docs/rotas.svg): cada endpoint da API, com quem pode acessar (público, dono ou a permissão do papel) e o que faz.
 - [`fluxo.svg`](backend/docs/fluxo.svg): como o código funciona, seguindo uma requisição real (adicionar um item ao carrinho) pelo código de cada etapa: limite por IP, segurança, controller, service, repository e a resposta, com os erros possíveis em cada uma.
 
 ## Próximos passos
@@ -262,7 +294,8 @@ Diagramas em [`backend/docs/`](backend/docs/), gerados a partir do próprio cód
 - [x] Docker e Docker Compose
 - [x] CI/CD com GitHub Actions
 - [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
-- [ ] Frontend (React / Next.js)
+- [x] Frontend (TanStack Start / React 19), com dados de demonstração
+- [ ] Ligar o frontend à API (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
 - [ ] Migrações do banco com Flyway, no lugar do `ddl-auto=update`
 - [ ] Cloud Armor na frente da API, para barrar ataques de volume antes do Cloud Run
 

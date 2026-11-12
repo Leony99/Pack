@@ -1,0 +1,335 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1560" height="2406" viewBox="0 0 1560 2406">
+<defs><style>@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&amp;display=swap");text{font-family:JetBrains Mono, Fira Code, monospace;font-variant-ligatures:none;}</style></defs>
+<rect width="1560" height="2406" fill="#0d1117"/>
+<text x="30" y="50" font-size="24" font-weight="700" fill="#e6edf3" xml:space="preserve">Pack API: rotas</text>
+<text x="30" y="78" font-size="13" font-weight="400" fill="#8b949e" xml:space="preserve">Cada endpoint: o método, a URL (todas começam com /api/v1), quem pode acessar e o que faz. Os detalhes e o teste de cada um estão no Swagger.</text>
+<text x="30" y="98" font-size="13" font-weight="400" fill="#8b949e" xml:space="preserve">As regras de acesso ficam todas no config/SecurityConfig.java; as regras de negócio citadas aqui, nos services.</text>
+<text x="30" y="132" font-size="11" font-weight="700" fill="#3bca6d" xml:space="preserve">público</text>
+<text x="89" y="132" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">sem login</text>
+<text x="183.3" y="132" font-size="11" font-weight="700" fill="#8b949e" xml:space="preserve">logado</text>
+<text x="235.3" y="132" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">qualquer token válido</text>
+<text x="410.0" y="132" font-size="11" font-weight="700" fill="#ffa657" xml:space="preserve">dono</text>
+<text x="448.0" y="132" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">o {customerId} ou o pedido é de quem está logado</text>
+<text x="803.6" y="132" font-size="11" font-weight="700" fill="#d2a8ff" xml:space="preserve">PERMISSÃO</text>
+<text x="876.6" y="132" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">funcionário cujo papel tem a permissão</text>
+<text x="56" y="186" font-size="10" font-weight="700" fill="#8b949e" xml:space="preserve">MÉTODO</text>
+<text x="136" y="186" font-size="10" font-weight="700" fill="#8b949e" xml:space="preserve">URL (depois de /api/v1)</text>
+<text x="650" y="186" font-size="10" font-weight="700" fill="#8b949e" xml:space="preserve">QUEM PODE</text>
+<text x="900" y="186" font-size="10" font-weight="700" fill="#8b949e" xml:space="preserve">O QUE FAZ</text>
+<rect x="30" y="200" width="1500" height="150" rx="8" fill="#161b22" stroke="#30363d"/>
+<text x="56" y="226" font-size="12" font-weight="700" fill="#e6edf3" xml:space="preserve">AUTENTICAÇÃO</text>
+<text x="1384.6" y="226" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">auth/AuthController</text>
+<rect x="56" y="243" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="256" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="256" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/auth/register</text>
+<text x="650" y="256" font-size="11" font-weight="400" fill="#3bca6d" xml:space="preserve">público</text>
+<text x="900" y="256" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Cadastra o cliente e já devolve o token (limite de tentativas por IP)</text>
+<rect x="40" y="264" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="267" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="280" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="280" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/auth/login</text>
+<text x="650" y="280" font-size="11" font-weight="400" fill="#3bca6d" xml:space="preserve">público</text>
+<text x="900" y="280" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Login do cliente → token JWT (5 erros por e-mail+IP bloqueiam 15 min)</text>
+<rect x="56" y="291" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="304" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="304" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/auth/staff/login</text>
+<text x="650" y="304" font-size="11" font-weight="400" fill="#3bca6d" xml:space="preserve">público</text>
+<text x="900" y="304" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Login do funcionário → token JWT</text>
+<rect x="40" y="312" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="315" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="328" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="328" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/auth/me</text>
+<text x="650" y="328" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">logado</text>
+<text x="900" y="328" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Quem é o dono do token</text>
+<rect x="30" y="368" width="1500" height="462" rx="8" fill="#161b22" stroke="#30363d"/>
+<text x="56" y="394" font-size="12" font-weight="700" fill="#e6edf3" xml:space="preserve">CATÁLOGO: produtos, variantes e imagens</text>
+<text x="1437.4" y="394" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">product/...</text>
+<rect x="56" y="411" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="424" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="424" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/products?nome=&amp;tag=&amp;pagina=</text>
+<text x="650" y="424" font-size="11" font-weight="400" fill="#3bca6d" xml:space="preserve">público</text>
+<text x="900" y="424" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Lista em páginas; busca por nome (3+ letras, sem acento) ou tag</text>
+<rect x="40" y="432" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="435" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="448" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="448" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/products/{id}</text>
+<text x="650" y="448" font-size="11" font-weight="400" fill="#3bca6d" xml:space="preserve">público</text>
+<text x="900" y="448" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Um produto, com variantes, imagens e tags</text>
+<rect x="56" y="459" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="472" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="472" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/products/slug/{slug}</text>
+<text x="650" y="472" font-size="11" font-weight="400" fill="#3bca6d" xml:space="preserve">público</text>
+<text x="900" y="472" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Um produto pelo endereço amigável</text>
+<rect x="40" y="480" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="483" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="496" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="496" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/products</text>
+<text x="650" y="496" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="496" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Cria o produto (slug gerado do nome, se não vier)</text>
+<rect x="56" y="507" width="58" height="18" rx="4" fill="#e3b341" fill-opacity="0.15" stroke="#e3b341" stroke-opacity="0.6"/><text x="85" y="520" font-size="10" font-weight="700" fill="#e3b341" text-anchor="middle">PUT</text>
+<text x="136" y="520" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/products/{id}</text>
+<text x="650" y="520" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="520" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Edita o produto</text>
+<rect x="40" y="528" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="531" width="58" height="18" rx="4" fill="#f47067" fill-opacity="0.15" stroke="#f47067" stroke-opacity="0.6"/><text x="85" y="544" font-size="10" font-weight="700" fill="#f47067" text-anchor="middle">DELETE</text>
+<text x="136" y="544" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/products/{id}</text>
+<text x="650" y="544" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="544" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Apaga (409 se já foi vendido)</text>
+<rect x="56" y="555" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="568" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="568" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/products/{id}/tags</text>
+<text x="650" y="568" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="568" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Liga uma tag ao produto</text>
+<rect x="40" y="576" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="579" width="58" height="18" rx="4" fill="#f47067" fill-opacity="0.15" stroke="#f47067" stroke-opacity="0.6"/><text x="85" y="592" font-size="10" font-weight="700" fill="#f47067" text-anchor="middle">DELETE</text>
+<text x="136" y="592" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/products/{id}/tags/{tagId}</text>
+<text x="650" y="592" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="592" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Tira a tag do produto</text>
+<rect x="56" y="603" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="616" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="616" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/products/{productId}/variants</text>
+<text x="650" y="616" font-size="11" font-weight="400" fill="#3bca6d" xml:space="preserve">público</text>
+<text x="900" y="616" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Variantes do produto (tamanho + cor + SKU + estoque)</text>
+<rect x="40" y="624" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="627" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="640" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="640" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/products/{productId}/variants</text>
+<text x="650" y="640" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="640" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Cria a variante com o estoque inicial</text>
+<rect x="56" y="651" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="664" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="664" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/variants/{id}</text>
+<text x="650" y="664" font-size="11" font-weight="400" fill="#3bca6d" xml:space="preserve">público</text>
+<text x="900" y="664" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Uma variante</text>
+<rect x="40" y="672" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="675" width="58" height="18" rx="4" fill="#e3b341" fill-opacity="0.15" stroke="#e3b341" stroke-opacity="0.6"/><text x="85" y="688" font-size="10" font-weight="700" fill="#e3b341" text-anchor="middle">PUT</text>
+<text x="136" y="688" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/variants/{id}</text>
+<text x="650" y="688" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="688" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Edita tamanho, cor, SKU e preço (o estoque só muda por movimento)</text>
+<rect x="56" y="699" width="58" height="18" rx="4" fill="#f47067" fill-opacity="0.15" stroke="#f47067" stroke-opacity="0.6"/><text x="85" y="712" font-size="10" font-weight="700" fill="#f47067" text-anchor="middle">DELETE</text>
+<text x="136" y="712" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/variants/{id}</text>
+<text x="650" y="712" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="712" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Apaga e tira dos carrinhos (409 se já foi vendida)</text>
+<rect x="40" y="720" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="723" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="736" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="736" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/products/{productId}/images</text>
+<text x="650" y="736" font-size="11" font-weight="400" fill="#3bca6d" xml:space="preserve">público</text>
+<text x="900" y="736" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Imagens do produto, na ordem</text>
+<rect x="56" y="747" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="760" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="760" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/products/{productId}/images</text>
+<text x="650" y="760" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="760" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Adiciona imagem (só URL https)</text>
+<rect x="40" y="768" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="771" width="58" height="18" rx="4" fill="#e3b341" fill-opacity="0.15" stroke="#e3b341" stroke-opacity="0.6"/><text x="85" y="784" font-size="10" font-weight="700" fill="#e3b341" text-anchor="middle">PUT</text>
+<text x="136" y="784" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/images/{id}</text>
+<text x="650" y="784" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="784" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Edita a imagem</text>
+<rect x="56" y="795" width="58" height="18" rx="4" fill="#f47067" fill-opacity="0.15" stroke="#f47067" stroke-opacity="0.6"/><text x="85" y="808" font-size="10" font-weight="700" fill="#f47067" text-anchor="middle">DELETE</text>
+<text x="136" y="808" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/images/{id}</text>
+<text x="650" y="808" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="808" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Apaga a imagem</text>
+<rect x="30" y="848" width="1500" height="174" rx="8" fill="#161b22" stroke="#30363d"/>
+<text x="56" y="874" font-size="12" font-weight="700" fill="#e6edf3" xml:space="preserve">CATÁLOGO: tamanhos, cores e tags (o mesmo CRUD para os três)</text>
+<text x="1331.8" y="874" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">size/, color/, product_tag/</text>
+<rect x="56" y="891" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="904" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="904" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/sizes  /colors  /tags</text>
+<text x="650" y="904" font-size="11" font-weight="400" fill="#3bca6d" xml:space="preserve">público</text>
+<text x="900" y="904" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Lista</text>
+<rect x="40" y="912" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="915" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="928" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="928" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/sizes/{id}  /colors/{id}  /tags/{id}</text>
+<text x="650" y="928" font-size="11" font-weight="400" fill="#3bca6d" xml:space="preserve">público</text>
+<text x="900" y="928" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Um registro</text>
+<rect x="56" y="939" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="952" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="952" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/sizes  /colors  /tags</text>
+<text x="650" y="952" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="952" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Cria</text>
+<rect x="40" y="960" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="963" width="58" height="18" rx="4" fill="#e3b341" fill-opacity="0.15" stroke="#e3b341" stroke-opacity="0.6"/><text x="85" y="976" font-size="10" font-weight="700" fill="#e3b341" text-anchor="middle">PUT</text>
+<text x="136" y="976" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/sizes/{id}  /colors/{id}  /tags/{id}</text>
+<text x="650" y="976" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="976" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Edita</text>
+<rect x="56" y="987" width="58" height="18" rx="4" fill="#f47067" fill-opacity="0.15" stroke="#f47067" stroke-opacity="0.6"/><text x="85" y="1000" font-size="10" font-weight="700" fill="#f47067" text-anchor="middle">DELETE</text>
+<text x="136" y="1000" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/sizes/{id}  /colors/{id}  /tags/{id}</text>
+<text x="650" y="1000" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CATALOG_WRITE</text>
+<text x="900" y="1000" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Apaga (409 se estiver em uso)</text>
+<rect x="30" y="1040" width="1500" height="126" rx="8" fill="#161b22" stroke="#30363d"/>
+<text x="56" y="1066" font-size="12" font-weight="700" fill="#e6edf3" xml:space="preserve">ESTOQUE</text>
+<text x="1325.2" y="1066" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">product_variant/, inventory/</text>
+<rect x="56" y="1083" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="1096" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="1096" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/variants/estoque-baixo</text>
+<text x="650" y="1096" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">INVENTORY_MANAGE</text>
+<text x="900" y="1096" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Variantes com estoque baixo</text>
+<rect x="40" y="1104" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1107" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="1120" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="1120" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/variants/{variantId}/movements</text>
+<text x="650" y="1120" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">INVENTORY_MANAGE</text>
+<text x="900" y="1120" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Histórico de movimentos da variante</text>
+<rect x="56" y="1131" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="1144" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="1144" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/inventory/movements</text>
+<text x="650" y="1144" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">INVENTORY_MANAGE</text>
+<text x="900" y="1144" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">ENTRADA, SAIDA, DEVOLUCAO ou AJUSTE (até 100.000 por vez, trava a linha)</text>
+<rect x="30" y="1184" width="1500" height="414" rx="8" fill="#161b22" stroke="#30363d"/>
+<text x="56" y="1210" font-size="12" font-weight="700" fill="#e6edf3" xml:space="preserve">ÁREA DO CLIENTE: conta, endereços, carrinho e pedidos</text>
+<text x="1351.6" y="1210" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">customer/, cart/, order/</text>
+<rect x="56" y="1227" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="1240" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="1240" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers?pagina=</text>
+<text x="650" y="1240" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">CUSTOMER_READ</text>
+<text x="900" y="1240" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Lista os clientes, em páginas</text>
+<rect x="40" y="1248" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1251" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="1264" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="1264" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{id}</text>
+<text x="650" y="1264" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono ou CUSTOMER_READ</text>
+<text x="900" y="1264" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Dados do cliente</text>
+<rect x="56" y="1275" width="58" height="18" rx="4" fill="#e3b341" fill-opacity="0.15" stroke="#e3b341" stroke-opacity="0.6"/><text x="85" y="1288" font-size="10" font-weight="700" fill="#e3b341" text-anchor="middle">PUT</text>
+<text x="136" y="1288" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{id}</text>
+<text x="650" y="1288" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono</text>
+<text x="900" y="1288" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Edita os próprios dados</text>
+<rect x="40" y="1296" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1299" width="58" height="18" rx="4" fill="#f47067" fill-opacity="0.15" stroke="#f47067" stroke-opacity="0.6"/><text x="85" y="1312" font-size="10" font-weight="700" fill="#f47067" text-anchor="middle">DELETE</text>
+<text x="136" y="1312" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{id}</text>
+<text x="650" y="1312" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono</text>
+<text x="900" y="1312" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Apaga a conta (com pedidos, anonimiza os dados pessoais)</text>
+<rect x="56" y="1323" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="1336" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="1336" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{customerId}/addresses</text>
+<text x="650" y="1336" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono ou CUSTOMER_READ</text>
+<text x="900" y="1336" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Endereços do cliente</text>
+<rect x="40" y="1344" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1347" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="1360" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="1360" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{customerId}/addresses/{addressId}</text>
+<text x="650" y="1360" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono ou CUSTOMER_READ</text>
+<text x="900" y="1360" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Um endereço</text>
+<rect x="56" y="1371" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="1384" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="1384" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{customerId}/addresses</text>
+<text x="650" y="1384" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono</text>
+<text x="900" y="1384" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Cadastra endereço</text>
+<rect x="40" y="1392" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1395" width="58" height="18" rx="4" fill="#e3b341" fill-opacity="0.15" stroke="#e3b341" stroke-opacity="0.6"/><text x="85" y="1408" font-size="10" font-weight="700" fill="#e3b341" text-anchor="middle">PUT</text>
+<text x="136" y="1408" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{customerId}/addresses/{addressId}</text>
+<text x="650" y="1408" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono</text>
+<text x="900" y="1408" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Edita endereço</text>
+<rect x="56" y="1419" width="58" height="18" rx="4" fill="#f47067" fill-opacity="0.15" stroke="#f47067" stroke-opacity="0.6"/><text x="85" y="1432" font-size="10" font-weight="700" fill="#f47067" text-anchor="middle">DELETE</text>
+<text x="136" y="1432" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{customerId}/addresses/{addressId}</text>
+<text x="650" y="1432" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono</text>
+<text x="900" y="1432" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Apaga endereço</text>
+<rect x="40" y="1440" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1443" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="1456" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="1456" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{customerId}/cart</text>
+<text x="650" y="1456" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono ou CUSTOMER_READ</text>
+<text x="900" y="1456" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Carrinho com itens e total</text>
+<rect x="56" y="1467" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="1480" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="1480" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{customerId}/cart/items</text>
+<text x="650" y="1480" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono</text>
+<text x="900" y="1480" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Adiciona (soma na mesma linha; até 99 e até o estoque)</text>
+<rect x="40" y="1488" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1491" width="58" height="18" rx="4" fill="#f47067" fill-opacity="0.15" stroke="#f47067" stroke-opacity="0.6"/><text x="85" y="1504" font-size="10" font-weight="700" fill="#f47067" text-anchor="middle">DELETE</text>
+<text x="136" y="1504" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{customerId}/cart/items/{itemId}</text>
+<text x="650" y="1504" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono</text>
+<text x="900" y="1504" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Remove um item</text>
+<rect x="56" y="1515" width="58" height="18" rx="4" fill="#f47067" fill-opacity="0.15" stroke="#f47067" stroke-opacity="0.6"/><text x="85" y="1528" font-size="10" font-weight="700" fill="#f47067" text-anchor="middle">DELETE</text>
+<text x="136" y="1528" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{customerId}/cart</text>
+<text x="650" y="1528" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono</text>
+<text x="900" y="1528" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Esvazia o carrinho</text>
+<rect x="40" y="1536" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1539" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="1552" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="1552" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{customerId}/orders</text>
+<text x="650" y="1552" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono ou CUSTOMER_READ</text>
+<text x="900" y="1552" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Pedidos do cliente, em páginas</text>
+<rect x="56" y="1563" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="1576" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="1576" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/customers/{customerId}/orders</text>
+<text x="650" y="1576" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono</text>
+<text x="900" y="1576" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Checkout: pedido do carrinho (trava estoque; cupom com limite de erros)</text>
+<rect x="30" y="1616" width="1500" height="270" rx="8" fill="#161b22" stroke="#30363d"/>
+<text x="56" y="1642" font-size="12" font-weight="700" fill="#e6edf3" xml:space="preserve">PEDIDOS, PAGAMENTO E ENVIO</text>
+<text x="1331.8" y="1642" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">order/, payment/, shipment/</text>
+<rect x="56" y="1659" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="1672" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="1672" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/orders/{id}</text>
+<text x="650" y="1672" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono do pedido ou ORDER_MANAGE</text>
+<text x="900" y="1672" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Um pedido com itens e valores</text>
+<rect x="40" y="1680" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1683" width="58" height="18" rx="4" fill="#d2a8ff" fill-opacity="0.15" stroke="#d2a8ff" stroke-opacity="0.6"/><text x="85" y="1696" font-size="10" font-weight="700" fill="#d2a8ff" text-anchor="middle">PATCH</text>
+<text x="136" y="1696" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/orders/{id}/status?status=</text>
+<text x="650" y="1696" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">ORDER_MANAGE</text>
+<text x="900" y="1696" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Só CANCELADO (devolve o estoque, estorna ou recusa o pagamento)</text>
+<rect x="56" y="1707" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="1720" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="1720" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/orders/{orderId}/payment</text>
+<text x="650" y="1720" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono do pedido ou ORDER_MANAGE</text>
+<text x="900" y="1720" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">O pagamento do pedido</text>
+<rect x="40" y="1728" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1731" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="1744" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="1744" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/orders/{orderId}/payment</text>
+<text x="650" y="1744" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono do pedido ou ORDER_MANAGE</text>
+<text x="900" y="1744" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Registra o pagamento (valor exato; funcionário usa o método OUTRO)</text>
+<rect x="56" y="1755" width="58" height="18" rx="4" fill="#d2a8ff" fill-opacity="0.15" stroke="#d2a8ff" stroke-opacity="0.6"/><text x="85" y="1768" font-size="10" font-weight="700" fill="#d2a8ff" text-anchor="middle">PATCH</text>
+<text x="136" y="1768" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/payments/{id}/status?status=</text>
+<text x="650" y="1768" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">ORDER_MANAGE</text>
+<text x="900" y="1768" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">PENDENTE → APROVADO (pedido PAGO) ou RECUSADO; APROVADO → ESTORNADO</text>
+<rect x="40" y="1776" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1779" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="1792" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="1792" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/orders/{orderId}/shipment</text>
+<text x="650" y="1792" font-size="11" font-weight="400" fill="#ffa657" xml:space="preserve">dono do pedido ou ORDER_MANAGE</text>
+<text x="900" y="1792" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">O envio do pedido</text>
+<rect x="56" y="1803" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="1816" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="1816" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/orders/{orderId}/shipment</text>
+<text x="650" y="1816" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">ORDER_MANAGE</text>
+<text x="900" y="1816" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Cria o envio (só pedido PAGO)</text>
+<rect x="40" y="1824" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1827" width="58" height="18" rx="4" fill="#d2a8ff" fill-opacity="0.15" stroke="#d2a8ff" stroke-opacity="0.6"/><text x="85" y="1840" font-size="10" font-weight="700" fill="#d2a8ff" text-anchor="middle">PATCH</text>
+<text x="136" y="1840" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/shipments/{id}/status?status=</text>
+<text x="650" y="1840" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">ORDER_MANAGE</text>
+<text x="900" y="1840" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">PREPARANDO → DESPACHADO → ENTREGUE; DEVOLVIDO devolve estoque e estorna</text>
+<rect x="56" y="1851" width="58" height="18" rx="4" fill="#d2a8ff" fill-opacity="0.15" stroke="#d2a8ff" stroke-opacity="0.6"/><text x="85" y="1864" font-size="10" font-weight="700" fill="#d2a8ff" text-anchor="middle">PATCH</text>
+<text x="136" y="1864" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/shipments/{id}/rastreio</text>
+<text x="650" y="1864" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">ORDER_MANAGE</text>
+<text x="900" y="1864" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Atualiza o código de rastreio</text>
+<rect x="30" y="1904" width="1500" height="150" rx="8" fill="#161b22" stroke="#30363d"/>
+<text x="56" y="1930" font-size="12" font-weight="700" fill="#e6edf3" xml:space="preserve">CUPONS</text>
+<text x="1424.2" y="1930" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">order/coupon/</text>
+<rect x="56" y="1947" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="1960" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="1960" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/coupons  ·  /coupons/{id}</text>
+<text x="650" y="1960" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">COUPON_MANAGE</text>
+<text x="900" y="1960" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Lista e consulta</text>
+<rect x="40" y="1968" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="1971" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="1984" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="1984" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/coupons</text>
+<text x="650" y="1984" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">COUPON_MANAGE</text>
+<text x="900" y="1984" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Cria (desconto até 1.000.000; percentual até 100%)</text>
+<rect x="56" y="1995" width="58" height="18" rx="4" fill="#e3b341" fill-opacity="0.15" stroke="#e3b341" stroke-opacity="0.6"/><text x="85" y="2008" font-size="10" font-weight="700" fill="#e3b341" text-anchor="middle">PUT</text>
+<text x="136" y="2008" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/coupons/{id}</text>
+<text x="650" y="2008" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">COUPON_MANAGE</text>
+<text x="900" y="2008" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Edita</text>
+<rect x="40" y="2016" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="2019" width="58" height="18" rx="4" fill="#f47067" fill-opacity="0.15" stroke="#f47067" stroke-opacity="0.6"/><text x="85" y="2032" font-size="10" font-weight="700" fill="#f47067" text-anchor="middle">DELETE</text>
+<text x="136" y="2032" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/coupons/{id}</text>
+<text x="650" y="2032" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">COUPON_MANAGE</text>
+<text x="900" y="2032" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Apaga</text>
+<rect x="30" y="2072" width="1500" height="246" rx="8" fill="#161b22" stroke="#30363d"/>
+<text x="56" y="2098" font-size="12" font-weight="700" fill="#e6edf3" xml:space="preserve">FUNCIONÁRIOS, PAPÉIS E PERMISSÕES</text>
+<text x="1470.4" y="2098" font-size="11" font-weight="400" fill="#8b949e" xml:space="preserve">staff/</text>
+<rect x="56" y="2115" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="2128" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="2128" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/staff</text>
+<text x="650" y="2128" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">STAFF_MANAGE</text>
+<text x="900" y="2128" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Lista os funcionários</text>
+<rect x="40" y="2136" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="2139" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="2152" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="2152" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/staff</text>
+<text x="650" y="2152" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">STAFF_MANAGE</text>
+<text x="900" y="2152" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Cadastra funcionário com um papel</text>
+<rect x="56" y="2163" width="58" height="18" rx="4" fill="#f47067" fill-opacity="0.15" stroke="#f47067" stroke-opacity="0.6"/><text x="85" y="2176" font-size="10" font-weight="700" fill="#f47067" text-anchor="middle">DELETE</text>
+<text x="136" y="2176" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/staff/{id}</text>
+<text x="650" y="2176" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">STAFF_MANAGE</text>
+<text x="900" y="2176" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Apaga (o token dele para de valer na hora)</text>
+<rect x="40" y="2184" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="2187" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="2200" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="2200" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/roles</text>
+<text x="650" y="2200" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">STAFF_MANAGE</text>
+<text x="900" y="2200" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Papéis e as permissões de cada um</text>
+<rect x="56" y="2211" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="2224" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="2224" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/roles</text>
+<text x="650" y="2224" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">STAFF_MANAGE</text>
+<text x="900" y="2224" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Cria um papel</text>
+<rect x="40" y="2232" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="2235" width="58" height="18" rx="4" fill="#58a6ff" fill-opacity="0.15" stroke="#58a6ff" stroke-opacity="0.6"/><text x="85" y="2248" font-size="10" font-weight="700" fill="#58a6ff" text-anchor="middle">POST</text>
+<text x="136" y="2248" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/roles/{roleId}/permissions/{permissionId}</text>
+<text x="650" y="2248" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">STAFF_MANAGE</text>
+<text x="900" y="2248" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Dá a permissão ao papel (vale na próxima requisição)</text>
+<rect x="56" y="2259" width="58" height="18" rx="4" fill="#f47067" fill-opacity="0.15" stroke="#f47067" stroke-opacity="0.6"/><text x="85" y="2272" font-size="10" font-weight="700" fill="#f47067" text-anchor="middle">DELETE</text>
+<text x="136" y="2272" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/roles/{roleId}/permissions/{permissionId}</text>
+<text x="650" y="2272" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">STAFF_MANAGE</text>
+<text x="900" y="2272" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Tira a permissão do papel</text>
+<rect x="40" y="2280" width="1480" height="24" fill="#0d1117" opacity="0.5"/>
+<rect x="56" y="2283" width="58" height="18" rx="4" fill="#3bca6d" fill-opacity="0.15" stroke="#3bca6d" stroke-opacity="0.6"/><text x="85" y="2296" font-size="10" font-weight="700" fill="#3bca6d" text-anchor="middle">GET</text>
+<text x="136" y="2296" font-size="12" font-weight="400" fill="#79c0ff" xml:space="preserve">/permissions</text>
+<text x="650" y="2296" font-size="11" font-weight="400" fill="#d2a8ff" xml:space="preserve">STAFF_MANAGE</text>
+<text x="900" y="2296" font-size="11" font-weight="400" fill="#c9d1d9" xml:space="preserve">Todas as permissões que existem</text>
+<text x="30" y="2362" font-size="12" font-weight="400" fill="#8b949e" xml:space="preserve">Fora de /api/v1, públicos: GET /actuator/health (saúde, usado pelo Cloud Run) e /swagger-ui.html (documentação interativa).</text>
+<text x="30" y="2382" font-size="12" font-weight="400" fill="#8b949e" xml:space="preserve">Toda rota passa antes pelo LimitePorIp (120 requisições por minuto por IP). Sem permissão: 401 sem token, 403 com token.</text>
+</svg>

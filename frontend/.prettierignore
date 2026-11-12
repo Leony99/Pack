@@ -1,0 +1,8 @@
+node_modules
+dist
+.output
+.vinxi
+.nitro
+.tanstack
+package-lock.json
+routeTree.gen.ts

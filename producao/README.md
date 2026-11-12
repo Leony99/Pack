@@ -178,7 +178,7 @@ O limite pode ser trocado pela variável de ambiente `LIMITE` da função, sem m
 ```
 producao/
 ├── README.md                 este arquivo
-├── FERRAMENTAS.md            ferramentas usadas na configuração e como foram usadas
+├── FERRAMENTAS.md            o gcloud: para que a produção precisa dele e como usar sem instalar
 ├── budget-guard/
 │   ├── main.py               a função disjuntor
 │   └── requirements.txt      dependências da função
