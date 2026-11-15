@@ -1,13 +1,15 @@
-# Produção
+# Google Cloud: a produção da API
 
-Como a Pack API roda em produção:
-- **onde ela fica:** Google Cloud Run, com o banco no Neon;
-- **como os segredos chegam até ela;**
-- **como o custo fica em zero:** limitadores e disjuntor.
+Tudo o que montou e mantém a Pack API em produção no **Google Cloud**:
+- **os scripts `gcloud`** que criaram cada recurso (a API no Cloud Run, os segredos, as contas e a ligação com o GitHub);
+- **a função do disjuntor de custos**, que roda no próprio Google;
+- **como a API roda lá**, com o banco no Neon, e como o custo fica em zero.
+
+Os scripts rodam **no seu computador**, com o `gcloud` (a ferramenta de terminal do Google Cloud) logado na sua conta. Eles não rodam no GitHub: o deploy do dia a dia é feito pelo CD, que só troca a imagem da API. Como usar o `gcloud` sem instalá-lo está no [`FERRAMENTAS.md`](FERRAMENTAS.md).
 
 Os outros assuntos ficam em outros lugares:
 - o desenvolvimento local e os testes estão no [README principal](../README.md);
-- como uma versão nova chega aqui está no [CI/CD](../ci-cd/README.md).
+- como uma versão nova chega aqui está no [CI/CD](../.github/workflows/README.md).
 
 **API no ar:** https://pack-api-872578691493.southamerica-east1.run.app/swagger-ui.html
 
@@ -57,7 +59,7 @@ Os outros assuntos ficam em outros lugares:
 
 ## Do git push até a API no ar
 
-Você só envia o código. O **CI/CD** (GitHub Actions) testa, monta a imagem Docker, envia ao Artifact Registry e cria uma revisão nova no Cloud Run, tudo sozinho e sem nenhuma senha guardada no GitHub. Esse caminho está explicado em **[`ci-cd/README.md`](../ci-cd/README.md)**.
+Você só envia o código. O **CI/CD** (GitHub Actions) testa, monta a imagem Docker, envia ao Artifact Registry e cria uma revisão nova no Cloud Run, tudo sozinho e sem nenhuma senha guardada no GitHub. Esse caminho está explicado em **[`.github/workflows/README.md`](../.github/workflows/README.md)**.
 
 A partir daí, começa a parte de produção:
 
@@ -116,7 +118,7 @@ A API está hospedada de graça, dentro da cota gratuita do Google Cloud e do Ne
 
 | Limite | Valor | Por quê |
 |---|---|---|
-| Imagens guardadas | **as 2 mais recentes** | Uma regra de limpeza ([`gcp/limpeza-imagens.json`](gcp/limpeza-imagens.json)) apaga as antigas, para caber nos 0,5 GB grátis. Vale também para as imagens da função |
+| Imagens guardadas | **as 2 mais recentes** | Uma regra de limpeza ([`gcloud-scripts/config/limpeza-imagens.json`](gcloud-scripts/config/limpeza-imagens.json)) apaga as antigas, para caber nos 0,5 GB grátis. Vale também para as imagens da função |
 | Cota grátis do Cloud Run | **desliga em 85%** | Medida de hora em hora: a API sai do ar antes de qualquer cobrança (ver abaixo) |
 | Orçamento | **R$ 1 por mês** | Segunda camada: avisos por e-mail em 50%, 90% e 100% do gasto real, e o disjuntor age em 100% |
 | Função do disjuntor | **1 instância, 256 MB, só tráfego interno** | Só o Pub/Sub do próprio Google consegue acioná-la |
@@ -125,7 +127,7 @@ A API está hospedada de graça, dentro da cota gratuita do Google Cloud e do Ne
 
 ## Disjuntor de custos
 
-O objetivo é **nunca pagar nada**: a API sai do ar antes de a cota grátis do Cloud Run acabar. O orçamento do Google Cloud sozinho não serve para isso. Ele mede dinheiro cobrado, e o uso dentro da cota custa R$ 0, então ele só perceberia depois de a cota acabar. Por isso o disjuntor tem duas camadas, as duas no mesmo tópico do Pub/Sub e na mesma [função](budget-guard/main.py):
+O objetivo é **nunca pagar nada**: a API sai do ar antes de a cota grátis do Cloud Run acabar. O orçamento do Google Cloud sozinho não serve para isso. Ele mede dinheiro cobrado, e o uso dentro da cota custa R$ 0, então ele só perceberia depois de a cota acabar. Por isso o disjuntor tem duas camadas, as duas no mesmo tópico do Pub/Sub e na mesma [função](gcloud-scripts/budget-guard/main.py):
 
 ```
  1ª camada: cota grátis (principal)
@@ -159,7 +161,7 @@ A cota grátis mensal do Cloud Run (cobrança por requisição) é de **180 mil 
 - **A permissão pública sai:** a função remove a permissão que deixa qualquer pessoa (`allUsers`) chamar a API, e a API passa a responder **403**. Requisições barradas pela permissão não são cobradas.
 - **Nada é apagado:** serviço, banco, imagens e configuração continuam lá.
 - **Um deploy não religa:** o CD só troca a imagem e não mexe em acessos, então reabrir a API é sempre uma decisão sua.
-- **Religar:** rode [`gcp/religar-api.sh`](gcp/religar-api.sh). Também dá para rodar no Cloud Shell, o terminal do console do Google Cloud, sem instalar nada. Se a cota do mês estiver no limite, a próxima verificação desliga de novo; o normal é religar no mês seguinte, quando a cota se renova.
+- **Religar:** rode [`gcloud-cli-scripts/religar-api.sh`](gcloud-cli-scripts/religar-api.sh). Também dá para rodar no Cloud Shell, o terminal do console do Google Cloud, sem instalar nada. Se a cota do mês estiver no limite, a próxima verificação desliga de novo; o normal é religar no mês seguinte, quando a cota se renova.
 
 ### Testes feitos
 
@@ -176,25 +178,35 @@ O limite pode ser trocado pela variável de ambiente `LIMITE` da função, sem m
 ## Arquivos desta pasta
 
 ```
-producao/
-├── README.md                 este arquivo
-├── FERRAMENTAS.md            o gcloud: para que a produção precisa dele e como usar sem instalar
-├── budget-guard/
-│   ├── main.py               a função disjuntor
-│   └── requirements.txt      dependências da função
-└── gcp/
-    ├── setup.sh              cria tudo no Google Cloud, em etapas
-    ├── religar-api.sh        devolve o acesso público da API
-    └── limpeza-imagens.json  regra que guarda só as 2 imagens mais recentes
+google-cloud/
+├── README.md                      este arquivo
+├── FERRAMENTAS.md                 o gcloud: para que a produção precisa dele e como usar sem instalar
+├── gcloud-cli-scripts/            comandos do gcloud (a CLI) que VOCÊ roda, do seu computador
+│   ├── setup.sh                   cria tudo no Google Cloud, em etapas
+│   └── religar-api.sh             devolve o acesso público da API depois do disjuntor
+└── gcloud-scripts/                o que os scripts ENVIAM ao Google e fica lá
+    ├── budget-guard/              código que RODA NO GOOGLE (Cloud Run functions)
+    │   ├── main.py                a função disjuntor
+    │   └── requirements.txt       dependências da função
+    └── config/
+        └── limpeza-imagens.json   regra que guarda só as 2 imagens mais recentes
 ```
 
-O [`gcp/setup.sh`](gcp/setup.sh) é o registro de tudo o que existe no Google Cloud e permite refazer a configuração num projeto novo. Ele roda em etapas, nesta ordem:
+| Pasta | O que tem | Quem usa e quando |
+|---|---|---|
+| `gcloud-cli-scripts/` | Os comandos do `gcloud` | **Você**, no terminal do seu computador. O `setup.sh` uma vez, para montar ou refazer; o `religar-api.sh` só se o disjuntor cortar a API. |
+| `gcloud-scripts/config/` | Configurações em arquivo | O `setup.sh` envia ao Google; depois **o Google** as aplica sozinho |
+| `gcloud-scripts/budget-guard/` | Código de **Cloud Run functions** | O `setup.sh` (etapa `disjuntor`) envia a pasta da função inteira ao Google, por isso cada função tem a sua pasta. Depois ela roda **no Google**, de hora em hora. |
+
+Nada daqui é lido pelo GitHub nem pela API.
+
+O [`gcloud-cli-scripts/setup.sh`](gcloud-cli-scripts/setup.sh) é o registro de tudo o que existe no Google Cloud e permite refazer a configuração num projeto novo. Ele roda em etapas, nesta ordem:
 
 | Etapa | O que cria |
 |---|---|
 | `apis` | Ativa os serviços do Google usados |
 | `imagens` | Repositório de imagens com a regra de limpeza |
-| `segredos` | Segredos no Secret Manager, lidos de um `.env.prod` local (fora do git) |
+| `segredos` | Segredos no Secret Manager, lidos do `backend/.env.prod` local (fora do git; o modelo é a parte 2 do `backend/.env.example`) |
 | `contas` | Contas de serviço da API e do deploy, com permissões mínimas |
 | `github` | Workload Identity Federation para o repositório (só a branch `main`) |
 | `api` | Primeiro deploy do serviço no Cloud Run, com os limites |
@@ -203,5 +215,5 @@ O [`gcp/setup.sh`](gcp/setup.sh) é o registro de tudo o que existe no Google Cl
 | `orcamento` | Orçamento de R$ 1 ligado ao tópico (cria ou atualiza) |
 
 ```bash
-bash producao/gcp/setup.sh <etapa>     # da raiz do repositório, com o gcloud logado
+bash google-cloud/gcloud-cli-scripts/setup.sh <etapa>     # da raiz do repositório, com o gcloud logado
 ```

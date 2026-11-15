@@ -1,5 +1,5 @@
 # CI do backend: testa a API, confere se a imagem Docker monta e procura vulnerabilidades nela.
-# Chamado pelo .github/workflows/ci.yml (o código já precisa estar baixado com actions/checkout).
+# Chamado pelo .github/workflows/ci-cd.yml (o código já precisa estar baixado com actions/checkout).
 
 name: CI do backend
 description: Instala o Java 21, roda os testes da API, monta a imagem Docker e a varre com o Trivy

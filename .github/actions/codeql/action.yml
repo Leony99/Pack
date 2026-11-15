@@ -1,5 +1,5 @@
 # CodeQL: análise estática do código Java, em busca de falhas de segurança.
-# Chamado pelo .github/workflows/ci.yml (o código já precisa estar baixado com actions/checkout).
+# Chamado pelo .github/workflows/ci-cd.yml (o código já precisa estar baixado com actions/checkout).
 # O job precisa da permissão security-events: write para enviar os alertas à aba Security do GitHub.
 
 name: CodeQL do backend

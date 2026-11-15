@@ -1,8 +1,12 @@
-# Sobe a Pack inteira com um comando:   docker compose up --build
-# Desliga tudo:                         docker compose down
-# Só o banco (para rodar a API pelo ./mvnw):  docker compose up -d db
+# Sobe o backend (banco + API) com um comando, daqui de backend/:   docker compose up --build
+# Desliga tudo, mantendo os containers e os dados:                docker compose stop
+# Só o banco (para rodar a API pelo ./mvnw):                       docker compose up -d db
 #
-# Os valores ${...} vêm do .env aqui da raiz (copie o .env.example).
+# Os valores ${...} vêm do .env aqui de backend/ (copie o .env.example).
+
+# Nome fixo do projeto: sem ele, o Compose usaria o nome da pasta ("backend") e criaria outro
+# volume, e o banco de desenvolvimento pareceria vazio. Com "pack", o volume continua pack_pack-db-data.
+name: pack
 
 services:
 
@@ -25,9 +29,9 @@ services:
       timeout: 3s
       retries: 10
 
-  # A API, montada pelo backend/Dockerfile
+  # A API, montada pelo Dockerfile daqui de backend/
   api:
-    build: ./backend
+    build: .
     env_file: .env
     environment:
       # Dentro do Compose cada serviço é encontrado pelo nome: o banco é "db", não "localhost"

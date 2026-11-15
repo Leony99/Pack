@@ -2,7 +2,7 @@
 # Devolve o acesso público da API depois que o disjuntor de custos a tirou do ar.
 # Antes de rodar, veja no painel de Faturamento o que causou o gasto.
 #
-# Uso: bash producao/gcp/religar-api.sh
+# Uso (da raiz do repositório, com o gcloud logado): bash google-cloud/gcloud-cli-scripts/religar-api.sh
 # Sem o gcloud instalado: rode o mesmo comando abaixo no Cloud Shell (botão >_ no console do Google Cloud).
 
 set -euo pipefail

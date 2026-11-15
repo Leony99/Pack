@@ -1,15 +1,15 @@
 # Pack
 
-[![CI/CD](https://github.com/Leony99/Pack/actions/workflows/ci.yml/badge.svg)](https://github.com/Leony99/Pack/actions/workflows/ci.yml)
+[![CI/CD](https://github.com/Leony99/Pack/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Leony99/Pack/actions/workflows/ci-cd.yml)
 
 E-commerce de roupas. O repositório é um monorepo:
 
 | Pasta | O que tem |
 |---|---|
 | [`backend/`](backend/) | API REST em Spring Boot (descrita abaixo) |
-| [`frontend/`](frontend/) | Loja em TanStack Start (React 19): loja, área do cliente e painel administrativo, com dados de demonstração e ainda não ligada à API ([resumo](#frontend-loja-pack) e [explicação completa](frontend/README.md)) |
-| [`ci-cd/`](ci-cd/) | Pipeline de CI/CD no GitHub Actions: testes e publicação automáticos ([explicação](ci-cd/README.md)) |
-| [`producao/`](producao/) | Como a API roda em produção: Google Cloud Run, banco no Neon, limitadores e disjuntor de custos ([explicação](producao/README.md)) |
+| [`frontend/`](frontend/) | Loja em TanStack Start (React 19): loja, área do cliente e painel administrativo, com dados de demonstração; o catálogo já pode vir da API ([resumo](#frontend-loja-pack) e [explicação completa](frontend/README.md)) |
+| [`.github/`](.github/) | CI/CD no GitHub Actions: o workflow (`workflows/`) e os passos de cada etapa (`actions/`), com testes e publicação automáticos ([explicação](.github/workflows/README.md)) |
+| [`google-cloud/`](google-cloud/) | Produção no Google Cloud: os scripts `gcloud` que montaram tudo, a função do disjuntor de custos, os limitadores e o banco no Neon ([explicação](google-cloud/README.md)) |
 
 ## Sumário
 
@@ -109,7 +109,7 @@ Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos qu
 
 **Limite geral por IP**, em todas as rotas: no máximo 120 requisições por minuto do mesmo IP. Para IPv6, conta o bloco /64 inteiro, porque cada casa recebe um bloco e poderia trocar de endereço à vontade. Passou disso, a API responde 429 com `Retry-After` até o minuto acabar.
 - O filtro ([`LimitePorIp`](backend/src/main/java/com/leonycosta/packapi/config/LimitePorIp.java)) roda antes da segurança e dos controllers: uma requisição recusada não confere token nem consulta o banco.
-- Sem ele, um único IP poderia disparar buscas no catálogo, que é público e fazia cada busca ler a tabela inteira (agora tem índice), até gastar a cota grátis de CPU e o [disjuntor de custos](producao/README.md#disjuntor-de-custos) tirar a API do ar.
+- Sem ele, um único IP poderia disparar buscas no catálogo, que é público e fazia cada busca ler a tabela inteira (agora tem índice), até gastar a cota grátis de CPU e o [disjuntor de custos](google-cloud/README.md#disjuntor-de-custos) tirar a API do ar.
 - **O que ele não resolve:** o Cloud Run conta cada requisição antes de ela chegar à API, então um ataque grande ou vindo de muitos IPs ainda gasta a cota de requisições. Barrar antes exige o [Cloud Armor](#por-que-usar-o-cloud-armor).
 - **Cuidado com o frontend:** se ele chamar a API pelo próprio servidor (renderização no servidor do TanStack Start), todos os visitantes chegam com o IP desse servidor. Nesse caso, esse IP precisa de um limite próprio.
 
@@ -138,29 +138,32 @@ backend/src/main/java/com/leonycosta/packapi/
 
 ### 1. Configuração
 
-Crie o arquivo de configuração local a partir do modelo, na raiz do repositório, e preencha os valores:
+Crie o arquivo de configuração local a partir do modelo, dentro de `backend/`, e preencha os valores:
 - as senhas do banco local;
 - a chave do JWT, com pelo menos 32 caracteres;
 - o admin inicial.
 
-O `.env` não vai para o git, e as duas formas de rodar abaixo leem esse mesmo arquivo.
+O `.env` não vai para o git, e as duas formas de rodar abaixo leem esse mesmo arquivo. O mesmo modelo tem, comentada, a parte do `.env.prod`, que só é usada para montar a produção (ver [`google-cloud/`](google-cloud/README.md)).
 
 ```bash
+cd backend
 cp .env.example .env
 ```
+
+Os comandos abaixo rodam de dentro de `backend/`, onde ficam o `docker-compose.yml` e o `.env`.
 
 ### 2A. Com Docker (só precisa do Docker)
 
 ```bash
 docker compose up --build     # sobe o banco e a API
-docker compose down           # desliga (os dados ficam guardados no volume)
+docker compose stop           # desliga (os containers e os dados ficam guardados)
 docker compose down -v        # desliga e apaga os dados
 docker compose logs -f api    # log da API ao vivo
 ```
 
 O que acontece:
 
-1. **O Compose lê o [`docker-compose.yml`](docker-compose.yml)** e o `.env`.
+1. **O Compose lê o [`backend/docker-compose.yml`](backend/docker-compose.yml)** e o `backend/.env`.
 2. **Monta a imagem da API** seguindo o [`backend/Dockerfile`](backend/Dockerfile), em duas etapas:
 
    ```
@@ -179,7 +182,7 @@ O que acontece:
    - O [`.dockerignore`](backend/.dockerignore) deixa de fora o `target/`, os docs e os `.env`. Senhas nunca entram na imagem.
 3. **Sobe o container `db`:**
    - usa a imagem `postgres:18`, a mesma versão de produção;
-   - os dados ficam no volume `pack-db-data`;
+   - os dados ficam no volume `pack-db-data` (o projeto do Compose se chama `pack`, então o nome completo é `pack_pack-db-data`);
    - o Compose testa a cada 5 s se o banco já aceita conexões.
 4. **Sobe o container `api`** só quando o banco responde. Dentro da rede do Compose, a API encontra o banco pelo nome: `jdbc:postgresql://db:5432/pack-db`.
 
@@ -187,11 +190,10 @@ O que acontece:
 
 ```bash
 docker compose up -d db       # só o banco, no Docker
-cd backend
 ./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run
 ```
 
-A API roda direto no Java da sua máquina, o que deixa o reinício mais rápido enquanto você programa. Ela lê o `../.env` e conecta em `localhost:5432`.
+A API roda direto no Java da sua máquina, o que deixa o reinício mais rápido enquanto você programa. Ela lê o `.env` da pasta `backend/` e conecta em `localhost:5432`.
 
 Nas duas formas, a API sobe em `http://localhost:8080/api/v1`. As tabelas são criadas pelo Hibernate. As permissões, os papéis e o admin inicial (definido por `ADMIN_EMAIL` e `ADMIN_PASSWORD`) são criados na primeira execução.
 
@@ -244,11 +246,11 @@ Eles também rodam sozinhos a cada envio ao GitHub (ver [CI/CD](#cicd)).
 
 ## Frontend: loja PACK
 
-A loja fica em [`frontend/`](frontend/), feita com **TanStack Start** (React 19 com renderização no servidor), TanStack Router e Query, Tailwind CSS 4 e GSAP. Tem a loja completa, a compra (carrinho, cupom e checkout), a área do cliente e o painel administrativo. Por enquanto, tudo funciona com dados de demonstração e ainda não está ligado à API.
+A loja fica em [`frontend/`](frontend/), feita com **TanStack Start** (React 19 com renderização no servidor), TanStack Router e Query, Tailwind CSS 4 e GSAP. Tem a loja completa, a compra (carrinho, cupom e checkout), a área do cliente e o painel administrativo. O `npm run dev` usa a API local e o build de produção usa a API do Cloud Run (cada modo tem o seu `.env`); o `npm run dev:demo` usa só dados de demonstração. Com a API, o catálogo vem dela pelo servidor do frontend (o navegador nunca chama a API direto nem vê o token), e o site mostra avisos de "em breve" enquanto o banco estiver vazio. Login, carrinho, checkout e painel ainda estão na demonstração.
 
 **Visual:** preto e branco, com Anton nos títulos e um laranja só nos detalhes.
 
-- **Abertura e topo da home:** a home abre com um pré-loader que termina na foto em tela cheia, com o nome PACK, os cards da coleção e do último drop, a data e as notícias nas laterais.
+- **Abertura e topo da home:** a home abre com um pré-loader que termina na foto em tela cheia, com o nome PACK, os cards da coleção e do último drop, a data e as promoções ativas nas laterais.
 - **Menu solto:** fica por cima de todas as páginas, some ao rolar para baixo e volta ao rolar para cima. O Suporte abre ao passar o mouse.
 - **Páginas lado a lado:** Home, Catálogo, Contato, Tamanhos, FAQ e Área do cliente ficam numa fila. Trocar de página arrasta a tela para o lado, e o menu fica parado na frente (View Transitions).
 - **Páginas internas:** todas seguem o mesmo topo escuro, com o título grande numerado e o conteúdo centralizado embaixo.
@@ -260,7 +262,8 @@ Para rodar (precisa do Node.js 22 ou mais novo):
 ```bash
 cd frontend
 npm install
-npm run dev      # o endereço local aparece no terminal
+npm run dev        # http://localhost:3000, com a API local (suba antes, em backend/: docker compose up -d)
+npm run dev:demo   # só com os dados de demonstração
 npm test         # 18 testes (Vitest)
 ```
 
@@ -270,7 +273,7 @@ Tudo sobre o frontend (páginas, visual, organização, como o código funciona 
 
 A cada envio ao GitHub, o **GitHub Actions** roda os testes, monta a imagem Docker e procura falhas de segurança no código (CodeQL) e na imagem (Trivy). Se tudo passa e o envio é para a `main`, ele publica a versão nova no Google Cloud Run (CD). Se um teste falha, nada é publicado.
 
-Como o pipeline funciona, passo a passo, está em **[`ci-cd/README.md`](ci-cd/README.md)**.
+Como o pipeline funciona, passo a passo, está em **[`.github/workflows/README.md`](.github/workflows/README.md)**.
 
 ## Documentação
 
@@ -295,7 +298,7 @@ Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do pr
 - [x] CI/CD com GitHub Actions
 - [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
 - [x] Frontend (TanStack Start / React 19), com dados de demonstração
-- [ ] Ligar o frontend à API (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
+- [ ] Ligar o resto do frontend à API: o catálogo já está ligado; faltam login, conta, carrinho, checkout e painel (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
 - [ ] Migrações do banco com Flyway, no lugar do `ddl-auto=update`
 - [ ] Cloud Armor na frente da API, para barrar ataques de volume antes do Cloud Run
 

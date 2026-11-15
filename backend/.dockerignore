@@ -4,6 +4,7 @@ target/
 docs/
 .env
 .env.*
+docker-compose.yml
 .mvn/
 mvnw
 mvnw.cmd

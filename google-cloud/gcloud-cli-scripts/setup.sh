@@ -2,10 +2,10 @@
 # Configura o Google Cloud para a Pack: API no Cloud Run + disjuntor de custos.
 # É o registro de tudo o que foi criado no projeto, e serve para refazer do zero num projeto novo.
 #
-# Uso (da raiz do repositório, com o gcloud logado):  bash producao/gcp/setup.sh <etapa>
+# Uso (da raiz do repositório, com o gcloud logado):  bash google-cloud/gcloud-cli-scripts/setup.sh <etapa>
 # Etapas, nesta ordem: apis imagens segredos contas github api disjuntor agendador orcamento
 #
-# Precisa do .env.prod na raiz (fora do git) com NEON_URL, ADMIN_EMAIL e ADMIN_PASSWORD.
+# Precisa do backend/.env.prod (fora do git) com NEON_URL, ADMIN_EMAIL e ADMIN_PASSWORD.
 
 set -euo pipefail
 
@@ -25,8 +25,8 @@ sa() { echo "$1@$PROJETO.iam.gserviceaccount.com"; }
 IMAGEM_BASE="$REGIAO-docker.pkg.dev/$PROJETO/$REPO_IMAGENS/$SERVICO"
 gc() { gcloud --project="$PROJETO" --quiet "$@"; }
 
-# Lê uma variável do .env.prod
-prod() { grep -E "^$1=" .env.prod | head -1 | cut -d= -f2-; }
+# Lê uma variável do backend/.env.prod
+prod() { grep -E "^$1=" backend/.env.prod | head -1 | cut -d= -f2-; }
 
 # Separa a NEON_URL (postgresql://usuario:senha@host/banco?params) em NEON_USUARIO, NEON_SENHA, NEON_HOST e NEON_BANCO.
 # Se a string for a "pooled" (host com -pooler), usa o endereço direto: o Spring já tem o próprio pool de conexões.
@@ -65,7 +65,7 @@ etapa_imagens() {
     gc artifacts repositories create "$REPO_IMAGENS" --repository-format=docker \
         --location="$REGIAO" --description="Imagens da Pack API" || true
     gc artifacts repositories set-cleanup-policies "$REPO_IMAGENS" --location="$REGIAO" \
-        --policy=producao/gcp/limpeza-imagens.json --no-dry-run
+        --policy=google-cloud/gcloud-scripts/config/limpeza-imagens.json --no-dry-run
 }
 
 etapa_segredos() {
@@ -156,7 +156,7 @@ etapa_disjuntor() {
         --member="serviceAccount:$(sa $CONTA_DISJUNTOR)" --role=roles/monitoring.viewer >/dev/null
 
     gc functions deploy pack-budget-guard --gen2 --region="$REGIAO" \
-        --runtime=python312 --source=producao/budget-guard --entry-point=disjuntor \
+        --runtime=python312 --source=google-cloud/gcloud-scripts/budget-guard --entry-point=disjuntor \
         --trigger-topic="$TOPICO" \
         --service-account="$(sa $CONTA_DISJUNTOR)" \
         --trigger-service-account="$(sa $CONTA_DISJUNTOR)" \
@@ -166,7 +166,7 @@ etapa_disjuntor() {
 
     # o Google guarda a imagem de cada versão da função num repositório próprio: mesma limpeza das imagens da API
     gc artifacts repositories set-cleanup-policies gcf-artifacts --location="$REGIAO" \
-        --policy=producao/gcp/limpeza-imagens.json --no-dry-run >/dev/null
+        --policy=google-cloud/gcloud-scripts/config/limpeza-imagens.json --no-dry-run >/dev/null
 
     # o gatilho do Pub/Sub chama a função com a identidade do disjuntor
     gc functions add-invoker-policy-binding pack-budget-guard --region="$REGIAO" \
@@ -207,5 +207,5 @@ etapa_orcamento() {
 etapa=${1:-}
 case "$etapa" in
     apis|imagens|segredos|contas|github|api|disjuntor|agendador|orcamento) "etapa_$etapa" ;;
-    *) echo "Uso: bash producao/gcp/setup.sh <apis|imagens|segredos|contas|github|api|disjuntor|agendador|orcamento>"; exit 1 ;;
+    *) echo "Uso: bash google-cloud/gcloud-cli-scripts/setup.sh <apis|imagens|segredos|contas|github|api|disjuntor|agendador|orcamento>"; exit 1 ;;
 esac

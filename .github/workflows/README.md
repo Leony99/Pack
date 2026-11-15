@@ -1,30 +1,51 @@
 # CI/CD
 
 Como cada mudança na Pack é testada (CI), verificada em segurança (CodeQL e Trivy) e publicada (CD) automaticamente pelo **GitHub Actions**.
-- O desenvolvimento local e os testes estão no [README principal](../README.md).
-- Onde a API roda e como o custo fica em zero está em [`producao/`](../producao/README.md).
+- O desenvolvimento local e os testes estão no [README principal](../../README.md).
+- Onde a API roda e como o custo fica em zero está em [`google-cloud/`](../../google-cloud/README.md).
 
 ## Como está organizado
 
-O GitHub só lê workflows de `.github/workflows/`, mas aceita **ações locais** (*composite actions*) em qualquer pasta do repositório. Por isso o CI/CD fica dividido em duas partes:
+Tudo o que o GitHub Actions usa fica em `.github/`, dividido em duas pastas, como é a convenção do GitHub:
 
 ```
-.github/workflows/ci.yml     ← porta de entrada: QUANDO rodar e EM QUE ORDEM
-ci-cd/
-├── README.md                ← este arquivo
-├── ci-backend/action.yml    ← os passos do CI do backend (inclui o Trivy)
-├── codeql/action.yml        ← a análise de segurança do código (CodeQL)
-└── deploy/action.yml        ← os passos do CD (publicação no Google Cloud Run)
+.github/
+├── workflows/
+│   ├── ci-cd.yml             ← o workflow: QUANDO rodar e EM QUE ORDEM (o GitHub lê esta pasta sozinho)
+│   └── README.md             ← este arquivo
+└── actions/                  ← os PASSOS de cada etapa (ações locais, ou composite actions)
+    ├── ci-backend/action.yml ← o CI do backend: testes, imagem Docker e Trivy
+    ├── codeql/action.yml     ← a análise de segurança do código (CodeQL)
+    └── deploy/action.yml     ← o CD: publicação no Google Cloud Run
 ```
 
-O workflow só baixa o código e chama as ações desta pasta:
+- **`workflows/`:** o GitHub roda **todo** arquivo `.yml` desta pasta como workflow. Por isso aqui fica só o `ci-cd.yml`, e os passos ficam em `actions/`. Este README não atrapalha, porque o GitHub só considera os arquivos `.yml`.
+- **`actions/`:** cada pasta é uma ação com um `action.yml`. Ela só roda quando um workflow a chama com `uses:`.
+- **O README fica em `workflows/`, e não solto em `.github/`:** um `README.md` direto em `.github/` tomaria o lugar do README principal na página do repositório.
+
+O workflow só baixa o código e chama as ações:
 
 ```yaml
 - uses: actions/checkout@3d3c42e5... # v7.0.1   baixa o código (as ações locais estão nele)
-- uses: ./ci-cd/ci-backend                    # roda os passos do CI
+- uses: ./.github/actions/ci-backend          # roda os passos do CI
 ```
 
-Quando o frontend chegar, ele ganha a sua ação (`ci-cd/ci-frontend/`) e um job a mais no workflow.
+Quando o frontend chegar, ele ganha a sua ação (`.github/actions/ci-frontend/`) e um job a mais no workflow.
+
+### Quem faz o quê
+
+O CI/CD roda **no GitHub**, mas usa ferramentas de vários donos:
+
+| Dono | O que faz aqui |
+|---|---|
+| **GitHub** (Actions) | Cria a máquina Linux temporária de cada job, segue os passos e emite o token OIDC do deploy |
+| **Maven** e **Testcontainers** | Compilam e rodam os testes, com um PostgreSQL descartável |
+| **Docker** (já vem na máquina do GitHub) | `docker build` monta a imagem; no CD, `docker push` a envia ao Google |
+| **Aqua Security** (Trivy) e **GitHub** (CodeQL) | Procuram vulnerabilidades na imagem e no código |
+| **Google** (ações `google-github-actions/...`) | Entram no Google Cloud com o token, instalam o `gcloud` na máquina e publicam no Cloud Run |
+| **Google Cloud** | Recebe a imagem (Artifact Registry) e a roda (Cloud Run). Fica fora do GitHub, em [`google-cloud/`](../../google-cloud/README.md). |
+
+O login sem senha usa o **OIDC (OpenID Connect)**, um padrão aberto. O GitHub emite o token, e quem aceita é a nuvem. No Google Cloud o recurso que aceita se chama Workload Identity Federation; a AWS e a Azure têm o equivalente.
 
 ## O caminho de uma mudança
 
@@ -34,22 +55,22 @@ Cada job roda numa **máquina Linux temporária** do GitHub, criada para a execu
 git push / pull request
         │
         ▼
-GitHub lê .github/workflows/ci.yml
+GitHub lê .github/workflows/ci-cd.yml
         │
         ▼
-┌─ job "backend" (CI) ── ci-cd/ci-backend ─┐   falhou → ✗ para aqui, nada é publicado
+┌─ job "backend" (CI) ── ci-backend ───────┐   falhou → ✗ para aqui, nada é publicado
 │ 1. instala o Java 21 (com cache)         │            (relatórios dos testes ficam
 │ 2. ./mvnw test   (249 testes)            │             para download)
 │ 3. docker build  (confere a imagem)      │
 │ 4. Trivy         (CVEs na imagem)        │
 └────────────────┬─────────────────────────┘
                  │       ao mesmo tempo, em outra máquina:
-                 │       ┌─ job "codeql" ── ci-cd/codeql ───────────┐
+                 │       ┌─ job "codeql" ── codeql ─────────────────┐
                  │       │ compila e analisa o código Java          │──► alertas na aba Security
                  │       └──────────────────────────────────────────┘
                  │ passou, e é push na main?
                  ▼
-┌─ job "deploy" (CD) ── ci-cd/deploy ──────┐
+┌─ job "deploy" (CD) ── deploy ────────────┐
 │ 1. entra no Google Cloud (sem senha)     │
 │ 2. monta e envia a imagem                │──► Artifact Registry (São Paulo)
 │ 3. publica no Cloud Run                  │──► nova revisão da API
@@ -65,13 +86,13 @@ O resultado aparece:
 
 **Quando:** a cada envio para a `main` e a cada pull request.
 
-**Passos** ([`ci-backend/action.yml`](ci-backend/action.yml)):
+**Passos** ([`actions/ci-backend/action.yml`](../actions/ci-backend/action.yml)):
 
 1. **Instala o Java 21.** As dependências do Maven ficam em cache entre execuções, o que deixa as seguintes mais rápidas.
 2. **Roda os 249 testes** (`./mvnw test`): unidade, integração e concorrência.
    - O Testcontainers sobe um PostgreSQL 18 descartável no Docker, que já vem instalado na máquina do GitHub.
    - Não há segredo envolvido: os testes definem a própria configuração e não dependem de `.env`.
-3. **Monta a imagem Docker**, só para conferir que o [`Dockerfile`](../backend/Dockerfile) continua funcionando.
+3. **Monta a imagem Docker**, só para conferir que o [`Dockerfile`](../../backend/Dockerfile) continua funcionando.
 4. **Varre a imagem com o Trivy** e reprova se ela tiver uma vulnerabilidade conhecida CRÍTICA ou ALTA que já tenha correção (ver [Segurança no CI](#segurança-no-ci-codeql-e-trivy)).
 
 **Se algo falha:**
@@ -102,7 +123,7 @@ pull request / push ────┤
 3. Roda consultas que procuram caminhos perigosos. Exemplos: um texto que vem da requisição e chega a uma consulta SQL ou a um log sem tratamento; uma comparação de segredo vulnerável a medição de tempo; uma configuração de segurança desligada.
 
 **Onde está:**
-- os passos estão em [`codeql/action.yml`](codeql/action.yml);
+- os passos estão em [`actions/codeql/action.yml`](../actions/codeql/action.yml);
 - ele roda num job próprio (`codeql`), em paralelo com o CI;
 - usa o conjunto `security-extended`, o mais amplo só de segurança.
 
@@ -124,7 +145,7 @@ O job precisa da permissão `security-events: write` para enviar os alertas, e s
 
 **Regra:** reprova o CI só quando há uma CVE **CRÍTICA ou ALTA com correção disponível** (`ignore-unfixed`). Uma vulnerabilidade sem correção não tem o que fazer além de esperar, e travaria todo PR. A lista aparece no log do passo, com o pacote, a versão atual e a versão corrigida.
 
-**Cuidado:** uma CVE publicada hoje pode reprovar um PR que não mexeu em nada. A correção costuma ser atualizar a imagem base no [`Dockerfile`](../backend/Dockerfile) ou a dependência no `pom.xml`.
+**Cuidado:** uma CVE publicada hoje pode reprovar um PR que não mexeu em nada. A correção costuma ser atualizar a imagem base no [`Dockerfile`](../../backend/Dockerfile) ou a dependência no `pom.xml`.
 
 ### Ações fixadas pelo SHA
 
@@ -146,7 +167,7 @@ O risco vem do repositório **da ação**, e não do Pack: mesmo que só uma pes
 
 **Quando:** só num envio para a `main` e só depois que o CI passou (`needs: backend`).
 
-**Passos** ([`deploy/action.yml`](deploy/action.yml)):
+**Passos** ([`actions/deploy/action.yml`](../actions/deploy/action.yml)):
 
 1. **Entra no Google Cloud sem senha (Workload Identity Federation).**
    - O GitHub gera um **token temporário assinado** (OIDC), dizendo "esta execução é do repositório `Leony99/Pack`, na branch `main`". Para isso, o job tem a permissão `id-token: write`.
@@ -156,9 +177,9 @@ O risco vem do repositório **da ação**, e não do Pack: mesmo que só uma pes
 3. **Publica no Cloud Run.** A ação `deploy-cloudrun` cria uma **revisão** nova do serviço `pack-api`, e ela passa a receber todo o tráfego. A revisão anterior continua guardada, e dá para voltar a ela pelo console.
 
 **Garantias:**
-- **Nenhuma senha no GitHub:** o login é pelo token temporário. A conta `github-deploy` e a ligação com o repositório foram criadas pelo [`producao/gcp/setup.sh`](../producao/gcp/setup.sh) (etapas `contas` e `github`).
+- **Nenhuma senha no GitHub:** o login é pelo token temporário. A conta `github-deploy` e a ligação com o repositório foram criadas pelo [`google-cloud/gcloud-cli-scripts/setup.sh`](../../google-cloud/gcloud-cli-scripts/setup.sh) (etapas `contas` e `github`).
 - **A conta de deploy pode pouco:** ela envia imagens e publica revisões, mas **não mexe em permissões**.
-- **O deploy só troca a imagem:** memória, limites, variáveis, segredos e acesso público continuam como estão. Por isso um deploy nunca religa a API se o [disjuntor de custos](../producao/README.md#disjuntor-de-custos) a tiver desligado.
+- **O deploy só troca a imagem:** memória, limites, variáveis, segredos e acesso público continuam como estão. Por isso um deploy nunca religa a API se o [disjuntor de custos](../../google-cloud/README.md#disjuntor-de-custos) a tiver desligado.
 - **Um deploy por vez** (`concurrency`): dois envios seguidos não publicam ao mesmo tempo.
 
 ### Variáveis do GitHub
@@ -176,7 +197,7 @@ O workflow lê 4 **variáveis** do repositório (*Settings → Secrets and varia
 
 | Ação | Versão | Onde | Para quê |
 |---|---|---|---|
-| `actions/checkout` | v7.0.1 | workflow | Baixa o código, incluindo as ações locais desta pasta |
+| `actions/checkout` | v7.0.1 | workflow | Baixa o código, incluindo as ações locais de `.github/actions/` |
 | `actions/setup-java` | v6.1.0 | CI e CodeQL | Instala o Java 21 e guarda o cache do Maven |
 | `actions/upload-artifact` | v7.0.2 | CI | Guarda os relatórios dos testes quando algo falha |
 | `aquasecurity/trivy-action` | v0.36.0 | CI | Instala o Trivy v0.76.1 na máquina do GitHub, só durante a execução, e varre a imagem |

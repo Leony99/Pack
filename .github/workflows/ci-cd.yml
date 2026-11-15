@@ -1,10 +1,10 @@
 # Porta de entrada do CI/CD da Pack: diz QUANDO rodar e EM QUE ORDEM.
-# Os passos de cada etapa ficam em ci-cd/ (o GitHub só lê workflows desta pasta,
-# mas aceita ações locais em qualquer lugar do repositório). Explicação: ci-cd/README.md
+# Os passos de cada etapa ficam em .github/actions/ (ações locais, a convenção do GitHub).
+# Explicação: .github/workflows/README.md
 #
-#   CI (todo push e pull request para a main): testes da API + imagem Docker + Trivy → ci-cd/ci-backend
-#   CodeQL (junto com o CI): procura falhas de segurança no código                → ci-cd/codeql
-#   CD (só push na main, e só se o CI passar): publica no Google Cloud Run     → ci-cd/deploy
+#   CI (todo push e pull request para a main): testes da API + imagem Docker + Trivy → .github/actions/ci-backend
+#   CodeQL (junto com o CI): procura falhas de segurança no código                → .github/actions/codeql
+#   CD (só push na main, e só se o CI passar): publica no Google Cloud Run     → .github/actions/deploy
 
 name: CI/CD
 
@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: CI do backend
-        uses: ./ci-cd/ci-backend
+        uses: ./.github/actions/ci-backend
 
   codeql:
     name: CodeQL (falhas de segurança no código)
@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: CodeQL do backend
-        uses: ./ci-cd/codeql
+        uses: ./.github/actions/codeql
 
   deploy:
     name: Deploy no Cloud Run
@@ -54,7 +54,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Deploy no Cloud Run
-        uses: ./ci-cd/deploy
+        uses: ./.github/actions/deploy
         with:
           projeto: ${{ vars.GCP_PROJECT_ID }}
           regiao: ${{ vars.GCP_REGION }}
