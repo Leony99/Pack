@@ -13,8 +13,12 @@ type Props = {
   viewAllSearch: CatalogSearch;
 };
 
-/** Uma linha de até 4 produtos com o link para ver todos no catálogo (home e página do produto). */
+/**
+ * Uma linha de até 4 produtos com o link para ver todos no catálogo (home e página do produto).
+ * Sem produtos (catálogo vazio, nenhum com a tag da curadoria), a linha não aparece.
+ */
 export function SectionRow({ eyebrow, title, items, viewAllSearch }: Props) {
+  if (!items.length) return null;
   return (
     <section className="mx-auto max-w-[1400px] px-6 py-20 md:py-24">
       <div className="mb-12 flex flex-col items-baseline justify-between gap-4 md:flex-row">

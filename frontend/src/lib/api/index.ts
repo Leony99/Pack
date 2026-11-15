@@ -1,8 +1,11 @@
 // Camada de API: o único caminho entre as telas e os dados. Rotas e componentes importam de "@/lib/api"
-// e nunca de "@/data" (a não ser os tipos). Hoje cada função simula a resposta com os dados de src/data;
-// para ligar a API real, troca-se só o corpo da função pela chamada do comentário "BACKEND:" dela.
-// Detalhes e diferenças em relação à Pack API: frontend/README.md.
-export * from "./http";
+// e nunca de "@/data" (a não ser os tipos).
+// Cada função olha para o modo (modo.ts): com VITE_USAR_API=true, chama a Pack API pelo servidor do
+// frontend (funções de servidor + server/http.ts); sem ela, responde com a demonstração (src/data).
+// Hoje só o catálogo está ligado à API; o que falta e as diferenças de contrato: frontend/README.md.
+export * from "./erros";
+export * from "./modo";
+export { DROP, colecaoDoDrop } from "./tags";
 export * from "./catalogo";
 export * from "./compra";
 export * from "./autenticacao";

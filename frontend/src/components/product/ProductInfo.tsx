@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ShippingCalc } from "@/components/cart/ShippingCalc";
 import { Button } from "@/components/ui/button";
+import { DROP } from "@/lib/api";
 import { useCart } from "@/lib/cart";
 import type { Product } from "@/data/types";
 
-/** Coleções que ganham link na página do produto (as outras tags são internas). */
-const COLECOES_COM_LINK = ["drop-02", "essentials"];
+/** Coleções que ganham link na página do produto: os drops ("drop-02") e estas; as outras tags são internas. */
+const COLECOES_COM_LINK = ["essentials"];
 
 /** Parcelamento sem juros mostrado abaixo do preço. */
 const PARCELAS = 6;
@@ -68,7 +69,7 @@ export function ProductInfo({ product }: { product: Product }) {
 
       <div className="mt-5 flex flex-wrap gap-3">
         {(product.tags ?? [])
-          .filter((tag) => COLECOES_COM_LINK.includes(tag))
+          .filter((tag) => DROP.test(tag) || COLECOES_COM_LINK.includes(tag))
           .map((tag) => (
             <Link
               key={tag}

@@ -2,15 +2,15 @@
 import { faq, terms } from "@/data";
 import { emailValido, novoId, simularLatencia, state } from "./simulacao";
 
-/** GET /content/:page — FAQ e termos */
+/** FAQ e termos. */
 export async function getContent(_page: "faq" | "terms") {
-  // BACKEND: return apiFetch<{ faq: typeof faq; terms: typeof terms }>(`/content/${_page}`);
+  // PACK API: não tem conteúdo (FAQ, termos): continua em src/data/content.ts.
   return { faq, terms };
 }
 
-/** POST /newsletter { email } — na simulação, só guarda na memória */
+/** Inscreve na newsletter (na simulação, só guarda na memória). */
 export async function subscribeNewsletter(email: string): Promise<{ simulated: boolean }> {
-  // BACKEND: return apiFetch<{ simulated: boolean }>("/newsletter", { method: "POST", body: JSON.stringify({ email }) });
+  // PACK API: não tem newsletter (falta na API).
   const limpo = email.trim().toLowerCase();
   if (!emailValido(email.trim())) throw new Error("Informe um e-mail válido.");
   if (!state.subscribers.some((s) => s.email === limpo))
@@ -18,13 +18,13 @@ export async function subscribeNewsletter(email: string): Promise<{ simulated: b
   return { simulated: true };
 }
 
-/** POST /contact */
+/** Mensagem do formulário de contato. */
 export async function sendContact(data: {
   name: string;
   email: string;
   message: string;
 }): Promise<void> {
-  // BACKEND: await apiFetch("/contact", { method: "POST", body: JSON.stringify(data) });
+  // PACK API: não tem contato (falta na API).
   if (!data.name.trim() || !data.message.trim() || !emailValido(data.email))
     throw new Error("Preencha nome, e-mail válido e mensagem.");
   state.messages.push({ id: novoId(), ...data, status: "Aberto" });

@@ -13,26 +13,20 @@ import {
 import { calculateTotals } from "@/lib/checkout";
 import { pedidosDaSessao, sessao, simularLatencia, state } from "./simulacao";
 
-/** POST /coupons/validate { code } — cupom válido até o fim do dia da validade */
+/** Confere um cupom: vale até o fim do dia da validade. */
 export async function validateCoupon(code: string): Promise<Coupon | null> {
-  // BACKEND:
-  // return apiFetch<Coupon>("/coupons/validate", {
-  //   method: "POST",
-  //   body: JSON.stringify({ code }),
-  // }).catch(() => null);
+  // PACK API: não há validação pública de cupom. O código vai no checkout (codigoCupom do
+  // POST /api/v1/customers/{id}/orders), que recusa cupom inválido ou vencido. Falta na API: conferir antes.
   const codigo = code.trim().toUpperCase();
   const vigente = (c: Coupon) =>
     !c.validUntil || new Date(`${c.validUntil.slice(0, 10)}T23:59:59Z`).getTime() >= Date.now();
   return state.coupons.find((c) => c.code === codigo && vigente(c)) ?? null;
 }
 
-/** POST /shipping/quote { cep, subtotal } — acima do valor de frete grátis, só as opções pagas cobram */
+/** Opções de frete para o CEP; acima do valor de frete grátis, só as opções pagas cobram. */
 export async function quoteShipping(cep: string, subtotal: number): Promise<ShippingOption[]> {
-  // BACKEND:
-  // return apiFetch<ShippingOption[]>("/shipping/quote", {
-  //   method: "POST",
-  //   body: JSON.stringify({ cep, subtotal }),
-  // });
+  // PACK API: não calcula frete (falta na API). O envio só existe depois do pedido pago:
+  // POST /api/v1/orders/{id}/shipment, feito pela equipe.
   if (!/^\d{8}$/.test(cep)) throw new Error("CEP inválido");
   await simularLatencia(400);
   const gratis = subtotal >= freeShippingFrom;
@@ -45,15 +39,16 @@ export async function quoteShipping(cep: string, subtotal: number): Promise<Ship
 
 export type CartLine = { productId: string; size: string; qty: number };
 
-/** GET /cart — carrinho guardado do cliente logado (na simulação, ele vive só na tela) */
+/** Carrinho guardado do cliente logado (na simulação, ele vive só na tela). */
 export async function getCart(): Promise<CartLine[]> {
-  // BACKEND: return apiFetch<CartLine[]>("/cart");
+  // PACK API: GET /api/v1/customers/{id}/cart (cliente logado; id vem do /auth/me).
   return [];
 }
 
-/** PUT /cart — sincroniza o carrinho da tela com o servidor */
+/** Sincroniza o carrinho da tela com o servidor. */
 export async function syncCart(_lines: CartLine[]): Promise<void> {
-  // BACKEND: await apiFetch("/cart", { method: "PUT", body: JSON.stringify({ items: _lines }) });
+  // PACK API: não recebe o carrinho inteiro. Cada mudança é uma chamada: POST .../cart/items
+  // { variantId, quantidade } e DELETE .../cart/items/{itemId}. Precisa da variante (tamanho + cor).
 }
 
 /* -------------------------------------------------------------------- pedido */
@@ -66,14 +61,13 @@ export type OrderPayload = {
   payment: "pix" | "card";
 };
 
-/** POST /orders → cria o pedido e devolve a URL do pagamento (vazia na simulação) */
+/** Cria o pedido e devolve a URL do pagamento (vazia na simulação). */
 export async function createOrder(
   payload: OrderPayload,
 ): Promise<{ orderId: string; checkoutUrl: string }> {
-  // BACKEND: return apiFetch<{ orderId: string; checkoutUrl: string }>("/orders", {
-  //   method: "POST",
-  //   body: JSON.stringify(payload),
-  // });
+  // PACK API: POST /api/v1/customers/{id}/orders { addressId, codigoCupom }. O pedido sai do carrinho
+  // guardado na API (não dos itens enviados) e nasce AGUARDANDO_PAGAMENTO; o pagamento é outra
+  // chamada (POST /api/v1/orders/{id}/payment { metodo, valor }). Pagamento real: falta na API.
   if (!payload.items.length) throw new Error("Seu carrinho está vazio.");
 
   const items = payload.items.map((line) => {
@@ -126,15 +120,15 @@ export async function createOrder(
   return { orderId, checkoutUrl: "" };
 }
 
-/** GET /orders/:id — a API deve conferir se o pedido é de quem pede */
+/** Um pedido (a confirmação depois do checkout). */
 export async function getOrder(id: string): Promise<Order | null> {
-  // BACKEND: return apiFetch<Order>(`/orders/${encodeURIComponent(id)}`);
+  // PACK API: GET /api/v1/orders/{id} (dono do pedido ou equipe).
   return pedidosDaSessao.get(id) ?? state.orders.find((order) => order.id === id) ?? null;
 }
 
-/** GET /checkout/payment-methods */
+/** Formas de pagamento do checkout. */
 export async function getPaymentMethods() {
-  // BACKEND: return apiFetch<typeof paymentMethods>("/checkout/payment-methods");
+  // PACK API: os métodos são o enum PaymentMetodo; não há rota que os liste (fica no frontend).
   return paymentMethods;
 }
 

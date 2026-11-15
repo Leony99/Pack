@@ -1,4 +1,7 @@
 // Catálogo: produtos, tabela de medidas e coleções.
+// Com VITE_USAR_API=true, os produtos e as coleções (drops) vêm da Pack API (catalogo-api.ts);
+// sem ela, da demonstração. A tabela de medidas continua na demonstração: a API só tem os nomes dos
+// tamanhos, sem as medidas.
 import {
   sizeChart,
   type Collection,
@@ -8,7 +11,10 @@ import {
   type SizeRow,
   type Style,
 } from "@/data";
+import { produtoDaApiPorId, produtosDaApi } from "./catalogo-api";
+import { USA_API } from "./modo";
 import { state } from "./simulacao";
+import { colecaoDoDrop, DROP } from "./tags";
 
 export type ProductFilters = {
   style?: Style;
@@ -37,52 +43,68 @@ function combina(p: Product, filters: ProductFilters, busca?: string): boolean {
   );
 }
 
-/** GET /products?style=&type=&section=&search= */
-export async function getProducts(filters: ProductFilters = {}): Promise<Product[]> {
-  // BACKEND:
-  // const qs = new URLSearchParams(filters as Record<string, string>).toString();
-  // return apiFetch<Product[]>(`/products?${qs}`);
+/** Aplica os filtros e a ordenação do catálogo (os mesmos nos dois modos). */
+export function filtrarProdutos(produtos: Product[], filters: ProductFilters): Product[] {
   const busca = filters.search?.trim().toLowerCase();
-  return state.products
+  return produtos
     .filter((p) => combina(p, filters, busca))
-    .sort((a, b) => ordenar(a, b, filters.sort))
-    .map((p) => ({ ...p, stock: { ...p.stock }, tags: [...(p.tags ?? [])] }));
+    .sort((a, b) => ordenar(a, b, filters.sort));
 }
 
-/** GET /products/:id */
+/** Produtos do catálogo. API: GET /api/v1/products (+ filtros pelas tags, em tags.ts). */
+export async function getProducts(filters: ProductFilters = {}): Promise<Product[]> {
+  if (USA_API) {
+    // a busca por nome vai para a API (ignora acentos); o resto é filtrado aqui
+    const produtos = await produtosDaApi({ data: { nome: filters.search } });
+    return filtrarProdutos(produtos, { ...filters, search: undefined });
+  }
+  return filtrarProdutos(state.products, filters).map((p) => ({
+    ...p,
+    stock: { ...p.stock },
+    tags: [...(p.tags ?? [])],
+  }));
+}
+
+/** Um produto. API: GET /api/v1/products/{id}; não existe → null. */
 export async function getProduct(id: string): Promise<Product | null> {
-  // BACKEND: return apiFetch<Product>(`/products/${id}`);
+  if (USA_API) return produtoDaApiPorId({ data: id });
   return state.products.find((p) => p.id === id && p.active !== false) ?? null;
 }
 
-/** GET /products?section=destaques|novo-drop&limit=4 */
+/** Produtos de uma curadoria (destaques, novo drop), pela tag. */
 export async function getSection(section: Section, limit = 4): Promise<Product[]> {
-  // BACKEND: return apiFetch<Product[]>(`/products?section=${section}&limit=${limit}`);
   return (await getProducts({ section })).slice(0, limit);
 }
 
-/** GET /products/:id/related?limit=4 — produtos do mesmo tipo */
+/** Produtos da mesma categoria (a API não tem "relacionados": sai do catálogo). */
 export async function getRelated(id: string, limit = 4): Promise<Product[]> {
-  // BACKEND: return apiFetch<Product[]>(`/products/${id}/related?limit=${limit}`);
-  const base = state.products.find((p) => p.id === id);
+  const base = await getProduct(id);
   if (!base) return [];
   return (await getProducts({ type: base.type })).filter((p) => p.id !== id).slice(0, limit);
 }
 
-/** GET /sizes */
+/** Tabela de medidas: sempre da demonstração (a API não guarda as medidas). */
 export async function getSizeChart(): Promise<SizeRow[]> {
-  // BACKEND: return apiFetch<SizeRow[]>("/sizes");
   return sizeChart;
 }
 
-/** GET /collections */
+/**
+ * Coleções (os drops). API: montadas a partir das tags de drop dos produtos ("drop 02" → DROP 02),
+ * porque a API não tem coleções; sem produtos, não há coleções.
+ */
 export async function getCollections(): Promise<Collection[]> {
-  // BACKEND: return apiFetch<Collection[]>("/collections");
+  if (USA_API) {
+    const drops = new Set((await getProducts()).flatMap((p) => p.tags ?? []));
+    return [...drops]
+      .filter((t) => DROP.test(t))
+      .sort()
+      .map(colecaoDoDrop);
+  }
   return state.collections.map((c) => ({ ...c }));
 }
 
-/** GET /collections/:slug */
+/** Uma coleção pela tag ("drop-02"); não existe → null (a tela mostra o 404). */
 export async function getCollection(slug: string): Promise<Collection | null> {
-  // BACKEND: return apiFetch<Collection>(`/collections/${slug}`);
+  if (USA_API) return (await getCollections()).find((c) => c.tag === slug) ?? null;
   return state.collections.find((c) => c.tag === slug) ?? null;
 }

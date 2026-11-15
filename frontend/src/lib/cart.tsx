@@ -30,7 +30,8 @@ const mesmaLinha = (item: CartItem, id: string, size: string) =>
 /**
  * Carrinho, guardado só na memória da página (recarregar esvazia).
  * Nunca passa do estoque do tamanho: somar além dele mantém a quantidade no máximo disponível.
- * BACKEND: com cliente logado, carregar com getCart() e sincronizar com syncCart() a cada mudança.
+ * PACK API: com cliente logado, o carrinho passa a ser o da API (getCart / syncCart em
+ * lib/api/compra.ts), item por item e por variante (tamanho + cor).
  */
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);

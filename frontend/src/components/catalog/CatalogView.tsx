@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { selectClass } from "@/components/common/classes";
 import { ROTULO } from "@/components/layout/PaginaTopo";
+import { Vazio } from "@/components/common/Vazio";
 import { Button } from "@/components/ui/button";
 import { getCollections, getProducts } from "@/lib/api";
 import { catalogFilters, type CatalogSearch } from "./filtros";
@@ -40,6 +42,9 @@ export function CatalogView({
   const products = (query.data ?? []).filter(
     (p) => !stockOnly || Object.values(p.stock ?? {}).some((qtd) => qtd > 0),
   );
+  // vazio por causa de um filtro (dá para limpar) ou porque ainda não há nada cadastrado
+  const filtrado =
+    stockOnly || Object.entries(filters).some(([chave, valor]) => chave !== "sort" && valor);
 
   // mudou o filtro, volta a mostrar só o primeiro lote
   function filtrar(patch: CatalogSearch) {
@@ -145,12 +150,57 @@ export function CatalogView({
           Carregando peças...
         </p>
       ) : query.error ? (
-        <p role="alert">Não foi possível carregar os produtos.</p>
-      ) : !products.length ? (
-        <div className="py-16 text-center">
-          <h2 className="font-display text-4xl">NENHUMA PEÇA</h2>
-          <p className="mt-4 text-sm text-muted-foreground">Tente ajustar os filtros.</p>
+        <div role="alert" className="py-16 text-center">
+          <h2 className="font-display text-4xl">NÃO FOI POSSÍVEL CARREGAR</h2>
+          <p className="mt-4 text-sm text-muted-foreground">
+            {query.error.message || "Tente de novo em instantes."}
+          </p>
+          <Button
+            variant="outline"
+            className="mt-6 h-11 rounded-none text-[11px] tracking-[0.2em]"
+            onClick={() => void query.refetch()}
+          >
+            TENTAR DE NOVO
+          </Button>
         </div>
+      ) : !products.length ? (
+        filtrado && !locked ? (
+          <Vazio
+            titulo="Nenhuma peça"
+            texto="Nenhuma peça combina com esses filtros."
+            acao={
+              <Button
+                variant="outline"
+                className="h-11 rounded-none text-[11px] tracking-[0.2em]"
+                onClick={() => {
+                  setStockOnly(false);
+                  onChange(SEM_FILTROS);
+                }}
+              >
+                LIMPAR FILTROS
+              </Button>
+            }
+          />
+        ) : (
+          <Vazio
+            titulo="Em breve"
+            texto={
+              locked
+                ? "Ainda não há peças aqui. Volte em breve."
+                : "O catálogo ainda está sendo montado. As primeiras peças chegam em breve."
+            }
+            acao={
+              locked && (
+                <Link
+                  to="/catalogo"
+                  className="border border-ink px-6 py-3 text-[11px] font-medium tracking-[0.2em] transition-colors hover:bg-ink hover:text-paper"
+                >
+                  VER O CATÁLOGO
+                </Link>
+              )
+            }
+          />
+        )
       ) : (
         <>
           <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4 md:gap-x-6">

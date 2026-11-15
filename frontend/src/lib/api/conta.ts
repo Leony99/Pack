@@ -5,9 +5,9 @@ import { exigirCliente } from "./autenticacao";
 import { devolverAoEstoque } from "./compra";
 import { emailValido, novoId, sessao, state, todosOsPedidos } from "./simulacao";
 
-/** GET /customers/me/dashboard — resumo da área do cliente */
+/** Resumo da área do cliente. */
 export async function getAccountData() {
-  // BACKEND: return apiFetch("/customers/me/dashboard");
+  // PACK API: não tem painel do cliente; juntar GET /api/v1/auth/me, .../addresses e .../orders.
   const customer = exigirCliente();
   const doCliente = (orderId: string) =>
     todosOsPedidos().some((o) => o.id === orderId && o.customerId === customer.id);
@@ -19,11 +19,11 @@ export async function getAccountData() {
   };
 }
 
-/** PATCH /customers/me — também liga ou desliga a newsletter do e-mail */
+/** Atualiza os dados do cliente; também liga ou desliga a newsletter do e-mail. */
 export async function updateProfile(
   patch: Pick<CustomerProfile, "name" | "email" | "phone" | "newsletter">,
 ) {
-  // BACKEND: return apiFetch<CustomerProfile>("/customers/me", { method: "PATCH", body: JSON.stringify(patch) });
+  // PACK API: PUT /api/v1/customers/{id} { nome, email, telefone }.
   const atual = exigirCliente();
   if (!patch.name.trim() || !emailValido(patch.email))
     throw new Error("Nome e e-mail válido são obrigatórios.");
@@ -46,9 +46,9 @@ export async function updateProfile(
 
 /* ----------------------------------------------------------------- endereços */
 
-/** GET /customers/me/addresses */
+/** Endereços do cliente logado. */
 export async function getAddresses(): Promise<SavedAddress[]> {
-  // BACKEND: return apiFetch<SavedAddress[]>("/customers/me/addresses");
+  // PACK API: GET /api/v1/customers/{id}/addresses.
   const cliente = exigirCliente();
   return state.addresses.filter((a) => a.customerId === cliente.id).map((a) => ({ ...a }));
 }
@@ -61,9 +61,10 @@ function enderecoCompleto(a: SavedAddress): boolean {
   );
 }
 
-/** PUT /customers/me/addresses — cria ou edita; só um endereço é o principal */
+/** Cria ou edita um endereço; só um é o principal. */
 export async function saveAddress(address: SavedAddress) {
-  // BACKEND: return apiFetch<SavedAddress>("/customers/me/addresses", { method: "PUT", body: JSON.stringify(address) });
+  // PACK API: POST /api/v1/customers/{id}/addresses (novo) ou PUT .../addresses/{addressId}
+  // { cep, rua, numero, complemento, cidade, estado }.
   const cliente = exigirCliente();
   if (!enderecoCompleto(address)) throw new Error("Preencha endereço, CEP e UF válidos.");
   const existente = state.addresses.find((a) => a.id === address.id);
@@ -85,9 +86,9 @@ export async function saveAddress(address: SavedAddress) {
   return { ...row };
 }
 
-/** DELETE /customers/me/addresses/:id — se apagar o principal, o próximo vira principal */
+/** Apaga um endereço; se for o principal, o próximo vira principal. */
 export async function deleteAddress(addressId: string) {
-  // BACKEND: await apiFetch(`/customers/me/addresses/${addressId}`, { method: "DELETE" });
+  // PACK API: DELETE /api/v1/customers/{id}/addresses/{addressId}.
   const cliente = exigirCliente();
   const index = state.addresses.findIndex((a) => a.id === addressId && a.customerId === cliente.id);
   if (index < 0) throw new Error("Endereço indisponível.");
@@ -98,34 +99,34 @@ export async function deleteAddress(addressId: string) {
 
 /* ------------------------------------------------------------------- pedidos */
 
-/** GET /customers/me/orders */
+/** Pedidos do cliente logado. */
 export async function getMyOrders(): Promise<Order[]> {
-  // BACKEND: return apiFetch<Order[]>("/customers/me/orders");
+  // PACK API: GET /api/v1/customers/{id}/orders (paginado: { itens, totalItens... }).
   const cliente = exigirCliente();
   return todosOsPedidos()
     .filter((o) => o.customerId === cliente.id)
     .map((o) => ({ ...o }));
 }
 
-/** GET /customers/me/orders/:id */
+/** Um pedido do cliente logado. */
 export async function getMyOrder(orderId: string): Promise<Order | null> {
-  // BACKEND: return apiFetch<Order>(`/customers/me/orders/${orderId}`);
+  // PACK API: GET /api/v1/orders/{id} (a API confere se o pedido é do cliente).
   const cliente = exigirCliente();
   return todosOsPedidos().find((o) => o.id === orderId && o.customerId === cliente.id) ?? null;
 }
 
-/** POST /returns { orderId, reason } — uma solicitação de troca por pedido */
+/** Pede a troca de um pedido (uma solicitação por pedido). */
 export async function requestReturn(orderId: string, reason: string) {
-  // BACKEND: return apiFetch("/returns", { method: "POST", body: JSON.stringify({ orderId, reason }) });
+  // PACK API: não tem trocas (falta na API).
   if (!(await getMyOrder(orderId)) || !reason.trim()) throw new Error("Pedido ou motivo inválido.");
   if (state.returns.some((r) => r.orderId === orderId))
     throw new Error("Já existe uma solicitação para este pedido.");
   state.returns.push({ id: novoId(), orderId, reason, status: "Solicitada" });
 }
 
-/** POST /customers/me/orders/:id/cancel — só antes do envio; o estoque volta */
+/** Cancela um pedido do cliente: só antes do envio, e o estoque volta. */
 export async function cancelMyOrder(orderId: string) {
-  // BACKEND: await apiFetch(`/customers/me/orders/${orderId}/cancel`, { method: "POST" });
+  // PACK API: PATCH /api/v1/orders/{id}/status { status: "CANCELADO" } (antes do envio).
   const order = await getMyOrder(orderId);
   if (!order || !CANCELAVEL.includes(order.status))
     throw new Error("Este pedido não pode ser cancelado.");

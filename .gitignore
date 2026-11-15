@@ -2,6 +2,10 @@
 .env
 .env.*
 !.env.example
+# modos do frontend: só o endereço da API, sem segredo (segredos ficam no .env.*.local)
+!frontend/.env.development
+!frontend/.env.production
+!frontend/.env.demo
 
 ### Backend (Maven) ###
 target/

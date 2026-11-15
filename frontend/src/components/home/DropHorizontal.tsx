@@ -1,7 +1,9 @@
+import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { useGsap } from "@/hooks/useGsap";
+import { colecaoDoDrop, DROP } from "@/lib/api";
 import { gsap } from "@/lib/movimento";
 import type { Product } from "@/data/types";
 
@@ -36,7 +38,14 @@ export function DropHorizontal({ produtos }: { produtos: Product[] }) {
     return () => mm.revert();
   });
 
+  // sem peças no drop (catálogo vazio): a seção vira o aviso do próximo drop, sem a rolagem lateral
+  if (!produtos.length) return <DropEmBreve />;
+
   const total = String(produtos.length).padStart(2, "0");
+  // o drop é a tag de drop das peças ("drop-02" → DROP 02); sem ela, o título é NOVO DROP e os links
+  // levam ao catálogo filtrado pela curadoria
+  const tag = produtos.flatMap((p) => p.tags ?? []).find((t) => DROP.test(t));
+  const [palavra, ...resto] = (tag ? colecaoDoDrop(tag).name : "NOVO DROP").split(" ");
 
   return (
     <section
@@ -46,22 +55,19 @@ export function DropHorizontal({ produtos }: { produtos: Product[] }) {
       <div className="snap-x snap-mandatory scroll-px-6 overflow-x-auto md:snap-none md:overflow-visible md:motion-reduce:snap-x md:motion-reduce:overflow-x-auto">
         <div data-trilho className="flex w-max items-end gap-5 px-6 md:gap-10">
           <div className="flex w-[80vw] shrink-0 snap-start flex-col justify-end self-stretch md:w-[36vw]">
-            <p className="text-[10px] font-medium tracking-[0.3em] text-destaque">
-              ÚLTIMO DROP · SS26
-            </p>
+            <p className="text-[10px] font-medium tracking-[0.3em] text-destaque">ÚLTIMO DROP</p>
             <h2 className="mt-4 font-display text-[22vw] leading-[0.85] md:text-[10vw]">
-              DROP <span className="text-outline-light">02</span>
+              {palavra} <span className="text-outline-light">{resto.join(" ")}</span>
             </h2>
             <p className="mt-6 max-w-sm text-sm text-muted-foreground">
               {produtos.length} peças novas, feitas para a repetição. Role para ver todas.
             </p>
-            <Link
-              to="/colecao/$slug"
-              params={{ slug: "drop-02" }}
+            <LinkDoDrop
+              tag={tag}
               className="group mt-6 inline-flex w-fit items-center gap-2 border-b-2 border-foreground pb-1 text-xs font-medium uppercase tracking-[0.2em] transition hover:border-destaque"
             >
               Ver a coleção <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-            </Link>
+            </LinkDoDrop>
           </div>
           {produtos.map((p, i) => (
             <div
@@ -74,19 +80,60 @@ export function DropHorizontal({ produtos }: { produtos: Product[] }) {
               <ProductCard p={p} />
             </div>
           ))}
-          <Link
-            to="/colecao/$slug"
-            params={{ slug: "drop-02" }}
+          <LinkDoDrop
+            tag={tag}
             className="group flex w-[60vw] shrink-0 snap-start items-center gap-4 self-center font-display text-[13vw] leading-none md:w-[28vw] md:text-[5.5vw]"
           >
             VER TUDO
             <ArrowRight className="h-[0.6em] w-[0.6em] text-destaque transition-transform duration-500 group-hover:translate-x-3" />
-          </Link>
+          </LinkDoDrop>
         </div>
       </div>
       <div className="mx-6 mt-12 hidden h-px bg-foreground/20 md:block">
         <div data-progresso className="h-full origin-left scale-x-0 bg-destaque" />
       </div>
     </section>
+  );
+}
+
+/** O lugar do drop quando ainda não há peças: o aviso de que vem aí e o convite para a newsletter. */
+function DropEmBreve() {
+  return (
+    <section className="dark border-b border-border bg-background px-6 py-20 text-foreground md:py-28">
+      <p className="text-[10px] font-medium tracking-[0.3em] text-destaque">PRÓXIMO DROP</p>
+      <h2 className="mt-4 font-display text-[18vw] leading-[0.85] md:text-[8vw]">
+        EM <span className="text-outline-light">BREVE</span>
+      </h2>
+      <p className="mt-6 max-w-sm text-sm text-muted-foreground">
+        As peças do próximo drop ainda estão sendo preparadas. Entre na lista para saber primeiro.
+      </p>
+      <a
+        href="#newsletter"
+        className="group mt-6 inline-flex w-fit items-center gap-2 border-b-2 border-foreground pb-1 text-xs font-medium uppercase tracking-[0.2em] transition hover:border-destaque"
+      >
+        Entrar na lista <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+      </a>
+    </section>
+  );
+}
+
+/** Link para a coleção do drop ou, sem tag de drop, para o catálogo filtrado pelo novo drop. */
+function LinkDoDrop({
+  tag,
+  className,
+  children,
+}: {
+  tag?: string;
+  className: string;
+  children: ReactNode;
+}) {
+  return tag ? (
+    <Link to="/colecao/$slug" params={{ slug: tag }} className={className}>
+      {children}
+    </Link>
+  ) : (
+    <Link to="/catalogo" search={{ section: "novo-drop" }} className={className}>
+      {children}
+    </Link>
   );
 }

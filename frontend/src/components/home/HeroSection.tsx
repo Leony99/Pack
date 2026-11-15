@@ -1,9 +1,11 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, Newspaper } from "lucide-react";
+import { ArrowUpRight, BadgePercent } from "lucide-react";
 import moletom from "@/assets/product-hoodie.jpg";
 import regata from "@/assets/product-tank.jpg";
-import { noticias } from "@/data/noticias";
+import { promocoes } from "@/data/promocoes";
+import { DROP } from "@/lib/api";
+import { money } from "@/lib/checkout";
 import type { Product } from "@/data/types";
 import { useGsap } from "@/hooks/useGsap";
 import { abertura } from "@/lib/abertura";
@@ -21,7 +23,7 @@ const CARD = "shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]";
  * guardam o espaço dele no topo.
  *   Esquerda: o nome PACK (na fonte do logo), o texto e dois cards com foto de roupa (a coleção,
  *   com o VER COLEÇÃO, e o último drop).
- *   Direita: a data e a hora, o card de notícias e uma frase.
+ *   Direita: a data e a hora, o card de promoções ativas e uma frase.
  * É a continuação do pré-loader: ele termina com esta mesma foto aberta e, quando avisa
  * (`abertura`), os blocos das laterais sobem e as letras de PACK aparecem. Sem pré-loader
  * (voltando pelo site ou com "reduzir movimento"), tudo já aparece pronto.
@@ -99,6 +101,8 @@ export function HeroSection({
  * as vezes do botão VER COLEÇÃO, e o novo drop).
  */
 function ColunaEsquerda({ drop }: { drop: Product[] }) {
+  // a coleção do drop é a tag de drop das peças ("drop-02"); sem ela, o card leva ao catálogo
+  const tagDoDrop = drop.flatMap((p) => p.tags ?? []).find((t) => DROP.test(t));
   return (
     <div className="flex min-h-0 flex-col">
       <div aria-hidden className={ESPACO_DO_MENU} />
@@ -143,27 +147,30 @@ function ColunaEsquerda({ drop }: { drop: Product[] }) {
           }
           acao="VER COLEÇÃO"
         />
-        <CardFoto
-          to="/colecao/$slug"
-          params={{ slug: "drop-02" }}
-          foto={drop[0]?.image ?? regata}
-          rotulo={
-            <span className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inset-0 animate-ping bg-destaque opacity-60 motion-reduce:animate-none" />
-                <span className="relative h-2 w-2 bg-destaque" />
+        {/* sem peças no drop (catálogo vazio), fica só o card da coleção */}
+        {drop.length > 0 && (
+          <CardFoto
+            to={tagDoDrop ? "/colecao/$slug" : "/catalogo"}
+            params={tagDoDrop ? { slug: tagDoDrop } : undefined}
+            foto={drop[0]?.image ?? regata}
+            rotulo={
+              <span className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inset-0 animate-ping bg-destaque opacity-60 motion-reduce:animate-none" />
+                  <span className="relative h-2 w-2 bg-destaque" />
+                </span>
+                ÚLTIMO DROP
               </span>
-              ÚLTIMO DROP
-            </span>
-          }
-          titulo={
-            <>
-              PRETO
-              <br />+ BRANCO
-            </>
-          }
-          acao="VER DROP"
-        />
+            }
+            titulo={
+              <>
+                PRETO
+                <br />+ BRANCO
+              </>
+            }
+            acao="VER DROP"
+          />
+        )}
       </div>
     </div>
   );
@@ -226,7 +233,7 @@ function CardFoto({
 }
 
 /**
- * Abaixo do espaço do menu (só no computador): a data e a hora, o card de notícias e uma frase.
+ * Abaixo do espaço do menu (só no computador): a data e a hora, o card de promoções e uma frase.
  */
 function ColunaDireita() {
   return (
@@ -234,27 +241,37 @@ function ColunaDireita() {
       <div aria-hidden className={ESPACO_DO_MENU} />
       <Relogio />
 
-      {/* notícias da loja (data/noticias.ts); em telas baixas, só as duas primeiras */}
+      {/* promoções ativas (data/promocoes.ts); em telas baixas, só as duas primeiras */}
       <section
         data-entra
-        aria-label="Notícias"
+        aria-label="Promoções ativas"
         className={`${CARD} mt-6 w-full max-w-[280px] border border-paper/15 bg-ink/60 p-4 backdrop-blur-md`}
       >
         <p className="flex items-center gap-2 text-[10px] tracking-[0.2em]">
-          <Newspaper className="h-3.5 w-3.5" /> NOTÍCIAS
+          <BadgePercent className="h-3.5 w-3.5 text-destaque" /> PROMOÇÕES
         </p>
         <ul className="mt-3">
-          {noticias.map((noticia, i) => (
+          {promocoes.map((promocao, i) => (
             <li
-              key={noticia.titulo}
-              className={`grid grid-cols-[3.25rem_1fr] gap-2 border-t border-paper/15 py-2.5 first:border-t-0 ${
-                i >= 2 ? "hidden [@media(min-height:760px)]:grid" : ""
+              key={promocao.oferta}
+              className={`flex items-end justify-between gap-3 border-t border-paper/15 py-2.5 first:border-t-0 ${
+                i >= 2 ? "hidden [@media(min-height:760px)]:flex" : ""
               }`}
             >
-              <span className="pt-px text-[10px] tracking-[0.15em] text-paper/50">
-                {noticia.data}
+              <span>
+                <span className="block font-display text-lg uppercase leading-none tracking-wide">
+                  {promocao.oferta}
+                </span>
+                <span className="mt-1 block text-[10px] tracking-[0.15em] text-paper/50">
+                  ATÉ {promocao.ate}
+                </span>
               </span>
-              <span className="text-xs leading-snug text-paper/85">{noticia.titulo}</span>
+              <span className="shrink-0 text-right">
+                <span className="block text-[10px] tracking-[0.15em] text-paper/50">POR</span>
+                <span className="block font-display text-lg leading-none tracking-wide">
+                  {money(promocao.preco).replace(",00", "")}
+                </span>
+              </span>
             </li>
           ))}
         </ul>

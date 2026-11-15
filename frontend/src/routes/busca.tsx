@@ -6,6 +6,7 @@ import { getProducts } from "@/lib/api";
 import { pageHead } from "@/lib/metadata";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { Vazio } from "@/components/common/Vazio";
 import { Button } from "@/components/ui/button";
 import { RouteError, NotFoundPage } from "@/components/layout/RouteBoundary";
 const searchQuery = (q: string) =>
@@ -63,18 +64,25 @@ function SearchPage() {
             <ProductCard key={p.id} p={p} />
           ))}
         </div>
+      ) : q ? (
+        <Vazio
+          titulo="Nenhuma peça encontrada"
+          texto="Tente outro nome ou categoria."
+          acao={
+            <Button
+              variant="outline"
+              className="h-11 rounded-none text-[11px] tracking-[0.2em]"
+              onClick={() => navigate({ to: "/busca", search: { q: "" } })}
+            >
+              VER TODAS AS PEÇAS
+            </Button>
+          }
+        />
       ) : (
-        <div className="border-t border-border py-10">
-          <h2 className="text-2xl">NENHUMA PEÇA ENCONTRADA.</h2>
-          <p className="mt-3 text-sm text-muted-foreground">Tente outro nome ou categoria.</p>
-          <Button
-            variant="outline"
-            className="mt-6"
-            onClick={() => navigate({ to: "/busca", search: { q: "" } })}
-          >
-            VER TODAS AS PEÇAS
-          </Button>
-        </div>
+        <Vazio
+          titulo="Em breve"
+          texto="O catálogo ainda está sendo montado. As primeiras peças chegam em breve."
+        />
       )}
     </PageLayout>
   );

@@ -11,12 +11,24 @@ import { StyleCards } from "@/components/home/StyleCards";
 import { getSection } from "@/lib/api";
 import { pageHead } from "@/lib/metadata";
 
+/**
+ * Produtos da home. Se a API falhar, a home abre mesmo assim, sem as linhas de produtos (o topo, os
+ * estilos e a newsletter não dependem deles); o catálogo é que mostra o erro.
+ */
 const sectionsQuery = queryOptions({
   queryKey: ["products", "home"],
-  queryFn: async () => ({
-    destaques: await getSection("destaques"),
-    novoDrop: await getSection("novo-drop", 8),
-  }),
+  queryFn: async () => {
+    try {
+      const [destaques, novoDrop] = await Promise.all([
+        getSection("destaques"),
+        getSection("novo-drop", 8),
+      ]);
+      return { destaques, novoDrop };
+    } catch (erro) {
+      console.error("Home sem produtos:", erro);
+      return { destaques: [], novoDrop: [] };
+    }
+  },
 });
 
 export const Route = createFileRoute("/")({
@@ -58,7 +70,7 @@ function Index() {
       />
       <DropHorizontal produtos={novoDrop} />
 
-      <section className="border-t border-border bg-secondary">
+      <section id="newsletter" className="scroll-mt-24 border-t border-border bg-secondary">
         <div className="mx-auto max-w-[1400px] px-6 py-20 text-center">
           <h2 className="font-display text-4xl md:text-6xl">JOIN THE PACK</h2>
           <p className="mx-auto mt-4 max-w-md text-sm text-muted-foreground">

@@ -41,18 +41,45 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   });
 }
 
+/**
+ * Cabeçalhos de segurança em todas as respostas:
+ * - nosniff: o navegador não "adivinha" o tipo de um arquivo (um texto não vira script);
+ * - DENY / frame-ancestors: a loja não pode ser aberta dentro de um iframe de outro site (clickjacking);
+ * - Referrer-Policy: outros sites recebem só o domínio de onde veio o clique, não a URL inteira;
+ * - Permissions-Policy: a página não pede câmera, microfone nem localização.
+ * O HSTS (só HTTPS) e a CSP ficam para a hospedagem: ver "Segurança" no README.
+ */
+const CABECALHOS_DE_SEGURANCA: Record<string, string> = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Content-Security-Policy": "frame-ancestors 'none'",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+};
+
+function comCabecalhosDeSeguranca(response: Response): Response {
+  // a resposta pode ter cabeçalhos imutáveis: copia para uma nova, com o mesmo corpo (em stream)
+  const segura = new Response(response.body, response);
+  for (const [nome, valor] of Object.entries(CABECALHOS_DE_SEGURANCA)) {
+    if (!segura.headers.has(nome)) segura.headers.set(nome, valor);
+  }
+  return segura;
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      return comCabecalhosDeSeguranca(await normalizeCatastrophicSsrResponse(response));
     } catch (error) {
       console.error(error);
-      return new Response(renderErrorPage(), {
-        status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
-      });
+      return comCabecalhosDeSeguranca(
+        new Response(renderErrorPage(), {
+          status: 500,
+          headers: { "content-type": "text/html; charset=utf-8" },
+        }),
+      );
     }
   },
 };

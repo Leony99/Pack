@@ -37,10 +37,10 @@ export async function enterDemo(kind: "customer" | "staff") {
   return sessao.colaborador;
 }
 
-/** POST /auth/login { email, password } → { token, customer } */
+/** Entra como cliente. */
 export async function loginCustomer(email: string, password: string): Promise<Customer> {
-  // BACKEND: o token deve ficar num cookie httpOnly definido pelo servidor, nunca no localStorage.
-  // return apiFetch<Customer>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
+  // PACK API: POST /api/v1/auth/login { email, senha } → { token, expiraEm, usuario }. O token vai
+  // para o cookie httpOnly COOKIE_DO_TOKEN.cliente (server/http.ts), nunca para o navegador.
   if (!password.trim()) throw new Error("Informe uma senha de demonstração.");
   const customer = state.customers.find(
     (c) => c.email.toLowerCase() === email.trim().toLowerCase(),
@@ -53,13 +53,13 @@ export async function loginCustomer(email: string, password: string): Promise<Cu
   return { ...customer };
 }
 
-/** POST /auth/register */
+/** Cria a conta do cliente e já entra. */
 export async function registerCustomer(data: {
   name: string;
   email: string;
   password: string;
 }): Promise<Customer> {
-  // BACKEND: return apiFetch<Customer>("/auth/register", { method: "POST", body: JSON.stringify(data) });
+  // PACK API: POST /api/v1/auth/register { nome, email, telefone, senha } → o mesmo do login.
   if (!data.name.trim() || !emailValido(data.email) || data.password.length < 6)
     throw new Error("Informe nome, e-mail válido e senha com pelo menos 6 caracteres.");
   const email = data.email.trim().toLowerCase();
@@ -71,9 +71,9 @@ export async function registerCustomer(data: {
   return { ...customer };
 }
 
-/** POST /auth/staff/login → painel /admin */
+/** Entra como colaborador (painel /admin). */
 export async function loginStaff(email: string, password: string): Promise<Staff> {
-  // BACKEND: return apiFetch<Staff>("/auth/staff/login", { method: "POST", body: JSON.stringify({ email, password }) });
+  // PACK API: POST /api/v1/auth/staff/login { email, senha } → token no cookie COOKIE_DO_TOKEN.equipe.
   if (!password.trim()) throw new Error("Informe uma senha de demonstração.");
   const member = state.staff.find(
     (s) => s.email.toLowerCase() === email.trim().toLowerCase() && s.active,
@@ -83,43 +83,43 @@ export async function loginStaff(email: string, password: string): Promise<Staff
   return { ...member };
 }
 
-/** GET /auth/me */
+/** O cliente logado, ou null. */
 export async function getCurrentCustomer(): Promise<Customer | null> {
-  // BACKEND: return apiFetch<Customer>("/auth/me").catch(() => null);
+  // PACK API: GET /api/v1/auth/me com o token do cliente (401 → ninguém logado).
   return sessao.cliente ? { ...sessao.cliente } : null;
 }
 
-/** GET /auth/staff/me */
+/** O colaborador logado, ou null. */
 export async function getCurrentStaff(): Promise<Staff | null> {
-  // BACKEND: return apiFetch<Staff>("/auth/staff/me").catch(() => null);
+  // PACK API: GET /api/v1/auth/me com o token da equipe (traz as permissões do papel).
   return sessao.colaborador ? { ...sessao.colaborador } : null;
 }
 
-/** POST /auth/logout */
+/** Sai da sessão (cliente ou equipe). */
 export async function logout(kind: "customer" | "staff"): Promise<void> {
-  // BACKEND: await apiFetch("/auth/logout", { method: "POST" });
+  // PACK API: não tem logout (o JWT vale até expirar). Sair = apagar o cookie do token no servidor.
   if (kind === "customer") sessao.cliente = null;
   else sessao.colaborador = null;
 }
 
-/** POST /auth/recover { email } — envia o link de nova senha */
+/** Envia o link de nova senha. */
 export async function recoverPassword(email: string) {
-  // BACKEND: await apiFetch("/auth/recover", { method: "POST", body: JSON.stringify({ email }) });
+  // PACK API: não tem recuperação de senha (falta na API).
   if (!emailValido(email)) throw new Error("Informe um e-mail válido.");
   return { simulated: true };
 }
 
-/** POST /auth/reset { password, token } — define a nova senha pelo link recebido */
+/** Define a nova senha pelo link recebido. */
 export async function resetPassword(password: string, token: string) {
-  // BACKEND: await apiFetch("/auth/reset", { method: "POST", body: JSON.stringify({ password, token }) });
+  // PACK API: não tem recuperação de senha (falta na API).
   if (!token || password.length < 6)
     throw new Error("Link inválido ou senha com menos de 6 caracteres.");
   return { simulated: true };
 }
 
-/** PUT /auth/password { current, next } — cliente logado troca a senha */
+/** O cliente logado troca a senha. */
 export async function changePassword(current: string, next: string) {
-  // BACKEND: await apiFetch("/auth/password", { method: "PUT", body: JSON.stringify({ current, next }) });
+  // PACK API: não tem troca de senha (falta na API).
   exigirCliente();
   if (!current || next.length < 6)
     throw new Error("Informe a senha atual e uma nova senha com pelo menos 6 caracteres.");

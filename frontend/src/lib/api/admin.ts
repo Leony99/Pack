@@ -39,9 +39,10 @@ export type AdminRecord =
   | Subscriber
   | ReturnRequest;
 
-/** GET /admin/dashboard — cada lista vem vazia se o cargo não tem acesso a ela */
+/** Dados do painel; cada lista vem vazia se o cargo não tem acesso a ela. */
 export async function getAdminData() {
-  // BACKEND: return apiFetch("/admin/dashboard");
+  // PACK API: não tem painel com números; juntar as listagens (pedidos, estoque baixo em
+  // GET /api/v1/variants/estoque-baixo...). Cada uma exige a permissão do papel.
   const colaborador = sessao.colaborador;
   if (!colaborador) throw new Error("Entre no painel de demonstração.");
   const pode = (resource: AdminResource) => canStaff(colaborador.role, resource);
@@ -108,9 +109,10 @@ function chaveDe(record: AdminRecord): string {
   return "code" in record ? record.code : record.id;
 }
 
-/** PUT /admin/:resource — cria ou edita */
+/** Cria ou edita um registro do painel. */
 export async function saveAdminRecord(resource: RecursoEditavel, record: AdminRecord) {
-  // BACKEND: return apiFetch(`/admin/${resource}`, { method: "PUT", body: JSON.stringify(record) });
+  // PACK API: cada recurso tem a própria rota (products, variants, images, tags, coupons, staff,
+  // roles...). Coleções, mensagens, newsletter e trocas: faltam na API.
   exigirColaborador(resource);
   if (resource === "products") validarProduto(record as Product);
   if (resource === "coupons") validarCupom(record as Coupon);
@@ -124,9 +126,9 @@ export async function saveAdminRecord(resource: RecursoEditavel, record: AdminRe
   else rows.push({ ...record });
 }
 
-/** DELETE /admin/:resource/:id — apagar uma coleção tira a tag dela dos produtos */
+/** Apaga um registro; apagar uma coleção tira a tag dela dos produtos. */
 export async function deleteAdminRecord(resource: RecursoEditavel, recordId: string) {
-  // BACKEND: await apiFetch(`/admin/${resource}/${recordId}`, { method: "DELETE" });
+  // PACK API: DELETE na rota de cada recurso (ex.: /api/v1/products/{id}).
   exigirColaborador(resource);
   if (resource === "staff" && recordId === sessao.colaborador?.id)
     throw new Error("Não exclua seu próprio acesso.");
@@ -142,9 +144,10 @@ export async function deleteAdminRecord(resource: RecursoEditavel, recordId: str
   rows.splice(index, 1);
 }
 
-/** PATCH /admin/orders/:id { status, tracking } — cancelado não reabre; cancelar devolve o estoque */
+/** Muda o status e o rastreio do pedido; cancelado não reabre, e cancelar devolve o estoque. */
 export async function updateOrder(orderId: string, status: string, tracking: string) {
-  // BACKEND: await apiFetch(`/admin/orders/${orderId}`, { method: "PATCH", body: JSON.stringify({ status, tracking }) });
+  // PACK API: PATCH /api/v1/orders/{id}/status (só cancelar); o resto vem do pagamento e do envio
+  // (PATCH /api/v1/payments/{id}/status, PATCH /api/v1/shipments/{id}/status e .../rastreio).
   exigirColaborador("orders");
   const order = todosOsPedidos().find((o) => o.id === orderId);
   if (!order) throw new Error("Pedido indisponível.");
@@ -157,9 +160,10 @@ export async function updateOrder(orderId: string, status: string, tracking: str
   order.tracking = tracking;
 }
 
-/** POST /admin/stock { productId, size, delta, reason } — o estoque nunca fica negativo */
+/** Ajusta o estoque de um tamanho; ele nunca fica negativo. */
 export async function adjustStock(productId: string, size: string, delta: number, reason: string) {
-  // BACKEND: await apiFetch("/admin/stock", { method: "POST", body: JSON.stringify({ productId, size, delta, reason }) });
+  // PACK API: POST /api/v1/inventory/movements { variantId, tipoMovimentacao, quantidade, motivo }
+  // (por variante, não por produto + tamanho).
   exigirColaborador("stock");
   const product = state.products.find((p) => p.id === productId);
   const valido =
