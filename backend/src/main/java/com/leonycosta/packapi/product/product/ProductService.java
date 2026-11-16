@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -95,11 +94,11 @@ public class ProductService {
         if (ids.size() < limite) {
             Sort recentes = Sort.by(Sort.Order.desc("criadoEm"), Sort.Order.asc("id"));
             completar(ids, productRepository.findAll(PageRequest.of(0, limite * 2, recentes)).stream()
-                    .map(Product::getId).toList(), limite);
+                    .map(p -> p.getId()).toList(), limite);
         }
         // busca os produtos de uma vez e devolve na ordem do ranking
         Map<UUID, Product> porId = productRepository.findAllById(ids).stream()
-                .collect(Collectors.toMap(Product::getId, Function.identity()));
+                .collect(Collectors.toMap(p -> p.getId(), p -> p));
         return ids.stream().map(porId::get).map(this::toResponse).toList();
     }
 
@@ -214,7 +213,7 @@ public class ProductService {
     public ProductResponse removeTag(UUID productId, UUID tagId) {
         Product product = findOrThrow(productId);
         List<ProductTag> restantes = product.getTags().stream()
-                .map(ProductTagLink::getTag)
+                .map(link -> link.getTag())
                 .filter(t -> !t.getId().equals(tagId))
                 .toList();
         if (restantes.size() == product.getTags().size()) {
