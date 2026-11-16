@@ -3,6 +3,8 @@ package com.leonycosta.packapi.product.product;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class ProductRequest {
@@ -23,4 +25,9 @@ public class ProductRequest {
     // Opcional — se não enviado o Service gera automaticamente a partir do nome
     @Size(max = 120, message = "Slug deve ter no máximo 120 caracteres")
     private String slug;
+
+    // As tags do produto. Ao criar, é obrigatório: pelo menos uma tag de ESTILO e exatamente uma de
+    // CATEGORIA (COLECAO e as sem filtro são opcionais). Ao editar, null mantém as tags como estão
+    @Size(max = 30, message = "No máximo 30 tags por produto")
+    private List<UUID> tagIds;
 }

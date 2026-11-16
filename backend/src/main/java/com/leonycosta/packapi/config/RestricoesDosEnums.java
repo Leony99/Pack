@@ -34,6 +34,7 @@ public class RestricoesDosEnums {
             new ColunaDeEnum("orders", "status", OrderStatus.class),
             new ColunaDeEnum("payments", "metodo", PaymentMetodo.class),
             new ColunaDeEnum("payments", "status", PaymentStatus.class),
+            new ColunaDeEnum("product_tags", "filtro", TagFiltro.class),
             new ColunaDeEnum("shipments", "status", ShipmentStatus.class));
 
     private final JdbcTemplate jdbc;

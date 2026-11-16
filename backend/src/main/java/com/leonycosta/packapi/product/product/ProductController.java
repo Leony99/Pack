@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Produtos", description = "Leitura pública; criar, alterar e apagar exige CATALOG_WRITE.")
@@ -33,6 +34,13 @@ public class ProductController {
             return productService.search(nome, pagina, tamanho);
         }
         return productService.findAll(pagina, tamanho);
+    }
+
+    // GET /products/mais-vendidos?limite=4: a linha DESTAQUES da loja
+    @Operation(summary = "Os mais vendidos, em ordem: 90 dias, depois desde sempre, completando com os mais novos")
+    @GetMapping("/mais-vendidos")
+    public List<ProductResponse> maisVendidos(@RequestParam(defaultValue = "4") int limite) {
+        return productService.maisVendidos(limite);
     }
 
     @Operation(summary = "Busca um produto")

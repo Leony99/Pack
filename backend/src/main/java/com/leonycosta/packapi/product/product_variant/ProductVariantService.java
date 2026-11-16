@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,6 +67,7 @@ public class ProductVariantService {
         variant.setSku(sku);
         variant.setPreco(request.getPreco());
         variant.setQuant(request.getQuant());
+        variant.setCriadoEm(LocalDateTime.now());
 
         return toResponse(variantRepository.save(variant));
     }
@@ -130,7 +132,8 @@ public class ProductVariantService {
                 new SizeResponse(v.getSize().getId(), v.getSize().getLabel()),
                 new ColorResponse(v.getColor().getId(), v.getColor().getNome(), v.getColor().getHex()),
                 v.getPreco() != null ? v.getPreco() : product.getPreco(),
-                v.getQuant()
+                v.getQuant(),
+                v.getCriadoEm()
         );
     }
 }

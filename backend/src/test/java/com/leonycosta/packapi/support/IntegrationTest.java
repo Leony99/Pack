@@ -176,8 +176,25 @@ public abstract class IntegrationTest {
         return post("/colors", corpo("nome", "Cor " + unico(), "hex", "#123456"), admin()).esperar(201).str("$.id");
     }
 
+    // Todo produto precisa de pelo menos um estilo e de exatamente uma categoria: as duas tags são
+    // criadas uma vez por teste e vão em todo produto criado por ele
+    private List<String> tagsObrigatorias;
+
+    protected List<String> tagsObrigatorias() {
+        if (tagsObrigatorias == null) {
+            tagsObrigatorias = List.of(novaTag("ESTILO"), novaTag("CATEGORIA"));
+        }
+        return tagsObrigatorias;
+    }
+
+    protected String novaTag(String filtro) {
+        return post("/tags", corpo("tag", filtro.toLowerCase() + "-" + unico(), "filtro", filtro), admin())
+                .esperar(201).str("$.id");
+    }
+
     protected String novoProduto(Number preco) {
-        return post("/products", corpo("nome", "Produto " + unico(), "preco", preco), admin()).esperar(201).str("$.id");
+        return post("/products", corpo("nome", "Produto " + unico(), "preco", preco, "tagIds", tagsObrigatorias()),
+                admin()).esperar(201).str("$.id");
     }
 
     // Produto novo com uma variante: preço do produto e estoque inicial informados

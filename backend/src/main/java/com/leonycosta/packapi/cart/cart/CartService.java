@@ -129,7 +129,7 @@ public class CartService {
                 v.getId(), v.getSku(),
                 new SizeResponse(v.getSize().getId(), v.getSize().getLabel()),
                 new ColorResponse(v.getColor().getId(), v.getColor().getNome(), v.getColor().getHex()),
-                precoUnit, v.getQuant()
+                precoUnit, v.getQuant(), v.getCriadoEm()
         );
         return new CartItemResponse(item.getId(), variantResponse, item.getQuantidade(), precoUnit, subtotal);
     }

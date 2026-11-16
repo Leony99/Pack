@@ -74,7 +74,7 @@ class StaffAndRolesTest extends IntegrationTest {
         String estoquista = novoFuncionario("ESTOQUISTA");
         Variante v = novaVariante(50, 5);
 
-        post("/products", corpo("nome", "Bermuda " + unico(), "preco", 80), estoquista).esperar(201);
+        post("/products", corpo("nome", "Bermuda " + unico(), "preco", 80, "tagIds", tagsObrigatorias()), estoquista).esperar(201);
         post("/inventory/movements", corpo("variantId", v.id(), "tipoMovimentacao", "ENTRADA", "quantidade", 1),
                 estoquista).esperar(201);
     }
@@ -116,7 +116,7 @@ class StaffAndRolesTest extends IntegrationTest {
         Variante v = novaVariante(50, 5);
         Pedido p = novoPedido(v, 1);
 
-        post("/products", corpo("nome", "Jaqueta " + unico(), "preco", 200), supervisor).esperar(201);
+        post("/products", corpo("nome", "Jaqueta " + unico(), "preco", 200, "tagIds", tagsObrigatorias()), supervisor).esperar(201);
         post("/inventory/movements", corpo("variantId", v.id(), "tipoMovimentacao", "ENTRADA", "quantidade", 1),
                 supervisor).esperar(201);
         get("/variants/estoque-baixo", supervisor).esperar(200);

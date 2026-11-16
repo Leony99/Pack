@@ -3,6 +3,7 @@ package com.leonycosta.packapi.product.product_variant;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import com.leonycosta.packapi.product.color.Color;
@@ -39,4 +40,9 @@ public class ProductVariant {
 
     @Column(nullable = false)
     private Integer quant;
+
+    // Quando a variante foi cadastrada (uma cor ou um tamanho novo deixa o produto com o selo NOVO).
+    // Nullable: as variantes cadastradas antes desta coluna existir ficam sem data e contam como antigas
+    @Column(name = "criado_em")
+    private LocalDateTime criadoEm;
 }
