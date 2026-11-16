@@ -6,7 +6,7 @@ import { selectClass } from "@/components/common/classes";
 import { ROTULO } from "@/components/layout/PaginaTopo";
 import { Vazio } from "@/components/common/Vazio";
 import { Button } from "@/components/ui/button";
-import { getCollections, getProducts } from "@/lib/api";
+import { getCollections, getOpcoesDoCatalogo, getProducts } from "@/lib/api";
 import { catalogFilters, type CatalogSearch } from "./filtros";
 
 /** Quantos produtos aparecem de cada vez (o "CARREGAR MAIS" mostra o próximo lote). */
@@ -37,6 +37,8 @@ export function CatalogView({
   const filters = catalogFilters(search);
   const query = useQuery({ queryKey: ["products", filters], queryFn: () => getProducts(filters) });
   const collections = useQuery({ queryKey: ["collections"], queryFn: getCollections });
+  // as opções de estilo e categoria são as tags da API com esses filtros (aba Tags do painel)
+  const opcoes = useQuery({ queryKey: ["collections", "opcoes"], queryFn: getOpcoesDoCatalogo });
   const [limit, setLimit] = useState(LOTE);
   const [stockOnly, setStockOnly] = useState(false);
   const products = (query.data ?? []).filter(
@@ -64,8 +66,7 @@ export function CatalogView({
               value={search.style ?? "all"}
               options={[
                 ["all", "Todos"],
-                ["casual", "Casual"],
-                ["treino", "Treino"],
+                ...(opcoes.data?.estilos ?? []).map((o) => [o.valor, o.nome] as [string, string]),
               ]}
               onChange={(v) => filtrar({ style: v })}
             />
@@ -74,27 +75,29 @@ export function CatalogView({
               value={search.type ?? "all"}
               options={[
                 ["all", "Todas"],
-                ["camisetas", "Camisetas"],
-                ["bermudas", "Bermudas"],
-                ["conjuntos", "Conjuntos"],
+                ...(opcoes.data?.categorias ?? []).map(
+                  (o) => [o.valor, o.nome] as [string, string],
+                ),
               ]}
               onChange={(v) => filtrar({ type: v })}
-            />
-            <Select
-              label="CURADORIA"
-              value={search.section ?? "all"}
-              options={[
-                ["all", "Todas"],
-                ["destaques", "Destaques"],
-                ["novo-drop", "Novo drop"],
-              ]}
-              onChange={(v) => filtrar({ section: v })}
             />
             <Select
               label="COLEÇÃO"
               value={search.collection ?? "all"}
               options={[["all", "Todas"], ...(collections.data ?? []).map((c) => [c.tag, c.name])]}
               onChange={(v) => filtrar({ collection: v })}
+            />
+            {/* a curadoria não vem das tags: destaques são os mais vendidos; novidades, os cadastros
+                dos últimos 3 meses */}
+            <Select
+              label="CURADORIA"
+              value={search.section ?? "all"}
+              options={[
+                ["all", "Todas"],
+                ["destaques", "Destaques"],
+                ["novo-drop", "Novidades"],
+              ]}
+              onChange={(v) => filtrar({ section: v })}
             />
           </>
         )}

@@ -16,8 +16,33 @@ import {
   subscribers,
   type CustomerProfile,
   type Order,
+  type Product,
   type StaffMember,
 } from "@/data";
+import { CATEGORIAS_INICIAIS, DROP, ESTILOS_FIXOS, type FiltroDaTag } from "./tags";
+
+/**
+ * As tags da demonstração: as que a loja cria sozinha (estilos fixos e categorias iniciais, como a
+ * API) e as que os produtos de exemplo usam, com o filtro que cada uma teria na API.
+ */
+function tagsDosProdutos(produtos: Product[]) {
+  const colecoes = collections.map((c) => c.tag);
+  const nomes = [
+    ...ESTILOS_FIXOS,
+    ...CATEGORIAS_INICIAIS,
+    ...produtos.flatMap((p) => p.tags ?? []),
+  ];
+  return [...new Set(nomes)].sort().map((tag) => {
+    const filtro: FiltroDaTag | null = ESTILOS_FIXOS.includes(tag)
+      ? "ESTILO"
+      : CATEGORIAS_INICIAIS.includes(tag)
+        ? "CATEGORIA"
+        : DROP.test(tag) || colecoes.includes(tag)
+          ? "COLECAO"
+          : null;
+    return { id: `tag-${tag}`, tag, filtro, fixa: ESTILOS_FIXOS.includes(tag) };
+  });
+}
 
 /** Cópias editáveis dos dados de demonstração (as telas de admin alteram estas listas). */
 export const state = {
@@ -37,6 +62,7 @@ export const state = {
   subscribers: subscribers.map((s) => ({ ...s })),
   returns: [...returns],
   stockMovements: [...stockMovements],
+  tags: tagsDosProdutos(products.map(decorateProduct)),
 };
 
 /** Quem está logado na demonstração (cliente e colaborador são sessões separadas). */

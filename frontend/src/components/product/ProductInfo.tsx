@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ShippingCalc } from "@/components/cart/ShippingCalc";
 import { Button } from "@/components/ui/button";
-import { DROP } from "@/lib/api";
+import { colecoesDoProduto } from "@/lib/api";
 import { useCart } from "@/lib/cart";
 import type { Product } from "@/data/types";
 
@@ -69,7 +69,9 @@ export function ProductInfo({ product }: { product: Product }) {
 
       <div className="mt-5 flex flex-wrap gap-3">
         {(product.tags ?? [])
-          .filter((tag) => DROP.test(tag) || COLECOES_COM_LINK.includes(tag))
+          .filter(
+            (tag) => colecoesDoProduto(product).includes(tag) || COLECOES_COM_LINK.includes(tag),
+          )
           .map((tag) => (
             <Link
               key={tag}

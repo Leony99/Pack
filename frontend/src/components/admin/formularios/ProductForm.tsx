@@ -1,12 +1,14 @@
 import { selectClass } from "@/components/common/classes";
 import { FormField } from "@/components/common/FormField";
+import { CATEGORIAS_INICIAIS, ESTILOS_FIXOS } from "@/lib/api";
 import { TAMANHOS } from "@/lib/dominio";
 import type { Collection } from "@/data/dashboard";
 import type { ItemType, Product, Section } from "@/data/types";
 import { alternarTag, lerTags } from "./tags";
 
-const CATEGORIAS: ItemType[] = ["camisetas", "bermudas", "conjuntos"];
-const ESTILOS = ["casual", "treino"] as const;
+// as tags que a loja cria sozinha (os estilos fixos e as categorias iniciais)
+const CATEGORIAS: ItemType[] = CATEGORIAS_INICIAIS;
+const ESTILOS = ESTILOS_FIXOS;
 
 /** Campos do produto: dados, estilos, coleções, descrição, estoque por tamanho e imagens. */
 export function ProductForm({

@@ -1,20 +1,19 @@
-import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { useGsap } from "@/hooks/useGsap";
-import { colecaoDoDrop, DROP } from "@/lib/api";
+import type { DropEmDestaque } from "@/lib/api";
+import { useRevelar } from "@/hooks/useRevelar";
 import { gsap } from "@/lib/movimento";
-import type { Product } from "@/data/types";
 
 /**
- * O último drop em rolagem lateral (tema escuro), com o mesmo espaço em cima e embaixo. No
+ * O drop em destaque (o da peça mais recente com tag de drop) em rolagem lateral (tema escuro), com o mesmo espaço em cima e embaixo. No
  * computador, a seção só prende quando o meio dela chega ao meio da tela; a partir daí, a rolagem
  * da página empurra a fila de peças para a esquerda, com a barra de progresso laranja embaixo. As
  * peças encolhem em telas baixas para a seção caber inteira na tela. No celular (e para quem pediu
  * menos movimento), a fila rola de lado, parando em cada peça.
  */
-export function DropHorizontal({ produtos }: { produtos: Product[] }) {
+export function DropHorizontal({ drop }: { drop: DropEmDestaque | null }) {
   const ref = useGsap<HTMLElement>((el) => {
     const mm = gsap.matchMedia();
     mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
@@ -38,19 +37,18 @@ export function DropHorizontal({ produtos }: { produtos: Product[] }) {
     return () => mm.revert();
   });
 
-  // sem peças no drop (catálogo vazio): a seção vira o aviso do próximo drop, sem a rolagem lateral
-  if (!produtos.length) return <DropEmBreve />;
+  // nenhuma peça com tag de drop: a seção vira o aviso do próximo drop, sem a rolagem lateral
+  if (!drop) return <DropEmBreve />;
 
+  const { colecao, produtos } = drop;
   const total = String(produtos.length).padStart(2, "0");
-  // o drop é a tag de drop das peças ("drop-02" → DROP 02); sem ela, o título é NOVO DROP e os links
-  // levam ao catálogo filtrado pela curadoria
-  const tag = produtos.flatMap((p) => p.tags ?? []).find((t) => DROP.test(t));
-  const [palavra, ...resto] = (tag ? colecaoDoDrop(tag).name : "NOVO DROP").split(" ");
+  // o título é o nome do drop ("drop-natal" → DROP NATAL), com a segunda parte vazada
+  const [palavra, ...resto] = colecao.name.split(" ");
 
   return (
     <section
       ref={ref}
-      className="dark flex flex-col justify-center overflow-hidden border-b border-border bg-background py-20 text-foreground md:py-14 md:motion-reduce:py-24"
+      className="dark flex flex-col justify-center overflow-hidden bg-background py-20 text-foreground md:py-14 md:motion-reduce:py-24"
     >
       <div className="snap-x snap-mandatory scroll-px-6 overflow-x-auto md:snap-none md:overflow-visible md:motion-reduce:snap-x md:motion-reduce:overflow-x-auto">
         <div data-trilho className="flex w-max items-end gap-5 px-6 md:gap-10">
@@ -62,12 +60,13 @@ export function DropHorizontal({ produtos }: { produtos: Product[] }) {
             <p className="mt-6 max-w-sm text-sm text-muted-foreground">
               {produtos.length} peças novas, feitas para a repetição. Role para ver todas.
             </p>
-            <LinkDoDrop
-              tag={tag}
+            <Link
+              to="/colecao/$slug"
+              params={{ slug: colecao.tag }}
               className="group mt-6 inline-flex w-fit items-center gap-2 border-b-2 border-foreground pb-1 text-xs font-medium uppercase tracking-[0.2em] transition hover:border-destaque"
             >
               Ver a coleção <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-            </LinkDoDrop>
+            </Link>
           </div>
           {produtos.map((p, i) => (
             <div
@@ -80,13 +79,14 @@ export function DropHorizontal({ produtos }: { produtos: Product[] }) {
               <ProductCard p={p} />
             </div>
           ))}
-          <LinkDoDrop
-            tag={tag}
+          <Link
+            to="/colecao/$slug"
+            params={{ slug: colecao.tag }}
             className="group flex w-[60vw] shrink-0 snap-start items-center gap-4 self-center font-display text-[13vw] leading-none md:w-[28vw] md:text-[5.5vw]"
           >
             VER TUDO
             <ArrowRight className="h-[0.6em] w-[0.6em] text-destaque transition-transform duration-500 group-hover:translate-x-3" />
-          </LinkDoDrop>
+          </Link>
         </div>
       </div>
       <div className="mx-6 mt-12 hidden h-px bg-foreground/20 md:block">
@@ -96,44 +96,32 @@ export function DropHorizontal({ produtos }: { produtos: Product[] }) {
   );
 }
 
-/** O lugar do drop quando ainda não há peças: o aviso de que vem aí e o convite para a newsletter. */
+/**
+ * O lugar do drop quando ainda não há peças: o aviso de que vem aí e o convite para a newsletter.
+ * A seção preta fica entre duas claras (destaques e newsletter), sem borda; o texto sobe de leve ao
+ * aparecer (useRevelar).
+ */
 function DropEmBreve() {
+  const ref = useRevelar<HTMLElement>();
   return (
-    <section className="dark border-b border-border bg-background px-6 py-20 text-foreground md:py-28">
-      <p className="text-[10px] font-medium tracking-[0.3em] text-destaque">PRÓXIMO DROP</p>
-      <h2 className="mt-4 font-display text-[18vw] leading-[0.85] md:text-[8vw]">
+    <section ref={ref} className="dark bg-background px-6 py-20 text-foreground md:py-28">
+      <p data-revela className="text-[10px] font-medium tracking-[0.3em] text-destaque">
+        PRÓXIMO DROP
+      </p>
+      <h2 data-revela className="mt-4 font-display text-[18vw] leading-[0.85] md:text-[8vw]">
         EM <span className="text-outline-light">BREVE</span>
       </h2>
-      <p className="mt-6 max-w-sm text-sm text-muted-foreground">
+      <p data-revela className="mt-6 max-w-sm text-sm text-muted-foreground">
         As peças do próximo drop ainda estão sendo preparadas. Entre na lista para saber primeiro.
       </p>
-      <a
-        href="#newsletter"
-        className="group mt-6 inline-flex w-fit items-center gap-2 border-b-2 border-foreground pb-1 text-xs font-medium uppercase tracking-[0.2em] transition hover:border-destaque"
-      >
-        Entrar na lista <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-      </a>
+      <div data-revela>
+        <a
+          href="#newsletter"
+          className="group mt-6 inline-flex w-fit items-center gap-2 border-b-2 border-foreground pb-1 text-xs font-medium uppercase tracking-[0.2em] transition hover:border-destaque"
+        >
+          Entrar na lista <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+        </a>
+      </div>
     </section>
-  );
-}
-
-/** Link para a coleção do drop ou, sem tag de drop, para o catálogo filtrado pelo novo drop. */
-function LinkDoDrop({
-  tag,
-  className,
-  children,
-}: {
-  tag?: string;
-  className: string;
-  children: ReactNode;
-}) {
-  return tag ? (
-    <Link to="/colecao/$slug" params={{ slug: tag }} className={className}>
-      {children}
-    </Link>
-  ) : (
-    <Link to="/catalogo" search={{ section: "novo-drop" }} className={className}>
-      {children}
-    </Link>
   );
 }

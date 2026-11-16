@@ -4,9 +4,8 @@ import { ArrowUpRight, BadgePercent } from "lucide-react";
 import moletom from "@/assets/product-hoodie.jpg";
 import regata from "@/assets/product-tank.jpg";
 import { promocoes } from "@/data/promocoes";
-import { DROP } from "@/lib/api";
+import type { DropEmDestaque } from "@/lib/api";
 import { money } from "@/lib/checkout";
-import type { Product } from "@/data/types";
 import { useGsap } from "@/hooks/useGsap";
 import { abertura } from "@/lib/abertura";
 import { gsap, SplitText } from "@/lib/movimento";
@@ -22,7 +21,7 @@ const CARD = "shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]";
  * O menu não fica aqui: é o MenuFlutuante, solto por cima de todas as páginas, e as colunas
  * guardam o espaço dele no topo.
  *   Esquerda: o nome PACK (na fonte do logo), o texto e dois cards com foto de roupa (a coleção,
- *   com o VER COLEÇÃO, e o último drop).
+ *   com o VER COLEÇÃO, e o drop em destaque ou, sem nenhum drop, o EM BREVE).
  *   Direita: a data e a hora, o card de promoções ativas e uma frase.
  * É a continuação do pré-loader: ele termina com esta mesma foto aberta e, quando avisa
  * (`abertura`), os blocos das laterais sobem e as letras de PACK aparecem. Sem pré-loader
@@ -36,7 +35,7 @@ export function HeroSection({
 }: {
   imagem: string;
   retrato: string;
-  drop: Product[];
+  drop: DropEmDestaque | null;
 }) {
   const ref = useGsap<HTMLElement>((el) => {
     const mm = gsap.matchMedia();
@@ -98,11 +97,11 @@ export function HeroSection({
 
 /**
  * Abaixo do espaço do menu: o título, o texto e dois cards de foto lado a lado (a coleção, que faz
- * as vezes do botão VER COLEÇÃO, e o novo drop).
+ * as vezes do botão VER COLEÇÃO, e o drop em destaque).
  */
-function ColunaEsquerda({ drop }: { drop: Product[] }) {
-  // a coleção do drop é a tag de drop das peças ("drop-02"); sem ela, o card leva ao catálogo
-  const tagDoDrop = drop.flatMap((p) => p.tags ?? []).find((t) => DROP.test(t));
+function ColunaEsquerda({ drop }: { drop: DropEmDestaque | null }) {
+  // o nome do drop em duas linhas: "DROP NATAL" → DROP / NATAL
+  const [palavra, ...resto] = (drop?.colecao.name ?? "").split(" ");
   return (
     <div className="flex min-h-0 flex-col">
       <div aria-hidden className={ESPACO_DO_MENU} />
@@ -147,12 +146,33 @@ function ColunaEsquerda({ drop }: { drop: Product[] }) {
           }
           acao="VER COLEÇÃO"
         />
-        {/* sem peças no drop (catálogo vazio), fica só o card da coleção */}
-        {drop.length > 0 && (
+        {/* o card do drop sempre aparece: com o drop em destaque (o da peça mais recente com tag de
+            drop) ou, sem nenhum, com o EM BREVE (igual à seção do drop mais abaixo), que leva à
+            newsletter */}
+        {!drop ? (
           <CardFoto
-            to={tagDoDrop ? "/colecao/$slug" : "/catalogo"}
-            params={tagDoDrop ? { slug: tagDoDrop } : undefined}
-            foto={drop[0]?.image ?? regata}
+            to="#newsletter"
+            foto={regata}
+            rotulo={
+              <span className="flex items-center gap-2">
+                <span className="h-2 w-2 bg-destaque" />
+                PRÓXIMO DROP
+              </span>
+            }
+            titulo={
+              <>
+                EM
+                <br />
+                <span className="text-outline-light">BREVE</span>
+              </>
+            }
+            acao="AVISE-ME"
+          />
+        ) : (
+          <CardFoto
+            to="/colecao/$slug"
+            params={{ slug: drop.colecao.tag }}
+            foto={drop.produtos[0]?.image ?? regata}
             rotulo={
               <span className="flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
@@ -164,8 +184,13 @@ function ColunaEsquerda({ drop }: { drop: Product[] }) {
             }
             titulo={
               <>
-                PRETO
-                <br />+ BRANCO
+                {palavra}
+                {resto.length > 0 && (
+                  <>
+                    <br />
+                    {resto.join(" ")}
+                  </>
+                )}
               </>
             }
             acao="VER DROP"
@@ -188,7 +213,8 @@ function CardFoto({
   titulo,
   acao,
 }: {
-  to: "/catalogo" | "/colecao/$slug";
+  /** rota do site ou "#newsletter" (a seção da newsletter, na própria home) */
+  to: "/catalogo" | "/colecao/$slug" | "#newsletter";
   params?: { slug: string };
   foto: string;
   rotulo: ReactNode;
@@ -221,6 +247,13 @@ function CardFoto({
   );
   const classe = `${CARD} group relative flex h-[150px] min-w-0 flex-col justify-between overflow-hidden bg-ink p-2.5 md:h-[150px] md:[@media(min-height:760px)]:h-[190px]`;
 
+  if (to === "#newsletter") {
+    return (
+      <a data-entra href="#newsletter" className={classe}>
+        {conteudo}
+      </a>
+    );
+  }
   return to === "/catalogo" ? (
     <Link data-entra to="/catalogo" className={classe}>
       {conteudo}

@@ -36,7 +36,7 @@ import type { AdminScreenProps, AdminView, EditableResource, RunAction } from ".
 const titles: Record<AdminView, string> = {
   overview: "PAINEL PACK",
   products: "PRODUTOS",
-  collections: "COLEÇÕES E TAGS",
+  collections: "COLEÇÕES",
   stock: "ESTOQUE",
   orders: "PEDIDOS",
   coupons: "CUPONS",

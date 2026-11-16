@@ -11,7 +11,8 @@ export const accountNav = [
 export const adminNav = [
   { to: "/admin/painel", label: "Visão geral", resource: "orders" },
   { to: "/admin/produtos", label: "Produtos", resource: "products" },
-  { to: "/admin/colecoes", label: "Coleções e tags", resource: "collections" },
+  { to: "/admin/colecoes", label: "Coleções", resource: "collections" },
+  { to: "/admin/tags", label: "Tags", resource: "tags" },
   { to: "/admin/estoque", label: "Estoque", resource: "stock" },
   { to: "/admin/pedidos", label: "Pedidos", resource: "orders" },
   { to: "/admin/cupons", label: "Cupons", resource: "coupons" },
@@ -20,19 +21,6 @@ export const adminNav = [
   { to: "/admin/mensagens", label: "Atendimento", resource: "messages" },
   { to: "/admin/newsletter", label: "Newsletter", resource: "subscribers" },
   { to: "/admin/trocas", label: "Trocas", resource: "returns" },
-] as const;
-
-/** Estilos do menu principal da loja: cada um abre as categorias. */
-export const MENU_ESTILOS = [
-  { style: "casual", label: "CASUAL" },
-  { style: "treino", label: "TREINO" },
-] as const;
-
-/** Categorias de cada estilo no menu (levam a /catalogo/estilo/categoria). */
-export const MENU_CATEGORIAS = [
-  { type: "camisetas", label: "Camisetas" },
-  { type: "bermudas", label: "Bermudas" },
-  { type: "conjuntos", label: "Conjuntos" },
 ] as const;
 
 /** Na mesma ordem das páginas lado a lado (PAGINAS_EM_ORDEM). */

@@ -2,6 +2,7 @@ import { useState, type MouseEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ehNovo } from "@/lib/api";
 import { useCart } from "@/lib/cart";
 import type { Product } from "@/data/types";
 
@@ -52,7 +53,8 @@ export function ProductCard({ p }: { p: Product }) {
           ))}
         </Link>
 
-        {p.section === "novo-drop" && (
+        {/* NOVO: o produto, ou uma variante dele, foi cadastrado nos últimos 3 meses */}
+        {ehNovo(p) && (
           <span className="pointer-events-none absolute left-3 top-3 bg-destaque px-2 py-1 text-[10px] font-semibold tracking-[0.2em] text-destaque-foreground">
             NOVO
           </span>

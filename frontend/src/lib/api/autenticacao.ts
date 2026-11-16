@@ -10,7 +10,8 @@ export type Staff = StaffMember;
 /** O que cada cargo vê no painel: admin vê tudo. */
 export function canStaff(role: StaffMember["role"], resource: string): boolean {
   if (role === "admin") return true;
-  if (role === "operacao") return ["orders", "products", "stock", "collections"].includes(resource);
+  if (role === "operacao")
+    return ["orders", "products", "stock", "collections", "tags"].includes(resource);
   return ["orders", "customers", "messages", "returns"].includes(resource); // atendimento
 }
 

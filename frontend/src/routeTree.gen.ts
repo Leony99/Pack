@@ -28,6 +28,7 @@ import { Route as AdminNewsletterRouteImport } from './routes/admin_.newsletter'
 import { Route as AdminPainelRouteImport } from './routes/admin_.painel'
 import { Route as AdminPedidosRouteImport } from './routes/admin_.pedidos'
 import { Route as AdminProdutosRouteImport } from './routes/admin_.produtos'
+import { Route as AdminTagsRouteImport } from './routes/admin_.tags'
 import { Route as AdminTrocasRouteImport } from './routes/admin_.trocas'
 import { Route as CatalogoIndexRouteImport } from './routes/catalogo.index'
 import { Route as ColecaoSlugRouteImport } from './routes/colecao.$slug'
@@ -142,6 +143,11 @@ const AdminPedidosRoute = AdminPedidosRouteImport.update({
 const AdminProdutosRoute = AdminProdutosRouteImport.update({
   id: '/admin_/produtos',
   path: '/admin/produtos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTagsRoute = AdminTagsRouteImport.update({
+  id: '/admin_/tags',
+  path: '/admin/tags',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminTrocasRoute = AdminTrocasRouteImport.update({
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/admin/painel': typeof AdminPainelRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/tags': typeof AdminTagsRoute
   '/admin/trocas': typeof AdminTrocasRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/conta/dados': typeof ContaDadosRoute
@@ -306,6 +313,7 @@ export interface FileRoutesByTo {
   '/admin/painel': typeof AdminPainelRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/tags': typeof AdminTagsRoute
   '/admin/trocas': typeof AdminTrocasRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/conta/dados': typeof ContaDadosRoute
@@ -348,6 +356,7 @@ export interface FileRoutesById {
   '/admin_/painel': typeof AdminPainelRoute
   '/admin_/pedidos': typeof AdminPedidosRoute
   '/admin_/produtos': typeof AdminProdutosRoute
+  '/admin_/tags': typeof AdminTagsRoute
   '/admin_/trocas': typeof AdminTrocasRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/conta_/dados': typeof ContaDadosRoute
@@ -391,6 +400,7 @@ export interface FileRouteTypes {
     | '/admin/painel'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/admin/tags'
     | '/admin/trocas'
     | '/colecao/$slug'
     | '/conta/dados'
@@ -432,6 +442,7 @@ export interface FileRouteTypes {
     | '/admin/painel'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/admin/tags'
     | '/admin/trocas'
     | '/colecao/$slug'
     | '/conta/dados'
@@ -473,6 +484,7 @@ export interface FileRouteTypes {
     | '/admin_/painel'
     | '/admin_/pedidos'
     | '/admin_/produtos'
+    | '/admin_/tags'
     | '/admin_/trocas'
     | '/colecao/$slug'
     | '/conta_/dados'
@@ -515,6 +527,7 @@ export interface RootRouteChildren {
   AdminPainelRoute: typeof AdminPainelRoute
   AdminPedidosRoute: typeof AdminPedidosRoute
   AdminProdutosRoute: typeof AdminProdutosRoute
+  AdminTagsRoute: typeof AdminTagsRoute
   AdminTrocasRoute: typeof AdminTrocasRoute
   ColecaoSlugRoute: typeof ColecaoSlugRoute
   ContaDadosRoute: typeof ContaDadosRoute
@@ -670,6 +683,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/produtos'
       fullPath: '/admin/produtos'
       preLoaderRoute: typeof AdminProdutosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin_/tags': {
+      id: '/admin_/tags'
+      path: '/admin/tags'
+      fullPath: '/admin/tags'
+      preLoaderRoute: typeof AdminTagsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin_/trocas': {
@@ -835,6 +855,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminPainelRoute: AdminPainelRoute,
   AdminPedidosRoute: AdminPedidosRoute,
   AdminProdutosRoute: AdminProdutosRoute,
+  AdminTagsRoute: AdminTagsRoute,
   AdminTrocasRoute: AdminTrocasRoute,
   ColecaoSlugRoute: ColecaoSlugRoute,
   ContaDadosRoute: ContaDadosRoute,

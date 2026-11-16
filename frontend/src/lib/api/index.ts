@@ -5,10 +5,21 @@
 // Hoje só o catálogo está ligado à API; o que falta e as diferenças de contrato: frontend/README.md.
 export * from "./erros";
 export * from "./modo";
-export { DROP, colecaoDoDrop } from "./tags";
+export {
+  CATEGORIAS_INICIAIS,
+  ESTILOS_FIXOS,
+  colecaoDoDrop,
+  colecoesDoProduto,
+  nomeDaOpcao,
+  normalizarTag,
+  SLUG,
+  type FiltroDaTag,
+  type Opcao,
+} from "./tags";
 export * from "./catalogo";
 export * from "./compra";
 export * from "./autenticacao";
 export * from "./conta";
 export * from "./conteudo";
 export * from "./admin";
+export * from "./tags-painel";

@@ -146,3 +146,59 @@ describe("coleções e operações simuladas", () => {
     expect(await api.validateCoupon("EXPIRED")).toBeNull();
   });
 });
+
+describe("aba Tags (demonstração)", () => {
+  test("cada tag dos produtos aparece com o filtro que teria na API", async () => {
+    await api.enterDemo("staff");
+    const tags = await api.getTags();
+    expect(tags.find((t) => t.tag === "drop-02")).toMatchObject({ filtro: "COLECAO" });
+  });
+
+  test("a tag nova vira a opção do filtro; em uso, o filtro não muda", async () => {
+    await api.enterDemo("staff");
+    const salva = await api.saveTag({ tag: "Moletons", filtro: "CATEGORIA" });
+    expect(salva).toMatchObject({ tag: "moletons", filtro: "CATEGORIA" });
+    const drop = (await api.getTags()).find((t) => t.tag === "drop-02")!;
+    await expect(api.saveTag({ ...drop, filtro: null })).rejects.toThrow(/só muda/);
+  });
+
+  test("tag de estilo em uso não pode ser apagada; sem produtos, pode", async () => {
+    await api.enterDemo("staff");
+    const emUso = await api.saveTag({ tag: "treino-x", filtro: "ESTILO" });
+    const livre = await api.saveTag({ tag: "treino-y", filtro: "ESTILO" });
+    // getProduct da demonstração devolve a peça da simulação: ligar a tag nela é ligar no produto
+    (await api.getProduct("p1"))!.tags?.push("treino-x");
+    await expect(api.deleteTag(emUso.id)).rejects.toThrow(/troque a tag/);
+    await api.deleteTag(livre.id);
+    expect((await api.getTags()).map((t) => t.tag)).not.toContain("treino-y");
+  });
+
+  test("renomear a tag renomeia nos produtos; apagar tira dos produtos", async () => {
+    await api.enterDemo("staff");
+    const drop = (await api.getTags()).find((t) => t.tag === "drop-02")!;
+    await api.saveTag({ ...drop, tag: "drop-natal" });
+    expect((await api.getProduct("p1"))?.tags).toContain("drop-natal");
+    await api.deleteTag(drop.id);
+    expect((await api.getProduct("p1"))?.tags).not.toContain("drop-natal");
+  });
+
+  test("a loja tem os estilos fixos e as categorias iniciais; os fixos não mudam nem saem", async () => {
+    await api.enterDemo("staff");
+    const tags = await api.getTags();
+    const casual = tags.find((t) => t.tag === "casual")!;
+    expect(casual).toMatchObject({ filtro: "ESTILO", fixa: true });
+    for (const categoria of ["camisa", "bermuda", "conjunto"])
+      expect(tags.find((t) => t.tag === categoria)).toMatchObject({
+        filtro: "CATEGORIA",
+        fixa: false,
+      });
+    await expect(api.deleteTag(casual.id)).rejects.toThrow(/fixo/);
+    await expect(api.saveTag({ ...casual, tag: "casual-2" })).rejects.toThrow(/fixo/);
+  });
+
+  test("conta quantos produtos usam cada tag", () => {
+    const contagem = api.contarProdutosPorTag([{ tags: ["a", "b"] }, { tags: ["a"] }, {}]);
+    expect(contagem.get("a")).toBe(2);
+    expect(contagem.get("b")).toBe(1);
+  });
+});

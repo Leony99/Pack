@@ -8,7 +8,8 @@ import { DropHorizontal } from "@/components/home/DropHorizontal";
 import { HeroSection } from "@/components/home/HeroSection";
 import { PreLoader } from "@/components/home/PreLoader";
 import { StyleCards } from "@/components/home/StyleCards";
-import { getSection } from "@/lib/api";
+import { getDropEmDestaque, getSection } from "@/lib/api";
+import { useRevelar } from "@/hooks/useRevelar";
 import { pageHead } from "@/lib/metadata";
 
 /**
@@ -19,14 +20,12 @@ const sectionsQuery = queryOptions({
   queryKey: ["products", "home"],
   queryFn: async () => {
     try {
-      const [destaques, novoDrop] = await Promise.all([
-        getSection("destaques"),
-        getSection("novo-drop", 8),
-      ]);
-      return { destaques, novoDrop };
+      // o drop em destaque é o da peça mais recente com tag de drop (null: EM BREVE)
+      const [destaques, drop] = await Promise.all([getSection("destaques"), getDropEmDestaque()]);
+      return { destaques, drop };
     } catch (erro) {
       console.error("Home sem produtos:", erro);
-      return { destaques: [], novoDrop: [] };
+      return { destaques: [], drop: null };
     }
   },
 });
@@ -53,13 +52,13 @@ export const Route = createFileRoute("/")({
  */
 function Index() {
   const {
-    data: { destaques, novoDrop },
+    data: { destaques, drop },
   } = useSuspenseQuery(sectionsQuery);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PreLoader imagem={hero} retrato={heroRetrato} />
-      <HeroSection imagem={hero} retrato={heroRetrato} drop={novoDrop} />
+      <HeroSection imagem={hero} retrato={heroRetrato} drop={drop} />
       <StyleCards />
 
       <SectionRow
@@ -68,17 +67,29 @@ function Index() {
         items={destaques}
         viewAllSearch={{ section: "destaques" }}
       />
-      <DropHorizontal produtos={novoDrop} />
+      <DropHorizontal drop={drop} />
 
-      <section id="newsletter" className="scroll-mt-24 border-t border-border bg-secondary">
-        <div className="mx-auto max-w-[1400px] px-6 py-20 text-center">
-          <h2 className="font-display text-4xl md:text-6xl">JOIN THE PACK</h2>
-          <p className="mx-auto mt-4 max-w-md text-sm text-muted-foreground">
-            Acesso antecipado a drops, edições limitadas e conteúdo de treino.
-          </p>
+      <Newsletter />
+    </div>
+  );
+}
+
+/** Newsletter, logo depois da seção preta do drop; o conteúdo sobe de leve ao aparecer. */
+function Newsletter() {
+  const ref = useRevelar<HTMLElement>();
+  return (
+    <section ref={ref} id="newsletter" className="scroll-mt-24 bg-secondary">
+      <div className="mx-auto max-w-[1400px] px-6 py-20 text-center">
+        <h2 data-revela className="font-display text-4xl md:text-6xl">
+          JOIN THE PACK
+        </h2>
+        <p data-revela className="mx-auto mt-4 max-w-md text-sm text-muted-foreground">
+          Acesso antecipado a drops, edições limitadas e conteúdo de treino.
+        </p>
+        <div data-revela>
           <NewsletterForm />
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }

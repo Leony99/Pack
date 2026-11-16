@@ -1,9 +1,17 @@
 // Tradução da Pack API para as telas: tags nos filtros, produto → Product e erros da API.
 import { describe, expect, it } from "vitest";
 import { IMAGEM_SEM_FOTO, produtoDaApi, type ProdutoDaApi } from "./adaptadores";
-import { filtrarProdutos } from "./catalogo";
+import { ehNovo, filtrarProdutos } from "./catalogo";
 import { ErroDaApi } from "./erros";
-import { classificarTags, colecaoDoDrop, normalizarTag } from "./tags";
+import {
+  classificarTags,
+  colecaoDoDrop,
+  maisRecentesPrimeiro,
+  nomeDaOpcao,
+  normalizarTag,
+  opcoesDoFiltro,
+  tagDoDropEmDestaque,
+} from "./tags";
 
 /** Um produto como a API devolve (GET /api/v1/products/{id}). */
 function produto(extra: Partial<ProdutoDaApi> = {}): ProdutoDaApi {
@@ -19,10 +27,10 @@ function produto(extra: Partial<ProdutoDaApi> = {}): ProdutoDaApi {
       { id: "i1", url: "https://cdn.exemplo.com/frente.jpg", ordem: 0 },
     ],
     tags: [
-      { id: "t1", tag: "Camiseta" },
-      { id: "t2", tag: "Treino" },
-      { id: "t3", tag: "Drop 02" },
-      { id: "t4", tag: "Destaques" },
+      { id: "t1", tag: "camisetas", filtro: "CATEGORIA" },
+      { id: "t2", tag: "Treino", filtro: "ESTILO" },
+      { id: "t3", tag: "Drop 02", filtro: "COLECAO" },
+      { id: "t4", tag: "Destaques", filtro: null },
     ],
     variantes: [
       {
@@ -61,21 +69,45 @@ describe("tags", () => {
     expect(normalizarTag("Lançamento")).toBe("lancamento");
   });
 
-  it("distribui cada tag no seu filtro", () => {
+  it("a própria tag é a opção do filtro que ela tem na API", () => {
     const tags = classificarTags([
-      "camisetas",
-      "Casual",
-      "treino",
-      "novidades",
-      "drop 03",
-      "verão",
+      { id: "1", tag: "Moletons", filtro: "CATEGORIA" },
+      { id: "2", tag: "Casual", filtro: "ESTILO" },
+      { id: "3", tag: "treino", filtro: "ESTILO" },
+      { id: "4", tag: "Drop Natal", filtro: "COLECAO" },
+      { id: "5", tag: "verão", filtro: null },
     ]);
-    expect(tags.categoria).toBe("camisetas");
+    expect(tags.categoria).toBe("moletons");
     expect(tags.estilos).toEqual(["casual", "treino"]);
-    expect(tags.curadoria).toBe("novo-drop");
+    expect(tags.colecoes).toEqual(["drop-natal"]);
     // a tag sem filtro continua no produto (a busca usa)
     expect(tags.todas).toContain("verao");
-    expect(tags.todas).toContain("drop-03");
+  });
+
+  it("o nome da tag sozinho não decide o filtro", () => {
+    // sem filtro na API, "camisetas" e "drop-03" não viram categoria nem coleção
+    const tags = classificarTags([
+      { id: "1", tag: "camisetas" },
+      { id: "2", tag: "drop-03" },
+    ]);
+    expect(tags.categoria).toBeUndefined();
+    expect(tags.colecoes).toEqual([]);
+  });
+
+  it("as opções de cada filtro são as tags dele, sem repetir e em ordem", () => {
+    const tags = [
+      { id: "1", tag: "Treino", filtro: "ESTILO" as const },
+      { id: "2", tag: "casual", filtro: "ESTILO" as const },
+      { id: "3", tag: "treino", filtro: "ESTILO" as const },
+      { id: "4", tag: "moletons", filtro: "CATEGORIA" as const },
+      { id: "5", tag: "verao" },
+    ];
+    expect(opcoesDoFiltro(tags, "ESTILO")).toEqual([
+      { valor: "casual", nome: "Casual" },
+      { valor: "treino", nome: "Treino" },
+    ]);
+    expect(opcoesDoFiltro(tags, "CATEGORIA").map((o) => o.valor)).toEqual(["moletons"]);
+    expect(nomeDaOpcao("drop-natal")).toBe("Drop natal");
   });
 
   it("monta a coleção do drop a partir da tag", () => {
@@ -97,11 +129,11 @@ describe("produtoDaApi", () => {
       price: 169.9,
       type: "camisetas",
       styles: ["treino"],
-      section: "destaques",
       color: "BLACK",
       description: "Camiseta pesada.",
     });
     expect(p.tags).toContain("drop-02");
+    expect(p.colecoes).toEqual(["drop-02"]);
   });
 
   it("soma o estoque das cores de cada tamanho", () => {
@@ -129,8 +161,69 @@ describe("produtoDaApi", () => {
     expect(p.image).toBe(IMAGEM_SEM_FOTO);
     expect(p.stock).toEqual({});
     expect(p.styles).toEqual([]);
-    expect(p.type).toBe("camisetas");
+    expect(p.type).toBe("camisa");
     expect(p.description).toBeUndefined();
+  });
+});
+
+describe("drop em destaque", () => {
+  const peca = (tags: string[], createdAt?: string) => ({ tags, createdAt });
+
+  it("guarda a data de cadastro da API", () => {
+    expect(produtoDaApi(produto()).createdAt).toBe("2026-11-01T10:00:00");
+  });
+
+  it("escolhe o drop da peça cadastrada mais recentemente, com qualquer nome", () => {
+    const produtos = [
+      peca(["drop-02", "camiseta"], "2026-10-01T10:00:00"),
+      peca(["destaques"], "2026-12-20T10:00:00"),
+      peca(["drop-natal"], "2026-12-01T10:00:00"),
+      peca(["drop-10"], "2026-11-01T10:00:00"),
+    ];
+    expect(tagDoDropEmDestaque(produtos)).toBe("drop-natal");
+  });
+
+  it("sem peça com tag de drop, não há drop em destaque (EM BREVE)", () => {
+    expect(tagDoDropEmDestaque([peca(["destaques"], "2026-12-01T10:00:00")])).toBeUndefined();
+    expect(tagDoDropEmDestaque([])).toBeUndefined();
+  });
+
+  it("ordena da mais nova para a mais antiga; sem data, vai para o fim", () => {
+    const ordem = maisRecentesPrimeiro([
+      peca(["a"]),
+      peca(["b"], "2026-01-01T00:00:00"),
+      peca(["c"], "2026-06-01T00:00:00"),
+    ]).map((p) => p.tags[0]);
+    expect(ordem).toEqual(["c", "b", "a"]);
+  });
+});
+
+describe("selo NOVO", () => {
+  const agora = new Date("2026-11-16T12:00:00");
+
+  it("a tag destaques não vira curadoria (destaques são os mais vendidos)", () => {
+    expect(produtoDaApi(produto()).section).toBeUndefined();
+  });
+
+  it("usa o cadastro mais recente entre o do produto e o das variantes", () => {
+    const p = produto({ criadoEm: "2026-01-10T10:00:00" });
+    p.variantes![1]!.criadoEm = "2026-10-05T09:00:00";
+    p.variantes![2]!.criadoEm = null;
+    expect(produtoDaApi(p).novidadeEm).toBe("2026-10-05T09:00:00");
+  });
+
+  it("produto ou variante dos últimos 3 meses ganha o selo", () => {
+    expect(ehNovo({ novidadeEm: "2026-08-20T00:00:00" }, agora)).toBe(true);
+    expect(ehNovo({ novidadeEm: "2026-08-10T00:00:00" }, agora)).toBe(false);
+    expect(ehNovo({}, agora)).toBe(false);
+  });
+
+  it("o filtro Novidades do catálogo segue o selo", () => {
+    const novo = { ...produtoDaApi(produto()), id: "novo", novidadeEm: new Date().toISOString() };
+    const antigo = { ...produtoDaApi(produto()), id: "antigo", novidadeEm: "2020-01-01T00:00:00" };
+    expect(filtrarProdutos([novo, antigo], { section: "novo-drop" }).map((p) => p.id)).toEqual([
+      "novo",
+    ]);
   });
 });
 
@@ -141,7 +234,7 @@ describe("filtrarProdutos", () => {
       id: "b",
       nome: "Bermuda",
       preco: 120,
-      tags: [{ id: "t", tag: "bermudas" }],
+      tags: [{ id: "t", tag: "bermudas", filtro: "CATEGORIA" }],
     }),
   );
 

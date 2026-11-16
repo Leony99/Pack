@@ -114,4 +114,7 @@ export const decorateProduct = (product: Product): Product => ({
   ],
   stock: product.stock ?? { PP: 0, P: 5, M: 12, G: 8, GG: 3 },
   active: product.active ?? true,
+  // as peças do drop da demonstração contam como cadastradas agora (selo NOVO)
+  novidadeEm:
+    product.novidadeEm ?? (product.section === "novo-drop" ? new Date().toISOString() : undefined),
 });

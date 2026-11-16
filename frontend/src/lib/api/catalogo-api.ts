@@ -25,7 +25,7 @@ function validarBusca(entrada: unknown): { nome?: string } {
 
 /**
  * Todos os produtos ativos da API (ou os que batem com a busca por nome), já no formato das telas.
- * Os filtros de estilo, categoria, curadoria e drop são aplicados depois, sobre as tags (tags.ts):
+ * Os filtros de estilo, categoria e drop são aplicados depois, sobre as tags (tags.ts):
  * a API só filtra por uma tag exata, e as tags podem ter grafias diferentes.
  */
 export const produtosDaApi = createServerFn({ method: "GET" })
@@ -43,6 +43,26 @@ export const produtosDaApi = createServerFn({ method: "GET" })
       produtos.push(...resposta.itens);
       if (pagina + 1 >= resposta.totalPaginas) break;
     }
+    return produtos.map(produtoDaApi);
+  });
+
+/** Máximo que a API aceita em GET /products/mais-vendidos. */
+export const MAXIMO_DOS_MAIS_VENDIDOS = 48;
+
+/**
+ * Os mais vendidos, em ordem (GET /api/v1/products/mais-vendidos?limite=): os dos últimos 90 dias,
+ * depois os de sempre e, faltando, os cadastrados mais recentemente. É a linha DESTAQUES.
+ */
+export const maisVendidosDaApi = createServerFn({ method: "GET" })
+  .validator((limite: unknown) => {
+    if (typeof limite !== "number" || !Number.isInteger(limite))
+      throw new Error("Limite inválido.");
+    return Math.min(Math.max(limite, 1), MAXIMO_DOS_MAIS_VENDIDOS);
+  })
+  .handler(async ({ data: limite }): Promise<Product[]> => {
+    const produtos = await chamarApi<ProdutoDaApi[]>(
+      `/api/v1/products/mais-vendidos?limite=${limite}`,
+    );
     return produtos.map(produtoDaApi);
   });
 

@@ -8,15 +8,18 @@ const ESTILOS = [
   { style: "treino", img: shorts, title: "TREINO", desc: "Performance, mobilidade, repetição." },
 ] as const;
 
-/** Dois cards grandes, um por estilo, que abrem as camisetas daquele estilo. */
+/**
+ * Dois cards grandes, um por estilo fixo da loja (casual e treino), que abrem o catálogo já
+ * filtrado por aquele estilo (/catalogo?style=casual), com todas as categorias.
+ */
 export function StyleCards() {
   return (
     <section className="mx-auto grid max-w-[1400px] grid-cols-1 gap-px bg-border md:grid-cols-2">
       {ESTILOS.map((c) => (
         <Link
           key={c.style}
-          to="/catalogo/$style/$type"
-          params={{ style: c.style, type: "camisetas" }}
+          to="/catalogo"
+          search={{ style: c.style }}
           className="group relative aspect-[4/3] overflow-hidden bg-background"
         >
           <img

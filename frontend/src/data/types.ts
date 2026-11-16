@@ -6,8 +6,13 @@
  * através de `src/lib/api` — componentes e rotas importam daqui só os tipos.
  */
 
-export type Style = "casual" | "treino";
-export type ItemType = "camisetas" | "bermudas" | "conjuntos";
+/**
+ * Estilo e categoria: na API, são as tags com filtro ESTILO e CATEGORIA (a tag normalizada, como
+ * "treino" ou "moletons"), então qualquer texto vale. A loja cria sozinha os estilos fixos
+ * casual/treino e as categorias camisa/bermuda/conjunto, as mesmas da demonstração.
+ */
+export type Style = string;
+export type ItemType = string;
 export type Section = "destaques" | "novo-drop";
 
 /** PRODUCT (+ PRODUCT_IMAGE, PRODUCT_TAG_LINK achatados) */
@@ -24,12 +29,18 @@ export type Product = {
   styles: Style[];
   /** tag de categoria (PRODUCT_TAG) */
   type: ItemType;
-  /** tag de curadoria: destaques / novo-drop (PRODUCT_TAG) */
+  /** curadoria da demonstração (na API, destaques são os mais vendidos e novidades vêm da data) */
   section?: Section;
   description?: string;
   tags?: string[];
+  /** coleções (drops) do produto: as tags com filtro COLECAO na API; na demonstração, as "drop-..." */
+  colecoes?: string[];
   stock?: Record<string, number>;
   active?: boolean;
+  /** data de cadastro (ISO); escolhe o drop em destaque, o da peça mais recente */
+  createdAt?: string;
+  /** cadastro mais recente do produto ou de uma variante dele (ISO): até 3 meses, selo NOVO */
+  novidadeEm?: string;
 };
 
 /** COUPON */

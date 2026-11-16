@@ -1,24 +1,24 @@
 import { pageHead } from "@/lib/metadata";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import type { ItemType, Style } from "@/data/types";
 import { CatalogView } from "@/components/catalog/CatalogView";
 import { CardAviso, PaginaTopo } from "@/components/layout/PaginaTopo";
 import { freeShippingFrom } from "@/data/shipping";
-
-const VALID_STYLES: Style[] = ["casual", "treino"];
-const VALID_TYPES: ItemType[] = ["camisetas", "bermudas", "conjuntos"];
+import { getOpcoesDoCatalogo, nomeDaOpcao, SLUG } from "@/lib/api";
 
 export const Route = createFileRoute("/catalogo/$style/$type")({
   validateSearch: (s: Record<string, unknown>): { sort?: string } => ({
     sort: typeof s.sort === "string" ? s.sort : "recent",
   }),
-  beforeLoad: ({ params }) => {
-    if (
-      !VALID_STYLES.includes(params.style as Style) ||
-      !VALID_TYPES.includes(params.type as ItemType)
-    ) {
+  // estilo e categoria são tags (aba Tags do painel): o par precisa existir entre as opções
+  beforeLoad: async ({ params }) => {
+    if (!SLUG.test(params.style) || !SLUG.test(params.type)) throw notFound();
+    const opcoes = await getOpcoesDoCatalogo().catch(() => null);
+    // sem a API, a página abre e o catálogo mostra o erro
+    if (!opcoes) return;
+    const existe = (lista: { valor: string }[], valor: string) =>
+      lista.some((o) => o.valor === valor);
+    if (!existe(opcoes.estilos, params.style) || !existe(opcoes.categorias, params.type))
       throw notFound();
-    }
   },
   head: ({ params }) =>
     pageHead(`${params.type} / ${params.style}`, "Explore peças PACK por categoria e estilo."),
@@ -27,8 +27,8 @@ export const Route = createFileRoute("/catalogo/$style/$type")({
 
 function CatalogPage() {
   const { style, type } = Route.useParams();
-  const s = style as Style;
-  const t = type as ItemType;
+  const s = style;
+  const t = type;
 
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -36,8 +36,8 @@ function CatalogPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PaginaTopo
-        caminho={`CATÁLOGO / ${s.toUpperCase()} / ${t.toUpperCase()}`}
-        titulo={t}
+        caminho={`CATÁLOGO / ${nomeDaOpcao(s).toUpperCase()} / ${nomeDaOpcao(t).toUpperCase()}`}
+        titulo={nomeDaOpcao(t)}
         lado={
           <>
             <CardAviso

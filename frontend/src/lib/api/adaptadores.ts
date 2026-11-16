@@ -2,7 +2,7 @@
 // as telas usam (src/data/types.ts). As telas não conhecem a API: só esta camada muda se o contrato
 // mudar. Funções puras, testadas em adaptadores.test.ts.
 import type { Product } from "@/data/types";
-import { classificarTags } from "./tags";
+import { classificarTags, type TagDaApi } from "./tags";
 
 /** Listagem paginada da API: GET /products?pagina=0&tamanho=20. */
 export type PaginaDaApi<T> = {
@@ -20,6 +20,8 @@ export type VarianteDaApi = {
   color: { id: string; nome: string; hex: string } | null;
   precoEfetivo: number;
   quant: number;
+  /** null nas variantes cadastradas antes de a API guardar a data */
+  criadoEm?: string | null;
 };
 
 export type ProdutoDaApi = {
@@ -30,7 +32,7 @@ export type ProdutoDaApi = {
   slug: string;
   criadoEm: string;
   imagens: { id: string; url: string; ordem: number }[] | null;
-  tags: { id: string; tag: string }[] | null;
+  tags: TagDaApi[] | null;
   variantes: VarianteDaApi[] | null;
 };
 
@@ -63,7 +65,9 @@ function corDoProduto(variantes: VarianteDaApi[]): Product["color"] {
 /**
  * ProdutoDaApi → Product.
  * - estoque: soma a quantidade das variantes de cada tamanho (o produto pode ter várias cores);
- * - estilo, categoria e curadoria saem das tags (ver tags.ts);
+ * - estilo, categoria e coleções saem do filtro de cada tag na API (ver tags.ts); destaques e novidades não usam tag (mais
+ *   vendidos e data de cadastro);
+ * - novidadeEm: o cadastro mais recente entre o do produto e o das variantes (selo NOVO);
  * - imagens em ordem, só http(s); sem foto, usa IMAGEM_SEM_FOTO.
  * O que a tela ainda não usa (SKU, cor por variante, preço por variante) fica na API: a escolha de
  * variante entra quando o carrinho for ligado.
@@ -74,7 +78,7 @@ export function produtoDaApi(p: ProdutoDaApi): Product {
     .sort((a, b) => a.ordem - b.ordem)
     .map((i) => i.url)
     .filter(urlDeImagemSegura);
-  const tags = classificarTags((p.tags ?? []).map((t) => t.tag));
+  const tags = classificarTags(p.tags ?? []);
 
   const stock: Record<string, number> = {};
   for (const v of variantes) {
@@ -90,12 +94,24 @@ export function produtoDaApi(p: ProdutoDaApi): Product {
     images: imagens.length ? imagens : [IMAGEM_SEM_FOTO],
     color: corDoProduto(variantes),
     styles: tags.estilos,
-    // sem tag de categoria, cai em camisetas (é a categoria que a tela mostra quando não sabe)
-    type: tags.categoria ?? "camisetas",
-    section: tags.curadoria,
+    // todo produto novo tem categoria; um antigo, sem ela, cai em camisa (a primeira categoria da loja)
+    type: tags.categoria ?? "camisa",
     description: p.descricao ?? undefined,
     tags: tags.todas,
+    colecoes: tags.colecoes,
     stock,
     active: true,
+    createdAt: p.criadoEm,
+    novidadeEm: ultimaData([p.criadoEm, ...variantes.map((v) => v.criadoEm)]),
   };
+}
+
+/** A data mais recente da lista (ignora as vazias e as inválidas). */
+function ultimaData(datas: (string | null | undefined)[]): string | undefined {
+  let maior: string | undefined;
+  for (const data of datas) {
+    if (data && !Number.isNaN(Date.parse(data)) && (!maior || Date.parse(data) > Date.parse(maior)))
+      maior = data;
+  }
+  return maior;
 }

@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import type { CatalogSearch } from "@/components/catalog/filtros";
 import type { Product } from "@/data/types";
+import { useRevelar } from "@/hooks/useRevelar";
 
 type Props = {
   /** Texto pequeno acima do título. */
@@ -15,13 +16,18 @@ type Props = {
 
 /**
  * Uma linha de até 4 produtos com o link para ver todos no catálogo (home e página do produto).
- * Sem produtos (catálogo vazio, nenhum com a tag da curadoria), a linha não aparece.
+ * Sem produtos (catálogo vazio), a linha não aparece. O título e as peças sobem de leve ao
+ * aparecer na tela (useRevelar).
  */
 export function SectionRow({ eyebrow, title, items, viewAllSearch }: Props) {
+  const ref = useRevelar<HTMLElement>();
   if (!items.length) return null;
   return (
-    <section className="mx-auto max-w-[1400px] px-6 py-20 md:py-24">
-      <div className="mb-12 flex flex-col items-baseline justify-between gap-4 md:flex-row">
+    <section ref={ref} className="mx-auto max-w-[1400px] px-6 py-20 md:py-24">
+      <div
+        data-revela
+        className="mb-12 flex flex-col items-baseline justify-between gap-4 md:flex-row"
+      >
         <div>
           <p className="text-[10px] font-medium tracking-[0.3em] text-muted-foreground">
             {eyebrow}
@@ -39,7 +45,11 @@ export function SectionRow({ eyebrow, title, items, viewAllSearch }: Props) {
 
       <div className="grid grid-cols-1 gap-px border-0 bg-transparent md:grid-cols-4">
         {items.slice(0, 4).map((p) => (
-          <div key={p.id} className="bg-transparent p-5 transition-colors hover:bg-secondary">
+          <div
+            key={p.id}
+            data-revela
+            className="bg-transparent p-5 transition-colors hover:bg-secondary"
+          >
             <ProductCard p={p} />
           </div>
         ))}

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MENU_CATEGORIAS, MENU_ESTILOS, MENU_SUPORTE } from "./navegacao";
+import { MENU_SUPORTE } from "./navegacao";
 
 const POLITICAS = [
   { label: "Política de troca", to: "/politicas/troca" },
@@ -17,12 +17,12 @@ const COLUNAS = [
 const TITULO_DA_COLUNA = "text-xs font-medium tracking-[0.3em] text-muted-foreground";
 const LINK = "cursor-pointer hover:opacity-60";
 
-/** Rodapé: marca e newsletter, as categorias de cada estilo, suporte e políticas. */
+/** Rodapé: marca e newsletter, suporte e políticas. */
 export function SiteFooter() {
   return (
     <footer className="border-t border-border">
       <div className="px-4 py-16 md:px-6">
-        <div className="grid gap-10 md:grid-cols-5">
+        <div className="grid gap-10 md:auto-cols-fr md:grid-flow-col">
           <div>
             {/* o nome na altura de uma linha de título, para os links ficarem na mesma linha dos
                 das outras colunas */}
@@ -35,24 +35,6 @@ export function SiteFooter() {
               </li>
             </ul>
           </div>
-          {MENU_ESTILOS.map((estilo) => (
-            <div key={estilo.style}>
-              <p className={TITULO_DA_COLUNA}>{estilo.label}</p>
-              <ul className="mt-4 space-y-2 text-sm">
-                {MENU_CATEGORIAS.map((categoria) => (
-                  <li key={categoria.label}>
-                    <Link
-                      to="/catalogo/$style/$type"
-                      params={{ style: estilo.style, type: categoria.type }}
-                      className={LINK}
-                    >
-                      {categoria.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
           {COLUNAS.map((coluna) => (
             <div key={coluna.title}>
               <p className={TITULO_DA_COLUNA}>{coluna.title}</p>
