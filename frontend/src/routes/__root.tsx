@@ -4,12 +4,14 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Scripts,
+  useRouter,
   useRouterState,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { abertura } from "@/lib/abertura";
+import { instalarPercurso } from "@/lib/percurso";
 import { SessionProvider } from "@/lib/session";
 import { CartProvider } from "@/lib/cart";
 import { MenuFlutuante } from "@/components/layout/MenuFlutuante";
@@ -77,6 +79,10 @@ function RootComponent() {
   useEffect(() => {
     if (caminho !== "/") abertura.concluir();
   }, [caminho]);
+
+  // links entre as páginas do menu passam pelas páginas do meio; o da página atual volta ao topo
+  const router = useRouter();
+  useEffect(() => instalarPercurso(router), [router]);
 
   return (
     <SessionProvider>

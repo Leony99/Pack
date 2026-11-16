@@ -8,7 +8,8 @@ import { routeTree } from "./routeTree.gen";
 /**
  * As páginas do menu ficam lado a lado (HOME, CATÁLOGO, CONTATO, TAMANHOS, FAQ, ÁREA DO CLIENTE):
  * indo para uma mais à direita, a tela arrasta para a esquerda ("para-frente"); voltando, arrasta
- * para a direita ("para-tras"). Dentro da mesma página (ex.: /conta → /conta/pedidos) e nas páginas
+ * para a direita ("para-tras"). Indo a uma página a duas ou mais posições, o percurso.ts passa pelas
+ * do meio, com os tipos de etapa ("etapa-inicio", "etapa-meio", "etapa-fim"). Dentro da mesma página (ex.: /conta → /conta/pedidos) e nas páginas
  * fora do menu (busca, produto, carrinho...), a troca é sem animação.
  */
 function tiposDeTransicao({
@@ -35,7 +36,11 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     context: { queryClient },
+    // cada página guarda a própria rolagem (a chave é o caminho, não a entrada do histórico): sair
+    // da home no meio e voltar a deixa no meio, mesmo por um link; uma página nunca visitada abre no
+    // topo. Para voltar ao topo, rola-se para cima ou clica-se no link da própria página (percurso.ts)
     scrollRestoration: true,
+    getScrollRestorationKey: (location) => location.pathname,
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: RouteError,
     defaultNotFoundComponent: NotFoundPage,

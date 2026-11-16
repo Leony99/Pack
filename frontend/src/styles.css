@@ -149,6 +149,28 @@ html:active-view-transition-type(para-tras)::view-transition-new(root) {
   animation: chegar-da-esquerda 0.9s cubic-bezier(0.76, 0, 0.24, 1) both;
 }
 /*
+ * Percurso pelas páginas do meio (lib/percurso.ts): HOME → CONTATO passa por CATÁLOGO em etapas.
+ * A primeira acelera, as do meio seguem constantes e a última freia; a velocidade na junta é a
+ * mesma (inclinação 2 na ponta das curvas, com o dobro do tempo da etapa do meio), para as etapas
+ * parecerem um arrasto só. As durações vêm do percurso.ts (--etapa-ponta e --etapa-meio): o
+ * percurso inteiro dura de 0,9 s a 1,15 s, e quanto mais páginas no caminho, mais rápida cada etapa.
+ */
+html:active-view-transition-type(etapa-inicio)::view-transition-old(root),
+html:active-view-transition-type(etapa-inicio)::view-transition-new(root) {
+  animation-duration: var(--etapa-ponta, 0.46s);
+  animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.5);
+}
+html:active-view-transition-type(etapa-meio)::view-transition-old(root),
+html:active-view-transition-type(etapa-meio)::view-transition-new(root) {
+  animation-duration: var(--etapa-meio, 0.23s);
+  animation-timing-function: linear;
+}
+html:active-view-transition-type(etapa-fim)::view-transition-old(root),
+html:active-view-transition-type(etapa-fim)::view-transition-new(root) {
+  animation-duration: var(--etapa-ponta, 0.46s);
+  animation-timing-function: cubic-bezier(0.25, 0.5, 0.5, 1);
+}
+/*
  * O menu solto (MenuFlutuante) tem o próprio nome de transição: fica fora da página que arrasta,
  * parado na frente dela, e troca o item marcado na hora.
  */
