@@ -105,9 +105,9 @@
 <text x="450.3" y="624" font-size="13" fill="#3d5c3d">#</text>
 <text x="465.9" y="624" font-size="13" fill="#6e8b6e">estado do carrinho e de quem está logado</text>
 <text x="28" y="646" font-size="13" fill="#2e4a2e" xml:space="preserve">│   │   ├── </text>
-<text x="121.8" y="646" font-size="13" fill="#ffa657" xml:space="preserve">percurso.ts</text>
+<text x="121.8" y="646" font-size="13" fill="#ffa657" xml:space="preserve">volta-ao-topo.ts</text>
 <text x="450.3" y="646" font-size="13" fill="#3d5c3d">#</text>
-<text x="465.9" y="646" font-size="13" fill="#6e8b6e">arrasto pelas páginas do meio e voltar ao topo</text>
+<text x="465.9" y="646" font-size="13" fill="#6e8b6e">link da própria página volta ao topo</text>
 <text x="28" y="668" font-size="13" fill="#2e4a2e" xml:space="preserve">│   │   ├── </text>
 <text x="121.8" y="668" font-size="13" fill="#ffa657" xml:space="preserve">movimento.ts</text>
 <text x="450.3" y="668" font-size="13" fill="#3d5c3d">#</text>
