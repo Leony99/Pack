@@ -45,11 +45,14 @@ export function AddressSection({
   address,
   onChange,
   saved,
+  savedId,
   onUseSaved,
 }: {
   address: CheckoutAddress;
   onChange: (key: keyof CheckoutAddress, valor: string) => void;
   saved?: SavedAddress[];
+  /** O endereço salvo em uso (some quando o cliente edita um campo). */
+  savedId?: string;
   onUseSaved: (address: SavedAddress) => void;
 }) {
   return (
@@ -61,7 +64,7 @@ export function AddressSection({
           <select
             aria-label="Usar endereço salvo"
             className="h-12 w-full border border-input bg-background px-3 text-sm"
-            defaultValue=""
+            value={savedId ?? ""}
             onChange={(e) => {
               const escolhido = saved.find((a) => a.id === e.target.value);
               if (escolhido) onUseSaved(escolhido);

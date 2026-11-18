@@ -3,11 +3,12 @@ import { ArrowUpRight, LogOut, LockKeyhole } from "lucide-react";
 import type { ReactNode } from "react";
 import manga from "@/assets/product-longsleeve.jpg";
 import { useSession } from "@/lib/session";
-import { canStaff } from "@/lib/api";
+import { canStaff, USA_API } from "@/lib/api";
 import { accountNav, adminNav } from "./navegacao";
 import { CardAviso, PaginaTopo, ROTULO } from "./PaginaTopo";
 
-const AVISO_DEMO = (
+// Só no modo demonstração: com a API, os dados e as compras são reais
+const AVISO_DEMO = USA_API ? null : (
   <CardAviso
     escuro
     rotulo="AMBIENTE"
@@ -48,7 +49,13 @@ export function DashboardLayout({
           caminho={caminho}
           titulo="ACESSO À CONTA"
           imagem={manga}
-          texto="Entre para acessar o painel de demonstração. Nenhum dado real é utilizado."
+          texto={
+            USA_API
+              ? kind === "customer"
+                ? "Entre para ver os seus pedidos, endereços e dados."
+                : "Entre com a sua conta da equipe para acessar o painel."
+              : "Entre para acessar o painel de demonstração. Nenhum dado real é utilizado."
+          }
           lado={AVISO_DEMO}
         />
         <div className="mx-auto w-full max-w-[1200px] px-4 py-12 md:px-6">
@@ -65,9 +72,7 @@ export function DashboardLayout({
     );
 
   const nav =
-    kind === "customer"
-      ? accountNav
-      : adminNav.filter((n) => staff && canStaff(staff.role, n.resource));
+    kind === "customer" ? accountNav : adminNav.filter((n) => staff && canStaff(staff, n.resource));
   return (
     <main className="bg-background">
       <PaginaTopo

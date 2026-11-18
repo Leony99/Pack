@@ -5,6 +5,7 @@ import com.leonycosta.packapi.config.Pagina;
 import com.leonycosta.packapi.enums.CouponTipo;
 import com.leonycosta.packapi.exception.BusinessException;
 import com.leonycosta.packapi.exception.ConflictException;
+import com.leonycosta.packapi.exception.ParametroInvalidoException;
 import com.leonycosta.packapi.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class CouponService {
 
     private final CouponRepository couponRepository;
+    private final com.leonycosta.packapi.auth.LimiteDeTentativas limite;
 
     public Pagina<CouponResponse> findAll(int pagina, int tamanho) {
         Sort ordem = Sort.by("codigo", "id");
@@ -61,6 +63,19 @@ public class CouponService {
     }
 
     // Usado pelo OrderService: busca cupom pelo código e valida se ainda está válido
+    public CouponResponse validarParaCliente(String codigo, UUID clienteId) {
+        if (codigo == null || codigo.isBlank() || codigo.length() > 30) {
+            throw new ParametroInvalidoException("Informe o código do cupom (até 30 letras)");
+        }
+        limite.verificarCupom(clienteId);
+        try {
+            return toResponse(findValidByCodigo(codigo));
+        } catch (ResourceNotFoundException | BusinessException e) {
+            limite.cupomErrado(clienteId);
+            throw e;
+        }
+    }
+
     public Coupon findValidByCodigo(String codigo) {
         Coupon coupon = couponRepository.findByCodigo(codigo.toUpperCase())
                 .orElseThrow(() -> new ResourceNotFoundException("Cupom não encontrado: " + codigo));

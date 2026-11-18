@@ -75,6 +75,15 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
   - o pagamento segue PENDENTE → APROVADO → ESTORNADO, ou PENDENTE → RECUSADO, sem voltar atrás;
   - o envio só é aceito depois do pagamento aprovado e segue PREPARANDO → DESPACHADO → ENTREGUE. Quando o pacote volta para a loja (a transportadora não entregou ou o cliente devolveu), o envio vira DEVOLVIDO: o pedido fica devolvido, o estoque volta e o pagamento é estornado;
   - o funcionário muda o status do pedido direto só para cancelar. Os outros status vêm do pagamento e do envio, que registram como foi pago e por onde foi entregue;
+  - o próprio cliente cancela o pedido (`POST /orders/{id}/cancelar`) enquanto ele está aguardando pagamento ou pago. Em separação, o pacote já está sendo montado, e o cancelamento é pelo atendimento;
+- **Frete:** por tabela, a partir de São Paulo, pela região do CEP (o primeiro dígito): PAC e SEDEX, com o PAC grátis a partir de R$ 200 em produtos (`GET /frete?cep=&subtotal=`, público). O checkout exige o frete escolhido (`frete: PAC|SEDEX`), e a API calcula o preço e o soma ao total: o cupom desconta só os produtos. É provisório, ver [Próximos passos](#próximos-passos);
+- **Pagamento simulado (provisório):** com `app.pagamento.aprovacao-simulada=true` (o padrão; a variável `PAGAMENTO_SIMULADO=false` desliga), o pagamento que o cliente registra já nasce aprovado e o pedido vira pago, sem cobrança. O método `OUTRO`, da equipe, continua pendente até a aprovação. Sai quando entrar um gateway;
+- **Carrinho e cupom:** o cliente muda a quantidade de um item (`PATCH .../cart/items/{itemId}`) e confere o cupom antes de fechar (`GET /coupons/validar?codigo=`, com o mesmo limite de 5 erros por 15 minutos do checkout). Os itens do carrinho trazem o produto, o nome e a foto;
+- **Endereço:** tem bairro, apelido (Casa, Trabalho) e um endereço principal por cliente. O primeiro cadastrado vira o principal; marcar outro troca; apagar o principal passa para outro. O pedido guarda o bairro e o complemento junto com o resto do endereço;
+- **Painel da equipe:** a lista de todos os pedidos (`GET /orders`, com filtro de status), a de produtos com ativos e inativos (`GET /products/painel`, com busca por nome e tag), a edição de funcionário (`PUT /staff/{id}`; ninguém tira de si o acesso à equipe) e o resumo da visão geral (`GET /painel/resumo`), contado no banco numa chamada só e com só as áreas das permissões de quem pede;
+- **Contato:** o formulário da loja grava a mensagem (`POST /contato`, com o limite por IP do cadastro), e quem tem `CUSTOMER_READ` lê a caixa de entrada e marca como respondida. Trocas e devoluções chegam por aqui;
+- **Fotos dos produtos:** o painel envia a foto (`POST /products/{id}/images/upload`, até 5 MB). A API confere o tipo pelos primeiros bytes (JPEG, PNG, WebP ou AVIF; um HTML com nome .jpg é recusado), dá um nome novo e guarda no bucket do Cloud Storage (`IMAGENS_BUCKET`), pela API REST dele, com a identidade do Cloud Run (sem chave guardada). Sem o bucket (desenvolvimento e testes), guarda na pasta `IMAGENS_PASTA` e serve em `/imagens/...`. Apagar a foto ou o produto apaga o arquivo;
+- **Newsletter:** qualquer pessoa se inscreve (`POST /newsletter`, com o limite por IP do cadastro, e a mesma resposta para quem já estava na lista). O cliente entra e sai pela área dele, sempre com o e-mail da conta. A lista e as mudanças nela exigem `STAFF_MANAGE`; sair da lista não apaga a inscrição, só a desativa;
 - **Banco:** na partida, a API atualiza as regras do banco que limitam os valores de cada enum. O Hibernate cria essas regras com a tabela, mas não as atualiza depois, então um valor novo seria recusado num banco já existente. Esta solução é provisória: ver [Próximos passos](#próximos-passos).
 - **Conta do cliente:** sem pedidos, apagar a conta apaga o cadastro. Com pedidos, os dados pessoais são anonimizados e os pedidos ficam como histórico.
 - **Listagens paginadas:** produtos, clientes, funcionários, cupons, pedidos e movimentos de estoque vêm em páginas (`?pagina=0&tamanho=20`, no máximo 100 por página), com os totais para montar a navegação:
@@ -110,6 +119,7 @@ Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos qu
 **Limite geral por IP**, em todas as rotas: no máximo 120 requisições por minuto do mesmo IP. Para IPv6, conta o bloco /64 inteiro, porque cada casa recebe um bloco e poderia trocar de endereço à vontade. Passou disso, a API responde 429 com `Retry-After` até o minuto acabar.
 - O filtro ([`LimitePorIp`](backend/src/main/java/com/leonycosta/packapi/config/LimitePorIp.java)) roda antes da segurança e dos controllers: uma requisição recusada não confere token nem consulta o banco.
 - Sem ele, um único IP poderia disparar buscas no catálogo, que é público e fazia cada busca ler a tabela inteira (agora tem índice), até gastar a cota grátis de CPU e o [disjuntor de custos](google-cloud/README.md#disjuntor-de-custos) tirar a API do ar.
+- **O IP é o do visitante, mesmo pelo site:** o site chama a API pelo próprio servidor (BFF), então todos os visitantes chegariam com o IP dele e dividiriam os limites. O servidor do frontend manda o IP de cada visitante num cabeçalho, junto com uma chave combinada (`BFF_CHAVE`, no Secret Manager), e o filtro [`IpDoVisitante`](backend/src/main/java/com/leonycosta/packapi/config/IpDoVisitante.java), que roda antes de todos, só aceita esse IP quando a chave confere (comparada em tempo constante). Sem a chave, o cabeçalho é ignorado: quem chama a API direto não consegue fingir ser outro IP.
 - **O que ele não resolve:** o Cloud Run conta cada requisição antes de ela chegar à API, então um ataque grande ou vindo de muitos IPs ainda gasta a cota de requisições. Barrar antes exige o [Cloud Armor](#por-que-usar-o-cloud-armor).
 - **Cuidado com o frontend:** se ele chamar a API pelo próprio servidor (renderização no servidor do TanStack Start), todos os visitantes chegam com o IP desse servidor. Nesse caso, esse IP precisa de um limite próprio.
 
@@ -124,7 +134,7 @@ Os pacotes seguem o modelo *package-by-feature*, agrupados por categoria. Cada d
 ```
 backend/src/main/java/com/leonycosta/packapi/
 ├── staff/      staff, role, permission, role_permission
-├── customer/   customer, address
+├── customer/   customer, address, newsletter, contato
 ├── cart/       cart, cart_item
 ├── order/      order, order_item, payment, shipment, coupon
 ├── product/    product, product_variant, product_image, product_tag, size, color, inventory
@@ -217,6 +227,10 @@ curl -X POST localhost:8080/api/v1/auth/register -H "Content-Type: application/j
 
 # rota protegida, usando o token recebido
 curl localhost:8080/api/v1/auth/me -H "Authorization: Bearer <token>"
+
+# trocar a senha (pede a atual; errada → 422)
+curl -X PATCH localhost:8080/api/v1/auth/senha -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" -d '{"senhaAtual":"minhasenha1","novaSenha":"outrasenha2"}'
 ```
 
 ## Testes
@@ -246,7 +260,7 @@ Eles também rodam sozinhos a cada envio ao GitHub (ver [CI/CD](#cicd)).
 
 ## Frontend: loja PACK
 
-A loja fica em [`frontend/`](frontend/), feita com **TanStack Start** (React 19 com renderização no servidor), TanStack Router e Query, Tailwind CSS 4 e GSAP. Tem a loja completa, a compra (carrinho, cupom e checkout), a área do cliente e o painel administrativo. O `npm run dev` usa a API local e o build de produção usa a API do Cloud Run (cada modo tem o seu `.env`); o `npm run dev:demo` usa só dados de demonstração. Com a API, o catálogo vem dela pelo servidor do frontend (o navegador nunca chama a API direto nem vê o token), e o site mostra avisos de "em breve" enquanto o banco estiver vazio. Login, carrinho, checkout e painel ainda estão na demonstração.
+A loja fica em [`frontend/`](frontend/), feita com **TanStack Start** (React 19 com renderização no servidor), TanStack Router e Query, Tailwind CSS 4 e GSAP. Tem a loja completa, a compra (carrinho, cupom e checkout), a área do cliente e o painel administrativo. O `npm run dev` usa a API local e o build de produção usa a API do Cloud Run (cada modo tem o seu `.env`); o `npm run dev:demo` usa só dados de demonstração. Com a API, o catálogo, o login (cliente e equipe), a área do cliente, a newsletter, o carrinho e o checkout vêm dela pelo servidor do frontend (o navegador nunca chama a API direto nem vê o token, que fica num cookie `httpOnly`), e o site mostra avisos de "em breve" enquanto o banco estiver vazio. O painel da equipe também, com as abas pelas permissões do papel e as fotos dos produtos num bucket do Cloud Storage.
 
 **Visual:** preto e branco, com Anton nos títulos e um laranja só nos detalhes.
 
@@ -298,7 +312,10 @@ Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do pr
 - [x] CI/CD com GitHub Actions
 - [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
 - [x] Frontend (TanStack Start / React 19), com dados de demonstração
-- [ ] Ligar o resto do frontend à API: o catálogo já está ligado; faltam login, conta, carrinho, checkout e painel (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
+- [x] Ligar o frontend à API: catálogo, login, área do cliente, carrinho, checkout, painel e o IP real do visitante (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
+- [ ] Publicar o site (o build já sai para a Cloudflare), com a variável `PACK_BFF_CHAVE` igual ao segredo `pack-bff-chave`
+- [ ] **Frete real por um serviço externo** (Melhor Envio, que junta Correios e transportadoras, ou a API dos Correios): a tabela de hoje é por região do CEP e não olha peso nem medidas, então o preço sai aproximado. O serviço pede conta e chave, e cada produto passa a precisar de peso e dimensões
+- [ ] **Gateway de pagamento** (Mercado Pago, Stripe ou Pagar.me): no lugar da aprovação simulada, o cliente paga de verdade (Pix com QR Code, cartão) e o gateway avisa a API (webhook) quando o pagamento é aprovado
 - [ ] Migrações do banco com Flyway, no lugar do `ddl-auto=update`
 - [ ] Cloud Armor na frente da API, para barrar ataques de volume antes do Cloud Run
 

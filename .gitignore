@@ -85,3 +85,6 @@ build/
 backend/docs/geradores/
 # scripts que geram os diagramas de frontend/docs
 frontend/docs/geradores/
+
+# fotos do painel guardadas localmente (desenvolvimento, sem o bucket)
+backend/uploads/

@@ -85,10 +85,18 @@ describe("coleções e operações simuladas", () => {
     expect(ultima.temMais).toBe(false);
   });
   test("operação não recebe acesso administrativo a colaboradores e cupons", () => {
-    expect(api.canStaff("operacao", "stock")).toBe(true);
-    expect(api.canStaff("operacao", "staff")).toBe(false);
-    expect(api.canStaff("operacao", "coupons")).toBe(false);
-    expect(api.canStaff("atendimento", "products")).toBe(false);
+    expect(api.canStaff({ role: "operacao" }, "stock")).toBe(true);
+    expect(api.canStaff({ role: "operacao" }, "staff")).toBe(false);
+    expect(api.canStaff({ role: "operacao" }, "coupons")).toBe(false);
+    expect(api.canStaff({ role: "atendimento" }, "products")).toBe(false);
+  });
+  test("com a API, o painel segue as permissões do papel, não o nome", () => {
+    const estoquista = { role: "estoquista", permissoes: ["CATALOG_WRITE", "INVENTORY_MANAGE"] };
+    expect(api.canStaff(estoquista, "products")).toBe(true);
+    expect(api.canStaff(estoquista, "stock")).toBe(true);
+    expect(api.canStaff(estoquista, "orders")).toBe(false);
+    // um papel chamado "admin" sem permissões não vê nada
+    expect(api.canStaff({ role: "admin", permissoes: [] }, "orders")).toBe(false);
   });
   test("endereços mantêm apenas um principal por cliente", async () => {
     await api.enterDemo("customer");
@@ -100,7 +108,8 @@ describe("coleções e operações simuladas", () => {
     await api.registerCustomer({
       name: "Outro cliente",
       email: "outro@example.com",
-      password: "demo123",
+      phone: "21999990000",
+      password: "demo1234",
     });
     expect(await api.getAddresses()).toEqual([]);
     expect(await api.getMyOrders()).toEqual([]);

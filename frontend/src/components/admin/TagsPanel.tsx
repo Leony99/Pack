@@ -48,7 +48,7 @@ const NOVA: TagDaLoja = { id: "", tag: "", filtro: null, fixa: false };
 export function TagsPanel() {
   const { staff } = useSession();
   const queryClient = useQueryClient();
-  const allowed = !!staff && canStaff(staff.role, "tags");
+  const allowed = !!staff && canStaff(staff, "tags");
   const tags = useQuery({ queryKey: ["admin", "tags"], queryFn: getTags, enabled: allowed });
   const produtos = useQuery({
     queryKey: ["products", "painel-tags"],

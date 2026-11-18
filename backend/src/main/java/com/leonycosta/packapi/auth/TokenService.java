@@ -23,11 +23,13 @@ public class TokenService {
     @Value("${jwt.expiration-minutes}")
     private long expirationMinutes;
 
-    public TokenResponse gerar(UUID id, String nome, String email, TipoUsuario tipo, List<String> authorities) {
+    // papel: o nome do papel do funcionário (ex.: ESTOQUISTA), só para a tela mostrar; null para cliente
+    public TokenResponse gerar(UUID id, String nome, String email, TipoUsuario tipo, List<String> authorities,
+                               String papel) {
         Instant agora = Instant.now();
         Instant expira = agora.plus(expirationMinutes, ChronoUnit.MINUTES);
 
-        JwtClaimsSet claims = JwtClaimsSet.builder()
+        JwtClaimsSet.Builder claims = JwtClaimsSet.builder()
                 .issuer("pack-api")
                 .subject(id.toString())          // quem é: id do cliente ou do funcionário
                 .issuedAt(agora)
@@ -35,11 +37,11 @@ public class TokenService {
                 .claim("nome", nome)
                 .claim("email", email)
                 .claim("tipo", tipo.name())
-                .claim("authorities", authorities) // o que pode fazer
-                .build();
+                .claim("authorities", authorities); // o que pode fazer
+        if (papel != null) claims.claim("papel", papel);
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
-        String token = jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+        String token = jwtEncoder.encode(JwtEncoderParameters.from(header, claims.build())).getTokenValue();
 
-        return new TokenResponse(token, "Bearer", expira, new UsuarioResponse(id, nome, email, tipo, authorities));
+        return new TokenResponse(token, "Bearer", expira, new UsuarioResponse(id, nome, email, tipo, authorities, papel));
     }
 }

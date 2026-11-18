@@ -5,14 +5,30 @@ import manga from "@/assets/product-longsleeve.jpg";
 import { CardAviso, PaginaTopo, ROTULO } from "@/components/layout/PaginaTopo";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/common/FormField";
-import { enterDemo, loginCustomer, registerCustomer, loginStaff } from "@/lib/api";
+import {
+  enterDemo,
+  loginCustomer,
+  loginStaff,
+  registerCustomer,
+  SENHA_MAXIMA,
+  SENHA_MINIMA,
+  USA_API,
+} from "@/lib/api";
 import { useSession } from "@/lib/session";
 
 /**
  * Login do cliente (com a opção de criar conta) ou do colaborador. Entrando, vai para a área da conta
- * ou para o painel. "ACESSAR DEMONSTRAÇÃO" entra com o usuário de exemplo, sem senha.
+ * ou para o painel. Na demonstração, "ACESSAR DEMONSTRAÇÃO" entra com o usuário de exemplo, sem
+ * senha; com a API, o login é real e esse botão e os avisos de demonstração não aparecem.
  */
-export function AuthForm({ kind }: { kind: "customer" | "staff" }) {
+export function AuthForm({
+  kind,
+  voltar,
+}: {
+  kind: "customer" | "staff";
+  /** Depois de entrar, volta para cá (o checkout) em vez da área do cliente. */
+  voltar?: "/checkout";
+}) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -24,7 +40,7 @@ export function AuthForm({ kind }: { kind: "customer" | "staff" }) {
     try {
       await action();
       await refresh();
-      await navigate({ to: kind === "customer" ? "/conta" : "/admin/painel" });
+      await navigate({ to: kind === "customer" ? (voltar ?? "/conta") : "/admin/painel" });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível entrar.");
     } finally {
@@ -39,7 +55,12 @@ export function AuthForm({ kind }: { kind: "customer" | "staff" }) {
     await complete(() => {
       if (kind === "staff") return loginStaff(email, password);
       if (mode === "signup")
-        return registerCustomer({ name: String(campos.get("name")), email, password });
+        return registerCustomer({
+          name: String(campos.get("name")),
+          email,
+          phone: String(campos.get("phone")),
+          password,
+        });
       return loginCustomer(email, password);
     });
   }
@@ -49,11 +70,19 @@ export function AuthForm({ kind }: { kind: "customer" | "staff" }) {
         caminho={kind === "staff" ? "PACK / ACESSO DE COLABORADORES" : "PACK / ÁREA DO CLIENTE"}
         titulo={kind === "staff" ? "PAINEL PACK" : mode === "login" ? "ENTRAR" : "CRIAR CONTA"}
         imagem={manga}
-        texto="Ambiente demonstrativo — sem autenticação real. Não use sua senha pessoal. Contas e alterações são apagadas ao recarregar."
+        texto={
+          USA_API
+            ? kind === "staff"
+              ? "Acesso da equipe Pack: cada colaborador vê as partes do painel do seu papel."
+              : "Entre para acompanhar os seus pedidos, salvar endereços e comprar mais rápido."
+            : "Ambiente demonstrativo — sem autenticação real. Não use sua senha pessoal. Contas e alterações são apagadas ao recarregar."
+        }
         lado={
           <>
             <CardAviso rotulo="PEDIDOS" valor="HISTÓRICO" texto="acompanhe as suas compras" />
-            <CardAviso escuro rotulo="AMBIENTE" valor="DEMO" texto="sem cobranças ou envios" />
+            {!USA_API && (
+              <CardAviso escuro rotulo="AMBIENTE" valor="DEMO" texto="sem cobranças ou envios" />
+            )}
           </>
         }
       />
@@ -69,15 +98,28 @@ export function AuthForm({ kind }: { kind: "customer" | "staff" }) {
           </p>
           <form onSubmit={submit} className="space-y-5">
             {mode === "signup" && kind === "customer" && (
-              <FormField label="Nome completo" name="name" autoComplete="name" required />
+              <>
+                <FormField label="Nome completo" name="name" autoComplete="name" required />
+                <FormField
+                  label="Telefone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  maxLength={20}
+                  required
+                />
+              </>
             )}
             <FormField label="E-mail" name="email" type="email" autoComplete="email" required />
             <FormField
-              label="Senha de demonstração"
+              label={USA_API ? "Senha" : "Senha de demonstração"}
               name="password"
               type="password"
-              autoComplete="off"
-              minLength={mode === "signup" ? 6 : 1}
+              autoComplete={
+                !USA_API ? "off" : mode === "signup" ? "new-password" : "current-password"
+              }
+              minLength={mode === "signup" ? SENHA_MINIMA : 1}
+              maxLength={mode === "signup" ? SENHA_MAXIMA : 128}
               required
             />
             {error && (
@@ -93,14 +135,16 @@ export function AuthForm({ kind }: { kind: "customer" | "staff" }) {
               <ArrowRight />
             </Button>
           </form>
-          <Button
-            variant="outline"
-            disabled={busy}
-            className="mt-3 h-12 w-full rounded-none text-[11px] tracking-[0.2em]"
-            onClick={() => void complete(() => enterDemo(kind))}
-          >
-            ACESSAR DEMONSTRAÇÃO
-          </Button>
+          {!USA_API && (
+            <Button
+              variant="outline"
+              disabled={busy}
+              className="mt-3 h-12 w-full rounded-none text-[11px] tracking-[0.2em]"
+              onClick={() => void complete(() => enterDemo(kind))}
+            >
+              ACESSAR DEMONSTRAÇÃO
+            </Button>
+          )}
           {kind === "customer" && (
             <div className="mt-6 flex justify-between text-xs">
               <Button
@@ -113,9 +157,12 @@ export function AuthForm({ kind }: { kind: "customer" | "staff" }) {
               >
                 {mode === "login" ? "Criar conta" : "Já tenho conta"}
               </Button>
-              <Button variant="link" asChild className="px-0">
-                <Link to="/login/recuperar">Esqueci minha senha</Link>
-              </Button>
+              {/* com a API, a recuperação por e-mail ainda não existe */}
+              {!USA_API && (
+                <Button variant="link" asChild className="px-0">
+                  <Link to="/login/recuperar">Esqueci minha senha</Link>
+                </Button>
+              )}
             </div>
           )}
         </div>

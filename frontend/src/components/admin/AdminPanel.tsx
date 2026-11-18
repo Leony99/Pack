@@ -15,8 +15,10 @@ import {
   deleteAdminRecord,
   getAdminData,
   saveAdminRecord,
+  USA_API,
   type AdminRecord,
 } from "@/lib/api";
+import { PainelDaApi } from "./api/PainelDaApi";
 import { useSession } from "@/lib/session";
 import { RecordForm } from "./formularios/RecordForm";
 import { NOVO, newRecord } from "./novoRegistro";
@@ -61,11 +63,19 @@ const TABELAS = {
 } as const;
 
 /**
- * Painel administrativo. Carrega os dados do painel e mostra a tela pedida pela rota, se o cargo
+ * Painel administrativo. Com a API, cada aba fala com ela (components/admin/api); na demonstração,
+ * o painel abaixo, com os dados de src/data.
+ */
+export function AdminPanel(props: { view: AdminView; orderId?: string }) {
+  return USA_API ? <PainelDaApi {...props} /> : <PainelDaDemonstracao {...props} />;
+}
+
+/**
+ * Painel da demonstração. Carrega os dados do painel e mostra a tela pedida pela rota, se o cargo
  * do colaborador tiver acesso a ela. Toda alteração passa por run(), que atualiza os caches das
  * telas afetadas (painel, catálogo, conta e pedidos) e mostra o resultado no topo.
  */
-export function AdminPanel({ view, orderId }: { view: AdminView; orderId?: string }) {
+function PainelDaDemonstracao({ view, orderId }: { view: AdminView; orderId?: string }) {
   const { staff } = useSession();
   const queryClient = useQueryClient();
   const query = useQuery({
@@ -103,7 +113,7 @@ export function AdminPanel({ view, orderId }: { view: AdminView; orderId?: strin
       void run(() => deleteAdminRecord(resource, id), "Registro excluído.");
   }
 
-  const allowed = !!staff && (view === "overview" || canStaff(staff.role, view));
+  const allowed = !!staff && (view === "overview" || canStaff(staff, view));
   const novo = !orderId ? NOVO[view] : undefined;
 
   function conteudo(props: AdminScreenProps) {

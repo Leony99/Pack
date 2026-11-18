@@ -10,6 +10,9 @@ public class AddressResponse {
     private String rua;
     private String numero;
     private String complemento;
+    private String bairro;
     private String cidade;
     private String estado;
+    private String apelido;
+    private boolean principal;
 }

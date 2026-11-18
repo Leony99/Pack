@@ -26,10 +26,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
   async function refresh() {
-    const [cliente, colaborador] = await Promise.all([getCurrentCustomer(), getCurrentStaff()]);
-    setCustomer(cliente);
-    setStaff(colaborador);
-    setReady(true);
+    try {
+      const [cliente, colaborador] = await Promise.all([getCurrentCustomer(), getCurrentStaff()]);
+      setCustomer(cliente);
+      setStaff(colaborador);
+    } catch (erro) {
+      // API fora do ar ou limite de requisições (429): mantém quem estava logado (uma falha passageira
+      // não desloga ninguém) e tenta de novo na próxima consulta
+      console.warn("Não foi possível conferir a sessão:", erro);
+    } finally {
+      setReady(true);
+    }
   }
 
   async function signOut(kind: "customer" | "staff") {

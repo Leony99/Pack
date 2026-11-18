@@ -1,7 +1,9 @@
 // Tradução entre o formato da Pack API (campos em português, produto → variantes) e o formato que
 // as telas usam (src/data/types.ts). As telas não conhecem a API: só esta camada muda se o contrato
 // mudar. Funções puras, testadas em adaptadores.test.ts.
-import type { Product } from "@/data/types";
+import type { SavedAddress } from "@/data/dashboard";
+import type { Coupon, Order, Product } from "@/data/types";
+import { STATUS_DA_API } from "@/lib/dominio";
 import { classificarTags, type TagDaApi } from "./tags";
 
 /** Listagem paginada da API: GET /products?pagina=0&tamanho=20. */
@@ -46,7 +48,7 @@ export const IMAGEM_SEM_FOTO =
   );
 
 /** Só aceita imagens http(s): uma URL estranha vinda do banco não vira src de imagem. */
-function urlDeImagemSegura(url: string): boolean {
+export function urlDeImagemSegura(url: string): boolean {
   try {
     return ["http:", "https:"].includes(new URL(url).protocol);
   } catch {
@@ -105,6 +107,16 @@ export function produtoDaApi(p: ProdutoDaApi): Product {
     active: p.ativo ?? true,
     createdAt: p.criadoEm,
     novidadeEm: ultimaData([p.criadoEm, ...variantes.map((v) => v.criadoEm)]),
+    variantes: variantes
+      .filter((v) => v.size && v.color)
+      .map((v) => ({
+        id: v.id,
+        tamanho: v.size!.label,
+        cor: v.color!.nome,
+        corHex: v.color!.hex,
+        estoque: Math.max(0, v.quant),
+        preco: Number(v.precoEfetivo ?? p.preco),
+      })),
   };
 }
 
@@ -116,4 +128,225 @@ function ultimaData(datas: (string | null | undefined)[]): string | undefined {
       maior = data;
   }
   return maior;
+}
+
+/* --------------------------------------------------------------- área do cliente */
+
+/** AddressResponse da API. */
+export type EnderecoDaApi = {
+  id: string;
+  cep: string;
+  rua: string;
+  numero: string;
+  complemento: string | null;
+  bairro: string | null;
+  cidade: string;
+  estado: string;
+  apelido: string | null;
+  principal: boolean;
+};
+
+/** O que a API recebe num endereço (AddressRequest). */
+export type EnderecoParaApi = Omit<EnderecoDaApi, "id">;
+
+/** Endereço da API → o das telas. Nome e e-mail são os do cliente (a API não guarda no endereço). */
+export function enderecoDaApi(
+  e: EnderecoDaApi,
+  cliente: { name: string; email: string },
+): SavedAddress {
+  return {
+    id: e.id,
+    label: e.apelido ?? "",
+    primary: e.principal,
+    name: cliente.name,
+    email: cliente.email,
+    cep: e.cep.replace(/\D/g, ""),
+    street: e.rua,
+    number: e.numero,
+    complement: e.complemento ?? "",
+    neighborhood: e.bairro ?? "",
+    city: e.cidade,
+    state: e.estado,
+  };
+}
+
+/** Endereço das telas → o corpo da API (o CEP vai só com os números). */
+export function enderecoParaApi(a: SavedAddress): EnderecoParaApi {
+  return {
+    cep: a.cep.replace(/\D/g, ""),
+    rua: a.street.trim(),
+    numero: a.number.trim(),
+    complemento: a.complement.trim() || null,
+    bairro: a.neighborhood.trim(),
+    cidade: a.city.trim(),
+    estado: a.state.trim().toUpperCase(),
+    apelido: a.label.trim() || null,
+    principal: a.primary,
+  };
+}
+
+/** OrderResponse da API (o que as telas usam). */
+export type PedidoDaApi = {
+  id: string;
+  customer: { nome: string; email: string };
+  status: keyof typeof STATUS_DA_API;
+  total: number | string;
+  freteTipo: string | null;
+  fretePreco: number | string | null;
+  fretePrazoDias: number | null;
+  criadoEm: string;
+  enderecoCep: string;
+  enderecoRua: string;
+  enderecoNumero: string;
+  enderecoComplemento: string | null;
+  enderecoBairro: string | null;
+  enderecoCidade: string;
+  enderecoEstado: string;
+  coupon: { codigo: string } | null;
+  itens: {
+    id: string;
+    variantSku: string;
+    produtoId: string;
+    imagem: string | null;
+    tamanho: string;
+    cor: string;
+    produtoNome: string;
+    disponivel: boolean;
+    quantidade: number;
+    precoUnit: number | string;
+  }[];
+  payment: { metodo: string; status: string } | null;
+  shipment: { transportadora: string; codigoRastreio: string | null; status: string } | null;
+};
+
+/** Como cada método de pagamento da API aparece na tela. */
+const METODO_DE_PAGAMENTO: Record<string, string> = {
+  PIX: "Pix",
+  CARTAO_CREDITO: "Cartão de crédito",
+  CARTAO_DEBITO: "Cartão de débito",
+  BOLETO: "Boleto",
+  OUTRO: "Outro",
+};
+
+const STATUS_DO_PAGAMENTO: Record<string, string> = {
+  PENDENTE: "aguardando confirmação",
+  APROVADO: "aprovado",
+  RECUSADO: "recusado",
+  ESTORNADO: "estornado",
+};
+
+/**
+ * Pedido da API → o das telas. O total da API já inclui o frete (PAC ou SEDEX, da tabela da API); o
+ * desconto é a diferença entre itens + frete e o total.
+ */
+export function pedidoDaApi(p: PedidoDaApi): Order {
+  const items = p.itens.map((i) => {
+    const foto = i.imagem && urlDeImagemSegura(i.imagem) ? i.imagem : IMAGEM_SEM_FOTO;
+    return {
+      id: i.produtoId,
+      name: i.produtoNome,
+      price: Number(i.precoUnit),
+      image: foto,
+      images: [foto],
+      color: (i.cor.toLowerCase().includes("branc") ? "WHITE" : "BLACK") as Product["color"],
+      styles: [],
+      type: "",
+      size: i.tamanho,
+      qty: i.quantidade,
+      disponivel: i.disponivel,
+    };
+  });
+  const subtotal = items.reduce((soma, i) => soma + i.price * i.qty, 0);
+  const total = Number(p.total);
+  const frete = Number(p.fretePreco ?? 0);
+  return {
+    id: p.id,
+    customer: { name: p.customer.nome, email: p.customer.email },
+    items,
+    address: {
+      name: p.customer.nome,
+      email: p.customer.email,
+      cep: p.enderecoCep.replace(/\D/g, ""),
+      street: p.enderecoRua,
+      number: p.enderecoNumero,
+      complement: p.enderecoComplemento ?? "",
+      neighborhood: p.enderecoBairro ?? "",
+      city: p.enderecoCidade,
+      state: p.enderecoEstado,
+    },
+    // o frete escolhido no checkout; a transportadora e o rastreio vêm depois, com o envio
+    shipping: {
+      label: [p.freteTipo, p.shipment ? `pela ${p.shipment.transportadora}` : "aguardando envio"]
+        .filter(Boolean)
+        .join(" · "),
+      days: p.fretePrazoDias ? `até ${p.fretePrazoDias} dias úteis` : "",
+      price: frete,
+    },
+    payment: p.payment?.metodo === "PIX" ? "pix" : "card",
+    paymentLabel: p.payment
+      ? `${METODO_DE_PAGAMENTO[p.payment.metodo] ?? p.payment.metodo} · ${STATUS_DO_PAGAMENTO[p.payment.status] ?? p.payment.status}`
+      : "Pagamento ainda não informado",
+    subtotal,
+    // o total da API já tem o frete: o desconto é o que falta para fechar a conta
+    discount: Math.max(0, Math.round((subtotal + frete - total) * 100) / 100),
+    total,
+    status: STATUS_DA_API[p.status] ?? p.status,
+    createdAt: p.criadoEm,
+    tracking: p.shipment?.codigoRastreio ?? "",
+  };
+}
+
+/* ---------------------------------------------------------------------- compra */
+
+/** CartItemResponse da API. */
+export type ItemDoCarrinhoDaApi = {
+  id: string;
+  variant: VarianteDaApi;
+  produtoId: string;
+  produtoNome: string;
+  imagem: string | null;
+  ativo: boolean;
+  quantidade: number;
+  precoUnitario: number | string;
+};
+
+/**
+ * Item do carrinho da API → a linha das telas: o produto (só o que o carrinho mostra), a variante e o
+ * id do item na API (para mudar a quantidade ou tirar). O estoque do tamanho é o da variante.
+ */
+export function itemDoCarrinhoDaApi(i: ItemDoCarrinhoDaApi) {
+  const foto = i.imagem && urlDeImagemSegura(i.imagem) ? i.imagem : IMAGEM_SEM_FOTO;
+  const tamanho = i.variant.size?.label ?? "";
+  return {
+    id: i.produtoId,
+    name: i.produtoNome,
+    price: Number(i.precoUnitario),
+    image: foto,
+    images: [foto],
+    color: corDoProduto([i.variant]),
+    styles: [],
+    type: "",
+    active: i.ativo,
+    stock: { [tamanho]: Math.max(0, i.variant.quant) },
+    size: tamanho,
+    qty: i.quantidade,
+    variantId: i.variant.id,
+    cor: i.variant.color?.nome,
+    itemId: i.id,
+  };
+}
+
+/** Cupom da API (CouponResponse) → o das telas. */
+export function cupomDaApi(c: {
+  codigo: string;
+  desconto: number | string;
+  tipo: "PERCENTUAL" | "FIXO";
+  validade: string | null;
+}): Coupon {
+  return {
+    code: c.codigo,
+    discount: Number(c.desconto),
+    type: c.tipo === "PERCENTUAL" ? "percent" : "fixed",
+    validUntil: c.validade,
+  };
 }

@@ -14,6 +14,8 @@ import java.util.UUID;
 // JpaSpecificationExecutor: a listagem do catálogo monta o WHERE com os filtros pedidos (FiltroDoCatalogo)
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
     Optional<Product> findBySlug(String slug);
+
+    long countByAtivo(boolean ativo);
     boolean existsBySlug(String slug);
     // Busca por nome: ignora maiúsculas e acentos dos dois lados ("basica" encontra "Camiseta Básica").
     // A expressão fica em constantes porque o índice da busca (IndiceDaBuscaPorNome) precisa ser dela,

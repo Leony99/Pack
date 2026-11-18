@@ -41,6 +41,21 @@ export type Product = {
   createdAt?: string;
   /** cadastro mais recente do produto ou de uma variante dele (ISO): até 3 meses, selo NOVO */
   novidadeEm?: string;
+  /**
+   * Com a API: as variantes à venda (tamanho + cor). A peça que vai para o carrinho é uma delas; a
+   * página do produto mostra o seletor de cor quando há mais de uma cor.
+   */
+  variantes?: VarianteDoProduto[];
+};
+
+/** Uma variante da API como as telas usam: a combinação de tamanho e cor, com estoque e preço. */
+export type VarianteDoProduto = {
+  id: string;
+  tamanho: string;
+  cor: string;
+  corHex: string;
+  estoque: number;
+  preco: number;
 };
 
 /** COUPON */
@@ -87,6 +102,8 @@ export type Order = {
   address: CheckoutAddress;
   shipping: ShippingOption;
   payment: "pix" | "card";
+  /** Com a API: o método e a situação do pagamento ("Pix · aprovado"). */
+  paymentLabel?: string;
   subtotal: number;
   discount: number;
   total: number;

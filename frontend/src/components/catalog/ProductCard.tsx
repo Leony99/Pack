@@ -4,7 +4,23 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ehNovo } from "@/lib/api";
 import { useCart } from "@/lib/cart";
-import type { Product } from "@/data/types";
+import { money } from "@/lib/checkout";
+import type { Product, VarianteDoProduto } from "@/data/types";
+
+/**
+ * A variante que o "ADICIONAR" põe no carrinho, com a API (a peça é a variante): o M da primeira cor
+ * com estoque nele; senão, a primeira variante com estoque.
+ */
+function varianteDisponivel(p: Product): VarianteDoProduto | undefined {
+  const comEstoque = (p.variantes ?? []).filter((v) => v.estoque > 0);
+  return comEstoque.find((v) => v.tamanho === "M") ?? comEstoque[0];
+}
+
+/** As cores do produto (com a API, os nomes das variantes; na demonstração, BLACK ou WHITE). */
+function cores(p: Product): string {
+  const nomes = [...new Set((p.variantes ?? []).map((v) => v.cor))];
+  return nomes.length ? nomes.join(", ") : p.color;
+}
 
 /** Tamanho que o "ADICIONAR" põe no carrinho: o M, se tiver estoque; senão, o primeiro disponível. */
 function tamanhoDisponivel(p: Product): string | undefined {
@@ -26,7 +42,9 @@ export function ProductCard({ p }: { p: Product }) {
   const { addToCart } = useCart();
   const navigate = useNavigate();
   const [idx, setIdx] = useState(0);
-  const tamanho = tamanhoDisponivel(p);
+  const variante = varianteDisponivel(p);
+  // com a API, só há o que adicionar se houver uma variante com estoque
+  const tamanho = p.variantes?.length ? variante?.tamanho : tamanhoDisponivel(p);
   const imgs = p.images.length ? p.images : [p.image];
 
   // as setas ficam dentro do link do produto: sem isso, o clique também abriria a página
@@ -95,7 +113,7 @@ export function ProductCard({ p }: { p: Product }) {
             disabled={!tamanho}
             onClick={(e) => {
               e.preventDefault();
-              if (tamanho) addToCart(p, tamanho);
+              if (tamanho) void addToCart(p, tamanho, variante);
             }}
             className="h-11 min-w-0 flex-1 rounded-none px-2 cursor-pointer border border-foreground bg-background py-3 text-xs font-medium tracking-wider text-foreground transition hover:bg-secondary"
           >
@@ -122,10 +140,10 @@ export function ProductCard({ p }: { p: Product }) {
         <div>
           <h3 className="text-sm font-normal uppercase tracking-[0.12em]">{p.name}</h3>
           <p className="mt-2 text-[10px] font-normal uppercase tracking-[0.2em] text-muted-foreground">
-            {p.type} · {p.color}
+            {p.type} · {cores(p)}
           </p>
         </div>
-        <p className="shrink-0 text-sm font-medium tracking-tight">R$ {p.price}</p>
+        <p className="shrink-0 text-sm font-medium tracking-tight">{money(p.price)}</p>
       </Link>
     </article>
   );

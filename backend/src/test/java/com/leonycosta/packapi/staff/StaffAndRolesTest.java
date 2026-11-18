@@ -140,7 +140,7 @@ class StaffAndRolesTest extends IntegrationTest {
         Cliente ana = novoCliente();
         String endereco = novoEndereco(ana);
 
-        post("/customers/" + ana.id() + "/orders", corpo("addressId", endereco), supervisor).esperar(403);
+        post("/customers/" + ana.id() + "/orders", corpo("frete", "PAC", "addressId", endereco), supervisor).esperar(403);
     }
 
     // ------------------------------------------------------------------ permissões lidas do banco a cada requisição

@@ -35,10 +35,26 @@ public class OrderController {
         return orderService.checkout(customerId, request);
     }
 
+    // GET /orders?status=PAGO&pagina=0: o painel da equipe (ORDER_MANAGE)
+    @Operation(summary = "Lista todos os pedidos em páginas, os mais novos primeiro (filtro opcional por status)")
+    @GetMapping("/orders")
+    public Pagina<OrderResponse> listar(@RequestParam(required = false) com.leonycosta.packapi.enums.OrderStatus status,
+                                        @RequestParam(defaultValue = "0") int pagina,
+                                        @RequestParam(defaultValue = Pagina.TAMANHO_PADRAO) int tamanho) {
+        return orderService.listar(status, pagina, tamanho);
+    }
+
     @Operation(summary = "Busca um pedido")
     @GetMapping("/orders/{id}")
     public OrderResponse findById(@PathVariable UUID id) {
         return orderService.findById(id);
+    }
+
+    // O cliente cancela o próprio pedido, antes de a loja começar a separar
+    @Operation(summary = "O cliente cancela o próprio pedido (aguardando pagamento ou pago; o estoque volta)")
+    @PostMapping("/orders/{id}/cancelar")
+    public OrderResponse cancelar(@PathVariable UUID id) {
+        return orderService.cancelarPeloCliente(id);
     }
 
     @Operation(summary = "Muda o status do pedido (cancelar devolve o estoque)")

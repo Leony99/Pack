@@ -41,15 +41,25 @@ public class AuthController {
         return authService.loginStaff(request, http.getRemoteAddr());
     }
 
-    // Quem sou eu: os dados vêm do token; as permissões, do usuário logado
-    // (para funcionário, são as atuais do banco, não as da hora do login)
+    // Troca a senha de quem está logado (cliente ou funcionário), conferindo a senha atual
+    @Operation(summary = "Troca a senha do usuário logado (pede a senha atual)")
+    @PatchMapping("/senha")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void trocarSenha(@Valid @RequestBody TrocaDeSenhaRequest request, JwtAuthenticationToken auth,
+                            HttpServletRequest http) {
+        Jwt jwt = auth.getToken();
+        authService.trocarSenha(UUID.fromString(jwt.getSubject()), TipoUsuario.valueOf(jwt.getClaimAsString("tipo")),
+                request, http.getRemoteAddr());
+    }
+
+    // Quem sou eu: nome, e-mail e papel atuais (do banco, e não os da hora do login: o cliente pode ter mudado
+    // o nome ou o e-mail depois) e as permissões atuais do usuário logado
     @Operation(summary = "Dados do usuário dono do token")
     @GetMapping("/me")
     public UsuarioResponse me(JwtAuthenticationToken auth) {
         Jwt jwt = auth.getToken();
         List<String> permissoes = AuthorityUtils.authorityListToSet(auth.getAuthorities()).stream().sorted().toList();
-        return new UsuarioResponse(UUID.fromString(jwt.getSubject()),
-                jwt.getClaimAsString("nome"), jwt.getClaimAsString("email"),
-                TipoUsuario.valueOf(jwt.getClaimAsString("tipo")), permissoes);
+        return authService.quemSou(UUID.fromString(jwt.getSubject()), TipoUsuario.valueOf(jwt.getClaimAsString("tipo")),
+                permissoes);
     }
 }

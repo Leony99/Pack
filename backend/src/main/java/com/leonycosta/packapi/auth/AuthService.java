@@ -7,6 +7,7 @@ import com.leonycosta.packapi.customer.customer.CustomerRepository;
 import com.leonycosta.packapi.customer.customer.CustomerRequest;
 import com.leonycosta.packapi.customer.customer.CustomerResponse;
 import com.leonycosta.packapi.customer.customer.CustomerService;
+import com.leonycosta.packapi.exception.BusinessException;
 import com.leonycosta.packapi.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +36,7 @@ public class AuthService {
         limite.verificarECadastrar(ip);
         CustomerRequest dados = new CustomerRequest(request.getNome(), request.getEmail(), request.getTelefone());
         CustomerResponse c = customerService.create(dados, passwordEncoder.encode(request.getSenha()));
-        return tokenService.gerar(c.getId(), c.getNome(), c.getEmail(), TipoUsuario.CUSTOMER, CUSTOMER_AUTHORITIES);
+        return tokenService.gerar(c.getId(), c.getNome(), c.getEmail(), TipoUsuario.CUSTOMER, CUSTOMER_AUTHORITIES, null);
     }
 
     // ip: quem está tentando (ver LimiteDeTentativas). Bloqueado → 429 antes de rodar o BCrypt.
@@ -45,7 +47,7 @@ public class AuthService {
                 .filter(x -> senhaConfere(request.getSenha(), x.getSenhaHash()))
                 .orElseThrow(() -> falhou(ip, email));
         limite.loginCerto(ip, email);
-        return tokenService.gerar(c.getId(), c.getNome(), c.getEmail(), TipoUsuario.CUSTOMER, CUSTOMER_AUTHORITIES);
+        return tokenService.gerar(c.getId(), c.getNome(), c.getEmail(), TipoUsuario.CUSTOMER, CUSTOMER_AUTHORITIES, null);
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +64,42 @@ public class AuthService {
                 .map(rp -> rp.getPermission().getNome())
                 .sorted()
                 .toList();
-        return tokenService.gerar(s.getId(), s.getNome(), s.getEmail(), TipoUsuario.STAFF, permissoes);
+        return tokenService.gerar(s.getId(), s.getNome(), s.getEmail(), TipoUsuario.STAFF, permissoes, s.getRole().getNome());
+    }
+
+    // Os dados atuais de quem está logado (GET /auth/me). Apagado depois do login: 401, como um token inválido
+    @Transactional(readOnly = true)
+    public UsuarioResponse quemSou(UUID id, TipoUsuario tipo, List<String> permissoes) {
+        if (tipo == TipoUsuario.CUSTOMER) {
+            Customer c = customerRepository.findById(id).orElseThrow(UnauthorizedException::credenciaisInvalidas);
+            return new UsuarioResponse(c.getId(), c.getNome(), c.getEmail(), tipo, permissoes, null);
+        }
+        Staff s = staffRepository.findById(id).orElseThrow(UnauthorizedException::credenciaisInvalidas);
+        return new UsuarioResponse(s.getId(), s.getNome(), s.getEmail(), tipo, permissoes, s.getRole().getNome());
+    }
+
+    // Troca a senha de quem está logado. A senha atual errada conta como tentativa de login (o mesmo limite
+    // por e-mail e IP), para o token roubado de alguém não servir para adivinhar a senha dele.
+    // O token atual continua valendo até expirar (a API não guarda sessões).
+    @Transactional
+    public void trocarSenha(UUID id, TipoUsuario tipo, TrocaDeSenhaRequest request, String ip) {
+        if (tipo == TipoUsuario.CUSTOMER) {
+            Customer c = customerRepository.findById(id).orElseThrow(UnauthorizedException::credenciaisInvalidas);
+            c.setSenhaHash(novaSenha(c.getEmail(), c.getSenhaHash(), request, ip));
+        } else {
+            Staff s = staffRepository.findById(id).orElseThrow(UnauthorizedException::credenciaisInvalidas);
+            s.setSenhaHash(novaSenha(s.getEmail(), s.getSenhaHash(), request, ip));
+        }
+    }
+
+    private String novaSenha(String email, String hashAtual, TrocaDeSenhaRequest request, String ip) {
+        limite.verificarLogin(ip, email);
+        if (!senhaConfere(request.getSenhaAtual(), hashAtual)) {
+            limite.loginFalhou(ip, email);
+            throw new BusinessException("A senha atual não confere");
+        }
+        limite.loginCerto(ip, email);
+        return passwordEncoder.encode(request.getNovaSenha());
     }
 
     private UnauthorizedException falhou(String ip, String email) {

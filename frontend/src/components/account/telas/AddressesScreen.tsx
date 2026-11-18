@@ -3,11 +3,14 @@ import { Pencil, Plus, Save, Trash2 } from "lucide-react";
 import { FormField } from "@/components/common/FormField";
 import { AddressText } from "@/components/order/AddressText";
 import { Button } from "@/components/ui/button";
-import { deleteAddress, saveAddress } from "@/lib/api";
+import { deleteAddress, saveAddress, USA_API } from "@/lib/api";
 import type { SavedAddress } from "@/data/dashboard";
 import type { AccountScreenProps } from "../tipos";
 
-/** Campos do formulário de endereço, na ordem da tela, com o rótulo de cada um. */
+/**
+ * Campos do formulário de endereço, na ordem da tela, com o rótulo de cada um. Com a API, o
+ * destinatário é o próprio cliente (a API não guarda um nome por endereço).
+ */
 const CAMPOS = [
   ["label", "Identificação"],
   ["name", "Destinatário"],
@@ -58,21 +61,26 @@ export function AddressesScreen({ data, busy, run }: AccountScreenProps) {
           className="mb-8 border border-ink/10 p-6"
           onSubmit={(e) => {
             e.preventDefault();
-            void run(async () => {
-              await saveAddress(editing);
-              setEditing(null);
-            }, "Endereço salvo na demonstração.");
+            void run(
+              async () => {
+                await saveAddress(editing);
+                setEditing(null);
+              },
+              USA_API ? "Endereço salvo." : "Endereço salvo na demonstração.",
+            );
           }}
         >
           <h2 className="mb-6 text-2xl">{editing.id ? "EDITAR" : "NOVO"} ENDEREÇO</h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            {CAMPOS.map(([campo, rotulo]) => (
+            {CAMPOS.filter(([campo]) => !(USA_API && campo === "name")).map(([campo, rotulo]) => (
               <FormField
                 key={campo}
                 label={rotulo}
                 value={editing[campo]}
                 required={campo !== "complement"}
-                maxLength={campo === "state" ? 2 : campo === "cep" ? 8 : 160}
+                maxLength={
+                  campo === "state" ? 2 : campo === "cep" ? 8 : campo === "label" ? 40 : 100
+                }
                 onChange={(e) =>
                   setEditing({ ...editing, [campo]: normalizar(campo, e.target.value) })
                 }

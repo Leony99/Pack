@@ -2,12 +2,15 @@ import { Link } from "@tanstack/react-router";
 import { FormField } from "@/components/common/FormField";
 import { OrderDetail } from "@/components/order/OrderDetail";
 import { Button } from "@/components/ui/button";
-import { cancelMyOrder, requestReturn } from "@/lib/api";
+import { cancelMyOrder, requestReturn, USA_API } from "@/lib/api";
 import { CANCELAVEL } from "@/lib/dominio";
 import type { Order } from "@/data/types";
 import type { AccountScreenProps } from "../tipos";
 
-/** Acompanhar um pedido: detalhe, cancelamento (antes do envio) e pedido de troca. */
+/**
+ * Acompanhar um pedido: detalhe, cancelamento (antes do envio) e pedido de troca. Com a API, a troca é
+ * pelo atendimento (não há formulário) e o cancelamento vale até o pedido entrar em separação.
+ */
 export function OrderScreen({
   data,
   busy,
@@ -30,7 +33,9 @@ export function OrderScreen({
             variant="outline"
             disabled={busy}
             onClick={() => {
-              if (window.confirm("Cancelar este pedido simulado?"))
+              if (
+                window.confirm(USA_API ? "Cancelar este pedido?" : "Cancelar este pedido simulado?")
+              )
                 void run(() => cancelMyOrder(orderId), "Pedido cancelado.");
             }}
           >
@@ -41,7 +46,12 @@ export function OrderScreen({
           <Link to="/suporte/contato">FALAR COM ATENDIMENTO</Link>
         </Button>
       </div>
-      {order.status !== "Cancelado" && (
+      {USA_API && order.status !== "Cancelado" && (
+        <p className="mt-8 pt-6 text-sm text-muted-foreground">
+          Para trocar ou devolver uma peça, fale com o atendimento e informe o número do pedido.
+        </p>
+      )}
+      {!USA_API && order.status !== "Cancelado" && (
         <form
           className="mt-8 pt-6"
           onSubmit={(e) => {

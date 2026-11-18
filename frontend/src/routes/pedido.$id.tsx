@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Check, ArrowRight } from "lucide-react";
-import { getOrder } from "@/lib/api";
+import { getOrder, USA_API } from "@/lib/api";
 import { money } from "@/lib/checkout";
 import { pageHead } from "@/lib/metadata";
 import { PageLayout } from "@/components/layout/PageLayout";
@@ -42,7 +42,9 @@ function Confirmation() {
             {order.id} · {order.status}
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
-            Esta confirmação é uma simulação. Nenhuma cobrança, envio ou e-mail foi realizado.
+            {USA_API
+              ? "Pagamento aprovado na simulação: nenhuma cobrança foi feita. Acompanhe o pedido em Minha conta."
+              : "Esta confirmação é uma simulação. Nenhuma cobrança, envio ou e-mail foi realizado."}
           </p>
         </div>
       </div>
@@ -98,11 +100,12 @@ function Confirmation() {
             CEP {order.address.cep}
           </p>
           <p className="mt-3 text-xs text-muted-foreground">
-            Prazo simulado: {order.shipping.days}
+            {USA_API ? "Prazo" : "Prazo simulado"}: {order.shipping.days}
           </p>
           <h3 className="mt-6 text-xl">PAGAMENTO</h3>
           <p className="mt-3 text-sm">
-            {order.payment === "pix" ? "Pix" : "Cartão de crédito"} — não processado
+            {order.paymentLabel ??
+              `${order.payment === "pix" ? "Pix" : "Cartão de crédito"} — não processado`}
           </p>
         </aside>
       </div>

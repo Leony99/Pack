@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { quoteShipping } from "@/lib/api";
+import { money } from "@/lib/checkout";
 import type { ShippingOption } from "@/data/types";
 
 /** Calculadora de frete da página do produto: o CEP é digitado com máscara e enviado só com os números. */
@@ -70,7 +71,7 @@ export function ShippingCalc({ price }: { price: number }) {
                 <p className="font-medium">{o.label}</p>
                 <p className="text-xs text-muted-foreground">{o.days}</p>
               </div>
-              <p className="font-medium">{o.price === 0 ? "GRÁTIS" : `R$ ${o.price.toFixed(2)}`}</p>
+              <p className="font-medium">{o.price === 0 ? "GRÁTIS" : money(o.price)}</p>
             </li>
           ))}
         </ul>

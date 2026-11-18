@@ -49,10 +49,18 @@ public class OrderService {
     private final CouponService couponService;
     private final InventoryMovementService inventoryService;
     private final LimiteDeTentativas limite;
+    private final com.leonycosta.packapi.order.frete.FreteService freteService;
 
     public Pagina<OrderResponse> findByCustomer(UUID customerId, int pagina, int tamanho) {
         Pageable pedido = Pagina.pedido(pagina, tamanho, Sort.by(Sort.Order.desc("criadoEm"), Sort.Order.asc("id")));
         return Pagina.de(orderRepository.findByCustomerId(customerId, pedido).map(this::toResponse));
+    }
+
+    // Todos os pedidos, o mais novo primeiro (o painel da equipe), com o filtro opcional de status
+    public Pagina<OrderResponse> listar(OrderStatus status, int pagina, int tamanho) {
+        Pageable pedido = Pagina.pedido(pagina, tamanho, Sort.by(Sort.Order.desc("criadoEm"), Sort.Order.asc("id")));
+        var pagina_ = status == null ? orderRepository.findAll(pedido) : orderRepository.findByStatus(status, pedido);
+        return Pagina.de(pagina_.map(this::toResponse));
     }
 
     public OrderResponse findById(UUID id) {
@@ -121,8 +129,16 @@ public class OrderService {
             total = aplicarDesconto(subtotalBruto, coupon);
         }
 
-        // 7. Cria o pedido com snapshot do endereço
+        // 7. Frete pela tabela da API, para o CEP do endereço (PAC grátis pela soma dos produtos, antes do cupom).
+        // O cupom desconta só os produtos: o frete entra depois
+        var frete = freteService.opcao(address.getCep(), subtotalBruto, request.getFrete());
+        total = total.add(frete.preco());
+
+        // 8. Cria o pedido com snapshot do endereço
         Order order = new Order();
+        order.setFreteTipo(frete.tipo());
+        order.setFretePreco(frete.preco());
+        order.setFretePrazoDias(frete.prazoDias());
         order.setCustomer(customerService.findEntityById(customerId));
         order.setCoupon(coupon);
         order.setTotal(total.setScale(2, RoundingMode.HALF_UP));
@@ -132,6 +148,8 @@ public class OrderService {
         order.setEnderecoCep(address.getCep());
         order.setEnderecoRua(address.getRua());
         order.setEnderecoNumero(address.getNumero());
+        order.setEnderecoComplemento(address.getComplemento());
+        order.setEnderecoBairro(address.getBairro());
         order.setEnderecoCidade(address.getCidade());
         order.setEnderecoEstado(address.getEstado());
         order.setCriadoEm(LocalDateTime.now());
@@ -187,6 +205,19 @@ public class OrderService {
         return toResponse(orderRepository.save(aplicarStatus(findOrThrow(id), status)));
     }
 
+    // O cliente cancela o próprio pedido (POST /orders/{id}/cancelar; a segurança confere que o pedido é dele).
+    // Só antes de a loja começar a separar: aguardando pagamento ou pago. Em separação, o pacote já está sendo
+    // montado e o caminho é o atendimento. O estoque volta e o pagamento é acertado, como no cancelamento da equipe
+    @Transactional
+    public OrderResponse cancelarPeloCliente(UUID id) {
+        Order order = findOrThrow(id);
+        if (order.getStatus() != OrderStatus.AGUARDANDO_PAGAMENTO && order.getStatus() != OrderStatus.PAGO) {
+            throw new BusinessException("Este pedido já está em separação ou a caminho e não pode mais ser "
+                    + "cancelado por aqui. Fale com o atendimento");
+        }
+        return toResponse(orderRepository.save(aplicarStatus(order, OrderStatus.CANCELADO)));
+    }
+
     // Mudança vinda do pagamento ou do envio (PaymentService e ShipmentService), que já cuidam do próprio status
     @Transactional
     public void mudarStatus(UUID id, OrderStatus status) {
@@ -237,6 +268,14 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido", id));
     }
 
+    // A foto de menor ordem do produto (a capa), ou null se ele não tem fotos
+    private static String fotoPrincipal(com.leonycosta.packapi.product.product.Product produto) {
+        return produto.getImagens().stream()
+                .min(Comparator.comparing(i -> i.getOrdem() == null ? Integer.MAX_VALUE : i.getOrdem()))
+                .map(i -> i.getUrl())
+                .orElse(null);
+    }
+
     // O nome guardado na compra; nos itens antigos, sem ele, o nome atual do produto
     private static String nomeDoProduto(OrderItem item) {
         return item.getProdutoNome() != null ? item.getProdutoNome() : item.getVariant().getProduct().getNome();
@@ -256,7 +295,10 @@ public class OrderService {
 
         List<OrderItemResponse> itens = o.getItens().stream()
                 .map(item -> new OrderItemResponse(
-                        item.getId(), item.getVariantSku(), nomeDoProduto(item), item.getVariant().getProduct().isAtivo(),
+                        item.getId(), item.getVariantSku(), item.getVariant().getProduct().getId(),
+                        fotoPrincipal(item.getVariant().getProduct()),
+                        item.getVariant().getSize().getLabel(), item.getVariant().getColor().getNome(),
+                        nomeDoProduto(item), item.getVariant().getProduct().isAtivo(),
                         item.getQuantidade(),
                         item.getPrecoUnit(),
                         item.getPrecoUnit().multiply(BigDecimal.valueOf(item.getQuantidade()))
@@ -274,8 +316,11 @@ public class OrderService {
         );
 
         return new OrderResponse(
-                o.getId(), customerResponse, o.getStatus(), o.getTotal(), o.getCriadoEm(),
+                o.getId(), customerResponse, o.getStatus(), o.getTotal(),
+                o.getFreteTipo() == null ? null : o.getFreteTipo().name(), o.getFretePreco(), o.getFretePrazoDias(),
+                o.getCriadoEm(),
                 o.getEnderecoCep(), o.getEnderecoRua(), o.getEnderecoNumero(),
+                o.getEnderecoComplemento(), o.getEnderecoBairro(),
                 o.getEnderecoCidade(), o.getEnderecoEstado(),
                 couponResponse, itens, paymentResponse, shipmentResponse
         );

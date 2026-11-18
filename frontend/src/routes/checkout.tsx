@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight, LockKeyhole } from "lucide-react";
@@ -11,7 +11,7 @@ import { PaymentSection } from "@/components/checkout/PaymentSection";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { NotFoundPage, RouteError } from "@/components/layout/RouteBoundary";
 import { Button } from "@/components/ui/button";
-import { createOrder, getAddresses, getPaymentMethods, quoteShipping } from "@/lib/api";
+import { createOrder, getAddresses, getPaymentMethods, quoteShipping, USA_API } from "@/lib/api";
 import { useCart } from "@/lib/cart";
 import { pageHead } from "@/lib/metadata";
 import { useSession } from "@/lib/session";
@@ -31,6 +31,8 @@ export const Route = createFileRoute("/checkout")({
  * Checkout em três etapas (endereço, entrega e pagamento) com o resumo do pedido ao lado.
  * O frete calculado vale para o CEP e o subtotal daquele momento: se um dos dois mudar, as opções
  * somem e é preciso calcular de novo. Concluir cria o pedido e leva à confirmação.
+ * Com a API, o checkout pede login (o carrinho e o pedido são do cliente), usa o endereço salvo
+ * escolhido (ou salva o digitado) e o pagamento é aprovado na hora, simulado pela própria API.
  */
 function Checkout() {
   const { customer } = useSession();
@@ -53,6 +55,8 @@ function Checkout() {
     city: "",
     state: "",
   });
+  // o endereço salvo escolhido (com a API, o pedido usa o id dele); editar um campo volta para "novo"
+  const [addressId, setAddressId] = useState<string | undefined>();
   const [delivery, setDelivery] = useState<ShippingOption[]>([]);
   const [quoteKey, setQuoteKey] = useState("");
   const [selected, setSelected] = useState("");
@@ -60,6 +64,15 @@ function Checkout() {
   const [busy, setBusy] = useState(false);
   const [quoting, setQuoting] = useState(false);
   const [error, setError] = useState("");
+
+  // com a API, começa pelo endereço principal do cliente
+  useEffect(() => {
+    const principal = savedAddresses.data?.find((a) => a.primary);
+    if (USA_API && principal && !addressId && !address.cep) {
+      setAddress(principal);
+      setAddressId(principal.id);
+    }
+  }, [savedAddresses.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // o frete calculado só vale para este CEP e este subtotal
   const currentKey = `${address.cep}:${cartTotal}`;
@@ -94,6 +107,7 @@ function Checkout() {
         items: cart.map((i) => ({ productId: i.id, size: i.size, qty: i.qty })),
         couponCode: coupon?.code,
         address,
+        addressId,
         shipping: shipping.label,
         payment,
       });
@@ -103,13 +117,27 @@ function Checkout() {
         return;
       }
       await navigate({ to: "/pedido/$id", params: { id: result.orderId } });
-      clearCart();
+      await clearCart();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível concluir o pedido.");
     } finally {
       setBusy(false);
     }
   }
+
+  if (USA_API && !customer)
+    return (
+      <PageLayout title="CHECKOUT" eyebrow="CARRINHO / CHECKOUT">
+        <p className="text-sm text-muted-foreground">
+          Entre na sua conta para finalizar a compra. As peças do carrinho continuam com você.
+        </p>
+        <Button asChild className="mt-6">
+          <Link to="/login" search={{ voltar: "/checkout" }}>
+            ENTRAR PARA FINALIZAR <ArrowRight />
+          </Link>
+        </Button>
+      </PageLayout>
+    );
 
   if (!cartCount)
     return (
@@ -126,16 +154,24 @@ function Checkout() {
   return (
     <PageLayout title="CHECKOUT" eyebrow="CARRINHO / CHECKOUT">
       <p className="mb-8 flex items-center gap-2 border-y border-border py-4 text-xs">
-        <LockKeyhole className="h-4 w-4" /> AMBIENTE DEMONSTRATIVO — SEM COBRANÇA
+        <LockKeyhole className="h-4 w-4" />{" "}
+        {USA_API
+          ? "PAGAMENTO SIMULADO — O PEDIDO É APROVADO NA HORA, SEM COBRANÇA"
+          : "AMBIENTE DEMONSTRATIVO — SEM COBRANÇA"}
       </p>
       <form onSubmit={submit} className="grid gap-12 lg:grid-cols-[1fr_400px]">
         <div>
           <AddressSection
             address={address}
-            onChange={(key, valor) => setAddress((a) => ({ ...a, [key]: valor }))}
+            onChange={(key, valor) => {
+              setAddress((a) => ({ ...a, [key]: valor }));
+              setAddressId(undefined);
+            }}
             saved={savedAddresses.data}
+            savedId={addressId}
             onUseSaved={(salvo) => {
               setAddress(salvo);
+              setAddressId(salvo.id);
               setSelected("");
             }}
           />
@@ -173,7 +209,7 @@ function Checkout() {
             disabled={busy || quoting}
             className="mt-6 h-12 w-full font-semibold bg-destaque text-destaque-foreground hover:bg-destaque/90"
           >
-            {busy ? "CONCLUINDO..." : "CONCLUIR PEDIDO SIMULADO"}
+            {busy ? "CONCLUINDO..." : USA_API ? "CONCLUIR PEDIDO" : "CONCLUIR PEDIDO SIMULADO"}
             <ArrowRight />
           </Button>
           <Link to="/carrinho" className="mt-4 block text-center text-xs underline">

@@ -11,4 +11,9 @@ gcloud run services add-iam-policy-binding pack-api \
     --project=pack-api-513821 --region=southamerica-east1 \
     --member=allUsers --role=roles/run.invoker
 
+# as fotos do painel, se o disjuntor também as tirou do ar
+gcloud storage buckets add-iam-policy-binding gs://pack-api-513821-fotos \
+    --project=pack-api-513821 --member=allUsers --role=roles/storage.objectViewer >/dev/null \
+    && echo "Fotos públicas de novo." || echo "Sem o bucket das fotos (etapa fotos do setup.sh ainda não rodou)."
+
 echo "API pública de novo."

@@ -11,4 +11,6 @@ public class UsuarioResponse {
     private String email;
     private TipoUsuario tipo;
     private List<String> permissoes;
+    // nome do papel do funcionário (ADMIN, ESTOQUISTA...), só para mostrar; null para cliente
+    private String papel;
 }

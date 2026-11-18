@@ -6,6 +6,7 @@ import { CouponField } from "@/components/cart/CouponField";
 import { OrderSummary } from "@/components/cart/OrderSummary";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
+import { chaveDaLinha, money } from "@/lib/checkout";
 
 /** Duração da animação de abrir e fechar (a mesma do duration-300 das classes). */
 const ANIMACAO_MS = 300;
@@ -15,7 +16,7 @@ const ANIMACAO_MS = 300;
  * lado. Fica montada até a animação de saída terminar (usePresenca). Os itens entram em sequência.
  */
 export function CartDrawer() {
-  const { cart, cartCount, cartOpen, setCartOpen, updateQty, removeItem } = useCart();
+  const { cart, cartCount, cartOpen, setCartOpen, updateQty, removeItem, aviso } = useCart();
   const { montado, saindo } = usePresenca(cartOpen, ANIMACAO_MS);
 
   // Esc fecha a gaveta
@@ -55,6 +56,11 @@ export function CartDrawer() {
           </button>
         </div>
         <div className="flex-1 overflow-auto">
+          {aviso && (
+            <p role="alert" className="mb-4 border border-border p-3 text-xs">
+              {aviso}
+            </p>
+          )}
           {cart.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
               <ShoppingBag className="h-8 w-8 text-muted-foreground" />
@@ -64,7 +70,7 @@ export function CartDrawer() {
             <ul>
               {cart.map((i, n) => (
                 <li
-                  key={i.id + i.size}
+                  key={chaveDaLinha(i)}
                   style={{ animationDelay: `${150 + n * 60}ms` }}
                   className="flex gap-4 border-b border-border p-6 duration-500 fill-mode-both animate-in fade-in slide-in-from-right-8 motion-reduce:animate-none"
                 >
@@ -74,11 +80,11 @@ export function CartDrawer() {
                       <div>
                         <p className="text-sm font-medium">{i.name}</p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Tam. {i.size} · {i.color}
+                          Tam. {i.size} · {i.cor ?? i.color}
                         </p>
                       </div>
                       <button
-                        onClick={() => removeItem(i.id, i.size)}
+                        onClick={() => void removeItem(chaveDaLinha(i))}
                         className="cursor-pointer text-muted-foreground hover:text-foreground"
                         aria-label="Remover"
                       >
@@ -88,7 +94,7 @@ export function CartDrawer() {
                     <div className="mt-auto flex items-center justify-between">
                       <div className="flex items-center border border-border">
                         <button
-                          onClick={() => updateQty(i.id, i.size, -1)}
+                          onClick={() => void updateQty(chaveDaLinha(i), -1)}
                           className="cursor-pointer px-2 py-1"
                           aria-label="Diminuir"
                         >
@@ -96,14 +102,14 @@ export function CartDrawer() {
                         </button>
                         <span className="px-3 text-sm">{i.qty}</span>
                         <button
-                          onClick={() => updateQty(i.id, i.size, 1)}
+                          onClick={() => void updateQty(chaveDaLinha(i), 1)}
                           className="cursor-pointer px-2 py-1"
                           aria-label="Aumentar"
                         >
                           <Plus className="h-3 w-3" />
                         </button>
                       </div>
-                      <p className="text-sm font-medium">R$ {i.qty * i.price}</p>
+                      <p className="text-sm font-medium">{money(i.qty * i.price)}</p>
                     </div>
                   </div>
                 </li>

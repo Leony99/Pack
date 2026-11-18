@@ -11,12 +11,17 @@ import {
   type ShippingOption,
 } from "@/data";
 import { calculateTotals } from "@/lib/checkout";
+import { cupomNaApi, finalizarPedidoNaApi, freteDaApi } from "./compra-api";
+import { pedidoDoClienteNaApi } from "./conta-api";
+import { USA_API } from "./modo";
 import { pedidosDaSessao, sessao, simularLatencia, state } from "./simulacao";
 
 /** Confere um cupom: vale até o fim do dia da validade. */
 export async function validateCoupon(code: string): Promise<Coupon | null> {
   // PACK API: não há validação pública de cupom. O código vai no checkout (codigoCupom do
-  // POST /api/v1/customers/{id}/orders), que recusa cupom inválido ou vencido. Falta na API: conferir antes.
+  // POST /api/v1/customers/{id}/orders), que recusa cupom inválido ou vencido. Antes do pedido, o cliente
+  // logado confere em GET /api/v1/coupons/validar (erros contam no limite de 5 por 15 minutos).
+  if (USA_API) return cupomNaApi({ data: code });
   const codigo = code.trim().toUpperCase();
   const vigente = (c: Coupon) =>
     !c.validUntil || new Date(`${c.validUntil.slice(0, 10)}T23:59:59Z`).getTime() >= Date.now();
@@ -25,9 +30,10 @@ export async function validateCoupon(code: string): Promise<Coupon | null> {
 
 /** Opções de frete para o CEP; acima do valor de frete grátis, só as opções pagas cobram. */
 export async function quoteShipping(cep: string, subtotal: number): Promise<ShippingOption[]> {
-  // PACK API: não calcula frete (falta na API). O envio só existe depois do pedido pago:
-  // POST /api/v1/orders/{id}/shipment, feito pela equipe.
+  // PACK API: GET /api/v1/frete?cep=&subtotal= (tabela da API: PAC e SEDEX, PAC grátis a partir de
+  // R$ 200). O pedido usa o mesmo cálculo, refeito pela API.
   if (!/^\d{8}$/.test(cep)) throw new Error("CEP inválido");
+  if (USA_API) return freteDaApi({ data: { cep, subtotal } });
   await simularLatencia(400);
   const gratis = subtotal >= freeShippingFrom;
   return shippingOptions.map((o) =>
@@ -39,17 +45,18 @@ export async function quoteShipping(cep: string, subtotal: number): Promise<Ship
 
 export type CartLine = { productId: string; size: string; qty: number };
 
-/** Carrinho guardado do cliente logado (na simulação, ele vive só na tela). */
-export async function getCart(): Promise<CartLine[]> {
-  // PACK API: GET /api/v1/customers/{id}/cart (cliente logado; id vem do /auth/me).
-  return [];
-}
-
-/** Sincroniza o carrinho da tela com o servidor. */
-export async function syncCart(_lines: CartLine[]): Promise<void> {
-  // PACK API: não recebe o carrinho inteiro. Cada mudança é uma chamada: POST .../cart/items
-  // { variantId, quantidade } e DELETE .../cart/items/{itemId}. Precisa da variante (tamanho + cor).
-}
+/**
+ * O carrinho do cliente logado na API (GET, POST, PATCH e DELETE em /api/v1/customers/{id}/cart):
+ * o CartProvider (lib/cart.tsx) usa estas funções. Sem login, o carrinho fica no navegador e vai para a
+ * API quando o cliente entra.
+ */
+export {
+  adicionarAoCarrinhoNaApi,
+  carrinhoDaApi,
+  esvaziarCarrinhoNaApi,
+  mudarQuantidadeNaApi,
+  removerDoCarrinhoNaApi,
+} from "./compra-api";
 
 /* -------------------------------------------------------------------- pedido */
 
@@ -58,6 +65,8 @@ export type OrderPayload = {
   couponCode?: string;
   shipping: string;
   address: CheckoutAddress;
+  /** Com a API: o endereço salvo escolhido (sem ele, o endereço digitado é salvo na conta). */
+  addressId?: string;
   payment: "pix" | "card";
 };
 
@@ -67,8 +76,22 @@ export async function createOrder(
 ): Promise<{ orderId: string; checkoutUrl: string }> {
   // PACK API: POST /api/v1/customers/{id}/orders { addressId, codigoCupom }. O pedido sai do carrinho
   // guardado na API (não dos itens enviados) e nasce AGUARDANDO_PAGAMENTO; o pagamento é outra
-  // chamada (POST /api/v1/orders/{id}/payment { metodo, valor }). Pagamento real: falta na API.
+  // chamada (POST /api/v1/orders/{id}/payment { metodo, valor }). Pagamento real: falta na API (hoje a
+  // aprovação é simulada pela própria API).
   if (!payload.items.length) throw new Error("Seu carrinho está vazio.");
+  if (USA_API) {
+    if (payload.shipping !== "PAC" && payload.shipping !== "SEDEX")
+      throw new Error("Selecione uma opção de entrega.");
+    return finalizarPedidoNaApi({
+      data: {
+        frete: payload.shipping,
+        pagamento: payload.payment,
+        cupom: payload.couponCode,
+        addressId: payload.addressId,
+        endereco: payload.address,
+      },
+    });
+  }
 
   const items = payload.items.map((line) => {
     const product = state.products.find((p) => p.id === line.productId && p.active !== false);
@@ -123,6 +146,7 @@ export async function createOrder(
 /** Um pedido (a confirmação depois do checkout). */
 export async function getOrder(id: string): Promise<Order | null> {
   // PACK API: GET /api/v1/orders/{id} (dono do pedido ou equipe).
+  if (USA_API) return pedidoDoClienteNaApi({ data: id });
   return pedidosDaSessao.get(id) ?? state.orders.find((order) => order.id === id) ?? null;
 }
 

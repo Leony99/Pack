@@ -88,7 +88,7 @@ class SecurityRulesTest extends IntegrationTest {
         String enderecoDaAna = novoEndereco(ana);
         Cliente bruno = novoCliente();
 
-        post("/customers/" + ana.id() + "/orders", corpo("addressId", enderecoDaAna), bruno.token()).esperar(403);
+        post("/customers/" + ana.id() + "/orders", corpo("frete", "PAC", "addressId", enderecoDaAna), bruno.token()).esperar(403);
     }
 
     @Test
@@ -132,6 +132,6 @@ class SecurityRulesTest extends IntegrationTest {
         Cliente ana = novoCliente();
         String endereco = novoEndereco(ana);
 
-        post("/customers/" + ana.id() + "/orders", corpo("addressId", endereco), admin()).esperar(403);
+        post("/customers/" + ana.id() + "/orders", corpo("frete", "PAC", "addressId", endereco), admin()).esperar(403);
     }
 }

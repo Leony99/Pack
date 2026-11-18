@@ -32,6 +32,17 @@ public class ProductImageController {
         return imageService.create(productId, request);
     }
 
+    // POST /products/{id}/images/upload (multipart: "arquivo" e, opcional, "ordem"): a foto vai para o bucket
+    @Operation(summary = "Envia a foto do produto (JPEG, PNG, WebP ou AVIF, até 5 MB)")
+    @PostMapping(value = "/products/{productId}/images/upload",
+            consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
+    public ProductImageResponse upload(@PathVariable UUID productId,
+                                       @RequestParam("arquivo") org.springframework.web.multipart.MultipartFile arquivo,
+                                       @RequestParam(required = false) Integer ordem) throws java.io.IOException {
+        return imageService.upload(productId, arquivo.getBytes(), ordem);
+    }
+
     @Operation(summary = "Atualiza uma imagem")
     @PutMapping("/images/{id}")
     public ProductImageResponse update(@PathVariable UUID id, @Valid @RequestBody ProductImageRequest request) {

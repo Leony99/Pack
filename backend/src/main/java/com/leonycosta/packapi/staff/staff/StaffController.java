@@ -34,6 +34,13 @@ public class StaffController {
         return staffService.create(request);
     }
 
+    @Operation(summary = "Edita nome, e-mail e papel do funcionário")
+    @PutMapping("/{id}")
+    public StaffResponse update(@PathVariable UUID id, @jakarta.validation.Valid @RequestBody StaffUpdateRequest request,
+                                @AuthenticationPrincipal Jwt jwt) {
+        return staffService.update(id, request, UUID.fromString(jwt.getSubject()));
+    }
+
     @Operation(summary = "Apaga um funcionário (não é possível apagar a si mesmo)")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

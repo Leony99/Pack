@@ -18,6 +18,8 @@ Os outros assuntos ficam em outros lugares:
 - [Visão geral](#visão-geral)
 - [Do git push até a API no ar](#do-git-push-até-a-api-no-ar)
 - [Limitadores](#limitadores)
+- [Despertador](#despertador)
+- [Fotos dos produtos](#fotos-dos-produtos)
 - [Disjuntor de custos](#disjuntor-de-custos)
 - [Arquivos desta pasta](#arquivos-desta-pasta)
 
@@ -140,6 +142,21 @@ Sem visitas por uns 15 minutos, o Cloud Run desliga a API (`--min-instances=0`).
 - **Não é garantido:** o Google pode desligar uma instância parada a qualquer momento. Na prática, ela quase sempre fica ligada.
 - **Tarefas do Cloud Scheduler:** são duas (`pack-verificar-cota` e `pack-despertador`), dentro das 3 grátis por conta.
 
+## Fotos dos produtos
+
+As fotos que a equipe envia pelo painel ficam no bucket `pack-api-513821-fotos` do Cloud Storage, criado pela etapa `fotos` do [`setup.sh`](gcloud-cli-scripts/setup.sh):
+
+```
+ painel ──foto reduzida (WebP, até 1600 px)──► API ──REST do Cloud Storage──► bucket (us-central1)
+ site   ◄──────────── https://storage.googleapis.com/pack-api-513821-fotos/<produto>/<foto>.webp
+```
+
+- **Não é um servidor:** não liga nem desliga. As fotos ficam sempre disponíveis, e só o uso é cobrado (nunca o tempo parado).
+- **Região:** `us-central1`, porque a cota grátis do Cloud Storage só vale nos EUA: 5 GB guardados e 5.000 envios e 50.000 leituras por mês, mais a transferência grátis da América do Norte. Cada foto sai com 150 a 300 KB, e o navegador a guarda por 1 ano (`Cache-Control: immutable`), então a mesma pessoa não gasta leitura de novo. Os valores mudam de tempos em tempos: confira na página de preços do Google.
+- **Quem faz o quê:** qualquer pessoa lê (o site mostra as fotos); só a conta da API (`pack-api-run`) grava e apaga, e só neste bucket. A API pega a credencial do servidor de metadados do Cloud Run: nenhuma chave fica guardada.
+- **No disjuntor:** quando ele corta, a leitura pública do bucket sai junto com a da API, e o `religar-api.sh` devolve as duas.
+- **Para criar:** `bash google-cloud/gcloud-cli-scripts/setup.sh fotos` e, depois, `... setup.sh disjuntor` de novo (a função passa a cuidar também do bucket).
+
 ## Disjuntor de custos
 
 O objetivo é **nunca pagar nada**: a API sai do ar antes de a cota grátis do Cloud Run acabar. O orçamento do Google Cloud sozinho não serve para isso. Ele mede dinheiro cobrado, e o uso dentro da cota custa R$ 0, então ele só perceberia depois de a cota acabar. Por isso o disjuntor tem duas camadas, as duas no mesmo tópico do Pub/Sub e na mesma [função](gcloud-scripts/budget-guard/main.py):
@@ -173,7 +190,7 @@ A cota grátis mensal do Cloud Run (cobrança por requisição) é de **180 mil 
 
 ### O que acontece no corte
 
-- **A permissão pública sai:** a função remove a permissão que deixa qualquer pessoa (`allUsers`) chamar a API, e a API passa a responder **403**. Requisições barradas pela permissão não são cobradas.
+- **A permissão pública sai:** a função remove a permissão que deixa qualquer pessoa (`allUsers`) chamar a API, e a API passa a responder **403**. Requisições barradas pela permissão não são cobradas. A leitura pública do bucket das fotos sai também, e as fotos somem do site.
 - **Nada é apagado:** serviço, banco, imagens e configuração continuam lá.
 - **Um deploy não religa:** o CD só troca a imagem e não mexe em acessos, então reabrir a API é sempre uma decisão sua.
 - **Religar:** rode [`gcloud-cli-scripts/religar-api.sh`](gcloud-cli-scripts/religar-api.sh). Também dá para rodar no Cloud Shell, o terminal do console do Google Cloud, sem instalar nada. Se a cota do mês estiver no limite, a próxima verificação desliga de novo; o normal é religar no mês seguinte, quando a cota se renova.
@@ -229,6 +246,8 @@ O [`gcloud-cli-scripts/setup.sh`](gcloud-cli-scripts/setup.sh) é o registro de 
 | `agendador` | Tarefa do Cloud Scheduler que aciona a medição da cota de hora em hora |
 | `despertador` | Tarefa do Cloud Scheduler que chama a API a cada 12 minutos, para ela não desligar (ver [Despertador](#despertador)) |
 | `orcamento` | Orçamento de R$ 1 ligado ao tópico (cria ou atualiza) |
+| `ipreal` | Segredo `pack-bff-chave` (aleatório), lido pela API como `BFF_CHAVE`: com ele, a API aceita o IP do visitante que o servidor do frontend informa. A hospedagem do site recebe a mesma chave em `PACK_BFF_CHAVE` (copie do console do Secret Manager) |
+| `fotos` | Bucket das fotos dos produtos (`us-central1`, leitura pública, gravação só da API) e a variável `IMAGENS_BUCKET` no Cloud Run (ver [Fotos dos produtos](#fotos-dos-produtos)). Depois dela, rode `disjuntor` de novo |
 
 ```bash
 bash google-cloud/gcloud-cli-scripts/setup.sh <etapa>     # da raiz do repositório, com o gcloud logado

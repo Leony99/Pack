@@ -6,7 +6,7 @@
 //   PACK_API_URL  endereço da API, sem barra no fim (ex.: http://localhost:8080)
 // Vem do .env do modo (.env.development, .env.production) e pode ser trocado pela variável de
 // ambiente de mesmo nome no servidor (a da hospedagem vale mais que a gravada no build).
-import { getCookie } from "@tanstack/react-start/server";
+import { getCookie, getRequestHeader, getRequestIP } from "@tanstack/react-start/server";
 import { ErroDaApi, type ErroDaApiJson } from "../erros";
 
 /** Quanto esperar a API antes de desistir (a API no Cloud Run pode levar até 1 min para acordar). */
@@ -29,6 +29,25 @@ function enderecoDaApi(): string {
   return url.replace(/\/+$/, "");
 }
 
+/**
+ * O IP real do visitante, para os limites por IP da API (o navegador não fala com a API: quem chama é
+ * este servidor, e sem isto todos os visitantes dividiriam os limites). Na Cloudflare, onde o site fica, o
+ * IP vem do CF-Connecting-IP, que ela mesma preenche; fora dela, o IP da conexão (nunca o X-Forwarded-For,
+ * que o navegador pode inventar). Vai com a chave combinada (PACK_BFF_CHAVE, só do servidor): a API só
+ * aceita o IP informado quando a chave confere (config/IpDoVisitante). Sem a chave, nada é enviado.
+ */
+function cabecalhosDoVisitante(): Record<string, string> {
+  const chave = typeof process === "undefined" ? undefined : process.env["PACK_BFF_CHAVE"];
+  if (!chave) return {};
+  let ip: string | undefined;
+  try {
+    ip = getRequestHeader("cf-connecting-ip") || getRequestIP();
+  } catch {
+    // fora de uma requisição (não acontece nas funções de servidor): sem IP
+  }
+  return ip ? { "X-Pack-Ip-Visitante": ip, "X-Pack-Bff-Chave": chave } : {};
+}
+
 type Opcoes = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
@@ -44,7 +63,10 @@ type Opcoes = {
 export async function chamarApi<T>(caminho: string, opcoes: Opcoes = {}): Promise<T> {
   if (!caminho.startsWith("/api/v1/")) throw new Error(`Caminho fora da API: ${caminho}`);
 
-  const headers: Record<string, string> = { Accept: "application/json" };
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    ...cabecalhosDoVisitante(),
+  };
   if (opcoes.body !== undefined) headers["Content-Type"] = "application/json";
   if (opcoes.sessao) {
     const token = getCookie(COOKIE_DO_TOKEN[opcoes.sessao]);
@@ -74,4 +96,58 @@ export async function chamarApi<T>(caminho: string, opcoes: Opcoes = {}): Promis
   const corpo = (await res.json().catch(() => null)) as ErroDaApiJson | null;
   const espera = Number(res.headers.get("Retry-After")) || undefined;
   throw ErroDaApi.daResposta(res.status, corpo, espera);
+}
+
+/**
+ * O id do usuário da sessão (o "sub" do token no cookie), ou null sem sessão. Não confere a
+ * assinatura: quem confere é a API, em toda chamada, e ela só deixa o dono mexer nos próprios dados
+ * (um id trocado no cookie só leva a um 401 ou 403).
+ */
+export function idDaSessao(sessao: Sessao): string | null {
+  const token = getCookie(COOKIE_DO_TOKEN[sessao]);
+  const parte = token?.split(".")[1];
+  if (!parte) return null;
+  try {
+    const base64 = parte.replace(/-/g, "+").replace(/_/g, "/");
+    const json = atob(base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "="));
+    const sub = (JSON.parse(json) as { sub?: unknown }).sub;
+    return typeof sub === "string" && /^[0-9a-f-]{36}$/i.test(sub) ? sub : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Envia um arquivo para a Pack API (multipart/form-data), com o token da sessão. Usado pelo upload das
+ * fotos do painel; os erros seguem o mesmo formato de chamarApi.
+ */
+export async function enviarArquivoParaApi<T>(
+  caminho: string,
+  formulario: FormData,
+  sessao: Sessao,
+): Promise<T> {
+  if (!caminho.startsWith("/api/v1/")) throw new Error(`Caminho fora da API: ${caminho}`);
+  const token = getCookie(COOKIE_DO_TOKEN[sessao]);
+  let res: Response;
+  try {
+    res = await fetch(`${enderecoDaApi()}${caminho}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        ...cabecalhosDoVisitante(),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formulario,
+      signal: AbortSignal.timeout(60_000),
+    });
+  } catch (erro) {
+    console.error("Pack API inacessível:", erro);
+    throw new ErroDaApi(
+      503,
+      "Não foi possível falar com a loja agora. Tente de novo em instantes.",
+    );
+  }
+  if (res.ok) return (await res.json()) as T;
+  const corpo = (await res.json().catch(() => null)) as ErroDaApiJson | null;
+  throw ErroDaApi.daResposta(res.status, corpo);
 }

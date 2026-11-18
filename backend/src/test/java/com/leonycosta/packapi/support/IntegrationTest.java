@@ -29,6 +29,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest(properties = {
         // valores só dos testes: não dependem do .env, que não existe no GitHub
         "jwt.secret=" + IntegrationTest.JWT_SECRET,
+        // os testes do pagamento aprovam pelo painel (a aprovação simulada tem a própria classe de teste)
+        "app.pagamento.aprovacao-simulada=false",
+        // fotos enviadas nos testes: numa pasta do target, servidas pela própria API
+        "app.imagens.pasta=target/test-uploads",
+        // o servidor do frontend informa o IP do visitante com esta chave (IpDoVisitanteTest)
+        "app.bff.chave=" + IntegrationTest.CHAVE_DO_BFF,
         "app.admin.email=" + IntegrationTest.ADMIN_EMAIL,
         "app.admin.senha=" + IntegrationTest.ADMIN_SENHA,
         "spring.datasource.password=definida-pelo-testcontainers",
@@ -51,6 +57,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Import(TestcontainersConfig.class)
 public abstract class IntegrationTest {
 
+    protected static final String CHAVE_DO_BFF = "chave-do-bff-dos-testes";
     protected static final String JWT_SECRET = "chave-usada-so-nos-testes-com-mais-de-32-caracteres";
     protected static final String ADMIN_EMAIL = "admin@teste.com";
     protected static final String ADMIN_SENHA = "senha-do-admin-de-teste";
@@ -80,7 +87,7 @@ public abstract class IntegrationTest {
         return executar(req);
     }
 
-    protected Resposta executar(MockHttpServletRequestBuilder req) {
+    protected Resposta executar(org.springframework.test.web.servlet.RequestBuilder req) {
         try {
             MvcResult r = mvc.perform(req).andReturn();
             return new Resposta(r.getResponse().getStatus(), r.getResponse().getContentAsString(StandardCharsets.UTF_8));
@@ -228,7 +235,8 @@ public abstract class IntegrationTest {
 
     protected String novoEndereco(Cliente c) {
         return post("/customers/" + c.id() + "/addresses",
-                corpo("cep", "20040-020", "rua", "Rua Teste", "numero", "1", "cidade", "Rio de Janeiro", "estado", "RJ"),
+                corpo("cep", "20040-020", "rua", "Rua Teste", "numero", "1", "bairro", "Centro", "cidade", "Rio de Janeiro",
+                        "estado", "RJ"),
                 c.token()).esperar(201).str("$.id");
     }
 
@@ -237,7 +245,7 @@ public abstract class IntegrationTest {
     }
 
     protected Resposta checkout(Cliente c, String enderecoId) {
-        return post("/customers/" + c.id() + "/orders", corpo("addressId", enderecoId), c.token());
+        return post("/customers/" + c.id() + "/orders", corpo("frete", "PAC", "addressId", enderecoId), c.token());
     }
 
     // Pedido pronto: cliente novo compra `quantidade` da variante

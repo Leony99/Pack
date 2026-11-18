@@ -63,7 +63,7 @@ class CustomerAreaTest extends IntegrationTest {
         String endereco = novoEndereco(ana);
 
         Resposta r = put("/customers/" + ana.id() + "/addresses/" + endereco, corpo("cep", "20040-020",
-                "rua", "Rua Nova", "numero", "10", "cidade", "Rio de Janeiro", "estado", "RJ"), ana.token())
+                "rua", "Rua Nova", "numero", "10", "bairro", "Centro", "cidade", "Rio de Janeiro", "estado", "RJ"), ana.token())
                 .esperar(200);
 
         assertThat(r.str("$.rua")).isEqualTo("Rua Nova");

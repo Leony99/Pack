@@ -20,12 +20,20 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final OrderService orderService;
 
+    // Provisório, até a loja ter um meio de pagamento (gateway): com true, o pagamento que o cliente registra
+    // (Pix, cartão, boleto) já nasce aprovado e o pedido vira PAGO na hora. O método OUTRO, que a equipe usa
+    // para pagamentos recebidos por fora, continua pendente até a aprovação no painel
+    private final boolean aprovacaoSimulada;
+
     public PaymentService(PaymentRepository paymentRepository,
                           OrderRepository orderRepository,
-                          @Lazy OrderService orderService) {
+                          @Lazy OrderService orderService,
+                          @org.springframework.beans.factory.annotation.Value("${app.pagamento.aprovacao-simulada:false}")
+                          boolean aprovacaoSimulada) {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
         this.orderService = orderService;
+        this.aprovacaoSimulada = aprovacaoSimulada;
     }
 
     public PaymentResponse findByOrder(UUID orderId) {
@@ -55,7 +63,11 @@ public class PaymentService {
         payment.setValor(request.getValor());
 
         // O pedido só vira PAGO quando o pagamento for APROVADO, em updateStatus()
-        return toResponse(paymentRepository.save(payment));
+        payment = paymentRepository.save(payment);
+        if (aprovacaoSimulada && request.getMetodo() != com.leonycosta.packapi.enums.PaymentMetodo.OUTRO) {
+            return updateStatus(payment.getId(), PaymentStatus.APROVADO);
+        }
+        return toResponse(payment);
     }
 
     @Transactional

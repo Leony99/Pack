@@ -18,6 +18,15 @@ public class CouponController {
 
     private final CouponService couponService;
 
+    // O cliente confere o cupom no carrinho, antes de fechar o pedido. Erros contam no mesmo limite do checkout
+    // (5 cupons errados bloqueiam o cliente por 15 min), para a rota não servir para adivinhar códigos
+    @Operation(summary = "O cliente confere um cupom (vigente → o desconto; senão 404 ou 422)")
+    @GetMapping("/validar")
+    public CouponResponse validar(@RequestParam String codigo,
+                                  org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken auth) {
+        return couponService.validarParaCliente(codigo, UUID.fromString(auth.getToken().getSubject()));
+    }
+
     @Operation(summary = "Lista os cupons em páginas")
     @GetMapping
     public Pagina<CouponResponse> findAll(@RequestParam(defaultValue = "0") int pagina,

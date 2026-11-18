@@ -72,6 +72,18 @@ public class CartService {
         return toResponse(cartRepository.save(cart));
     }
 
+    // Muda a quantidade de um item (até 99 e até o estoque da variante)
+    @Transactional
+    public CartResponse mudarQuantidade(UUID customerId, UUID itemId, int quantidade) {
+        Cart cart = travarCarrinho(customerId);
+        CartItem item = cart.getItens().stream().filter(i -> i.getId().equals(itemId)).findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Item do carrinho", itemId));
+        variantService.validarEstoque(item.getVariant(), quantidade);
+        item.setQuantidade(quantidade);
+        cart.setAtualizadoEm(LocalDateTime.now());
+        return toResponse(cartRepository.save(cart));
+    }
+
     @Transactional
     public CartResponse removeItem(UUID customerId, UUID itemId) {
         Cart cart = travarCarrinho(customerId);
@@ -135,6 +147,11 @@ public class CartService {
                 new ColorResponse(v.getColor().getId(), v.getColor().getNome(), v.getColor().getHex()),
                 precoUnit, v.getQuant(), v.getCriadoEm()
         );
-        return new CartItemResponse(item.getId(), variantResponse, item.getQuantidade(), precoUnit, subtotal);
+        var produto = v.getProduct();
+        String imagem = produto.getImagens().stream()
+                .min(java.util.Comparator.comparing(i -> i.getOrdem() == null ? Integer.MAX_VALUE : i.getOrdem()))
+                .map(i -> i.getUrl()).orElse(null);
+        return new CartItemResponse(item.getId(), variantResponse, produto.getId(), produto.getNome(), imagem,
+                produto.isAtivo(), item.getQuantidade(), precoUnit, subtotal);
     }
 }

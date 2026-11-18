@@ -47,6 +47,24 @@ public class Order {
     @Column(name = "endereco_numero", nullable = false)
     private String enderecoNumero;
 
+    // complemento e bairro: pedidos de antes destas colunas ficam sem
+    @Column(name = "endereco_complemento")
+    private String enderecoComplemento;
+
+    @Column(name = "endereco_bairro")
+    private String enderecoBairro;
+
+    // o frete escolhido no checkout, com o preço e o prazo da hora da compra (pedidos de antes: sem frete)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "frete_tipo")
+    private com.leonycosta.packapi.order.frete.TipoFrete freteTipo;
+
+    @Column(name = "frete_preco", precision = 10, scale = 2)
+    private BigDecimal fretePreco;
+
+    @Column(name = "frete_prazo_dias")
+    private Integer fretePrazoDias;
+
     @Column(name = "endereco_cidade", nullable = false)
     private String enderecoCidade;
 
