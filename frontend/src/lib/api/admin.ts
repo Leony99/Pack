@@ -126,7 +126,10 @@ export async function saveAdminRecord(resource: RecursoEditavel, record: AdminRe
   else rows.push({ ...record });
 }
 
-/** Apaga um registro; apagar uma coleção tira a tag dela dos produtos. */
+/**
+ * Apaga um registro; apagar uma coleção tira a tag dela dos produtos. Um produto que já esteve em um
+ * pedido não pode ser apagado (como na API): o caminho é desativá-lo.
+ */
 export async function deleteAdminRecord(resource: RecursoEditavel, recordId: string) {
   // PACK API: DELETE na rota de cada recurso (ex.: /api/v1/products/{id}).
   exigirColaborador(resource);
@@ -141,6 +144,13 @@ export async function deleteAdminRecord(resource: RecursoEditavel, recordId: str
       p.tags = p.tags?.filter((t) => t !== tag);
     });
   }
+  if (
+    resource === "products" &&
+    todosOsPedidos().some((o) => o.items.some((i) => i.id === recordId))
+  )
+    throw new Error(
+      "Este produto já esteve em um pedido e não pode ser apagado. Desative-o para tirá-lo da loja.",
+    );
   rows.splice(index, 1);
 }
 

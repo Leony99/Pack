@@ -3,7 +3,7 @@
 # É o registro de tudo o que foi criado no projeto, e serve para refazer do zero num projeto novo.
 #
 # Uso (da raiz do repositório, com o gcloud logado):  bash google-cloud/gcloud-cli-scripts/setup.sh <etapa>
-# Etapas, nesta ordem: apis imagens segredos contas github api disjuntor agendador orcamento
+# Etapas, nesta ordem: apis imagens segredos contas github api disjuntor agendador despertador orcamento
 #
 # Precisa do backend/.env.prod (fora do git) com NEON_URL, ADMIN_EMAIL e ADMIN_PASSWORD.
 
@@ -181,6 +181,23 @@ etapa_agendador() {
         --description="Mede a cota grátis do Cloud Run e desliga a API em 85%"
 }
 
+etapa_despertador() {
+    # A cada 12 minutos chama a API, para o Cloud Run não desligá-la por falta de visitas (ele desliga
+    # uma instância parada depois de uns 15 minutos, e religar o Spring Boot leva de 10 a 30 s).
+    # 5 chamadas por hora: ~3.600 por mês, perto de 0,2% dos 2 milhões de requisições grátis. Na
+    # cobrança por requisição, a instância parada entre uma chamada e outra não é cobrada.
+    # A rota /actuator/health/liveness não consulta o banco: o Neon continua dormindo quando ninguém usa
+    # (a /actuator/health completa o acordaria a cada chamada e gastaria a cota de horas dele).
+    # É a segunda tarefa do Cloud Scheduler (com a pack-verificar-cota); a conta tem 3 grátis.
+    local url
+    url=$(gc run services describe "$SERVICO" --region="$REGIAO" --format='value(status.url)')
+    gc scheduler jobs create http pack-despertador --location="$REGIAO" \
+        --schedule="*/12 * * * *" --time-zone="America/Sao_Paulo" \
+        --uri="$url/actuator/health/liveness" --http-method=GET \
+        --attempt-deadline=60s --max-retry-attempts=0 \
+        --description="Chama a API a cada 12 min para ela não desligar (sem tocar no banco)"
+}
+
 etapa_orcamento() {
     local conta
     conta=$(gc billing projects describe "$PROJETO" --format='value(billingAccountName)')
@@ -206,6 +223,6 @@ etapa_orcamento() {
 
 etapa=${1:-}
 case "$etapa" in
-    apis|imagens|segredos|contas|github|api|disjuntor|agendador|orcamento) "etapa_$etapa" ;;
-    *) echo "Uso: bash google-cloud/gcloud-cli-scripts/setup.sh <apis|imagens|segredos|contas|github|api|disjuntor|agendador|orcamento>"; exit 1 ;;
+    apis|imagens|segredos|contas|github|api|disjuntor|agendador|despertador|orcamento) "etapa_$etapa" ;;
+    *) echo "Uso: bash google-cloud/gcloud-cli-scripts/setup.sh <apis|imagens|segredos|contas|github|api|disjuntor|agendador|despertador|orcamento>"; exit 1 ;;
 esac

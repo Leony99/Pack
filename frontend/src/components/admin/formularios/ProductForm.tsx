@@ -197,7 +197,7 @@ export function ProductForm({
           checked={value.active !== false}
           onChange={(e) => set({ active: e.target.checked })}
         />
-        Produto ativo no catálogo
+        Produto ativo (aparece na loja; todo produto novo começa inativo)
       </label>
     </>
   );

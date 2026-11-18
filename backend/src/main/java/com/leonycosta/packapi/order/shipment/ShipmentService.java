@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -64,6 +65,9 @@ public class ShipmentService {
                     "Não é possível mudar o envio de " + shipment.getStatus() + " para " + status);
         }
         shipment.setStatus(status);
+        if (status == ShipmentStatus.ENTREGUE) {
+            shipment.setEntregueEm(LocalDateTime.now());
+        }
 
         // Espelha status do envio no pedido (DEVOLVIDO devolve o estoque e estorna o pagamento)
         OrderStatus novoStatusPedido = switch (status) {

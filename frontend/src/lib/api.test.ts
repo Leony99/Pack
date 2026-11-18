@@ -75,6 +75,15 @@ describe("coleções e operações simuladas", () => {
     expect((await api.getProducts({ collection: "drop-02" })).map((p) => p.id)).toEqual(["p1"]);
     expect(await api.getProducts({ collection: "outra" })).toEqual([]);
   });
+  test("catálogo vem em páginas, com o total e se há mais", async () => {
+    const todos = await api.getProducts();
+    const primeira = await api.getPaginaDoCatalogo({}, 0, 1);
+    expect(primeira.total).toBe(todos.length);
+    expect(primeira.produtos.map((p) => p.id)).toEqual([todos[0]!.id]);
+    expect(primeira.temMais).toBe(todos.length > 1);
+    const ultima = await api.getPaginaDoCatalogo({}, todos.length - 1, 1);
+    expect(ultima.temMais).toBe(false);
+  });
   test("operação não recebe acesso administrativo a colaboradores e cupons", () => {
     expect(api.canStaff("operacao", "stock")).toBe(true);
     expect(api.canStaff("operacao", "staff")).toBe(false);
@@ -200,5 +209,28 @@ describe("aba Tags (demonstração)", () => {
     const contagem = api.contarProdutosPorTag([{ tags: ["a", "b"] }, { tags: ["a"] }, {}]);
     expect(contagem.get("a")).toBe(2);
     expect(contagem.get("b")).toBe(1);
+  });
+});
+
+// Fica por último: desativa o produto p1, que os testes de cima usam
+describe("produto desativado e exclusão (demonstração)", () => {
+  test("produto que esteve em pedido não é apagado; desativado sai da loja", async () => {
+    await api.enterDemo("customer");
+    const { orderId } = await api.createOrder({
+      items: [{ productId: "p1", size: "M", qty: 1 }],
+      address,
+      shipping: "PAC",
+      payment: "pix",
+    });
+    await api.enterDemo("staff");
+    await api.updateOrder(orderId, "Cancelado", "");
+    // nem cancelado: o caminho é desativar
+    await expect(api.deleteAdminRecord("products", "p1")).rejects.toThrow(/Desative/);
+
+    const p1 = (await api.getAdminData()).products.find((p) => p.id === "p1")!;
+    await api.saveAdminRecord("products", { ...p1, active: false });
+    expect((await api.getProducts()).map((p) => p.id)).not.toContain("p1");
+    // a página do produto ainda abre, como indisponível
+    expect((await api.getProduct("p1"))?.active).toBe(false);
   });
 });

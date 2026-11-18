@@ -3,6 +3,7 @@ package com.leonycosta.packapi.order.shipment;
 import com.leonycosta.packapi.enums.ShipmentStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.leonycosta.packapi.order.order.Order;
@@ -29,4 +30,8 @@ public class Shipment {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ShipmentStatus status;
+
+    // Quando o envio virou ENTREGUE: conta o prazo de troca de 30 dias (ExclusaoDeVariantes)
+    @Column(name = "entregue_em")
+    private LocalDateTime entregueEm;
 }

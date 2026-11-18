@@ -1,18 +1,24 @@
 import { AdminRow, AdminTable } from "../AdminTable";
 import { RowActions } from "../RowActions";
+import { Button } from "@/components/ui/button";
+import { saveAdminRecord } from "@/lib/api";
 import { money } from "@/lib/checkout";
 import type { Product } from "@/data/types";
 import type { AdminScreenProps } from "../tipos";
 
 const totalEmEstoque = (p: Product) => Object.values(p.stock ?? {}).reduce((s, v) => s + v, 0);
-const estado = (p: Product) => (p.active === false ? "Oculto" : "Ativo");
+const estado = (p: Product) => (p.active === false ? "Inativo" : "Ativo");
 
-/** Produtos: foto, preço, tags, estoque total e se aparece no catálogo. */
-export function ProductsScreen({ data, busy, edit, remove }: AdminScreenProps) {
+/**
+ * Produtos: foto, preço, tags, estoque total e se aparece na loja. Todo produto novo começa inativo:
+ * ATIVAR o coloca na loja, DESATIVAR o tira (sem perder pedidos nem estoque). Excluir só vale para
+ * quem nunca esteve em um pedido.
+ */
+export function ProductsScreen({ data, busy, run, edit, remove }: AdminScreenProps) {
   return (
     <AdminTable
       filters={[
-        { key: "status", label: "Estado", options: ["Ativo", "Oculto"] },
+        { key: "status", label: "Estado", options: ["Ativo", "Inativo"] },
         { key: "type", label: "Categoria" },
         { key: "collection", label: "Coleção", options: data.collections.map((c) => c.tag) },
       ]}
@@ -42,6 +48,17 @@ export function ProductsScreen({ data, busy, edit, remove }: AdminScreenProps) {
           <td>{totalEmEstoque(p)}</td>
           <td>{estado(p)}</td>
           <td>
+            <Button
+              size="sm"
+              variant="outline"
+              className="mb-2"
+              disabled={busy}
+              onClick={() =>
+                void run(() => saveAdminRecord("products", { ...p, active: p.active === false }))
+              }
+            >
+              {p.active === false ? "ATIVAR" : "DESATIVAR"}
+            </Button>
             <RowActions
               // cópia do estoque e das tags: o formulário não altera a lista antes de salvar
               onEdit={() => edit({ ...p, stock: { ...p.stock }, tags: [...(p.tags ?? [])] })}

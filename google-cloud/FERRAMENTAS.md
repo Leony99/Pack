@@ -10,7 +10,7 @@ Ferramentas que o projeto **precisa** para configurar e atualizar a produção, 
 
 | Quando | Comando |
 |---|---|
-| Montar a produção do zero (num projeto novo do Google Cloud) | [`gcloud-cli-scripts/setup.sh`](gcloud-cli-scripts/setup.sh), etapa por etapa: `apis imagens segredos contas github api disjuntor agendador orcamento` |
+| Montar a produção do zero (num projeto novo do Google Cloud) | [`gcloud-cli-scripts/setup.sh`](gcloud-cli-scripts/setup.sh), etapa por etapa: `apis imagens segredos contas github api disjuntor agendador despertador orcamento` |
 | Religar a API depois que o disjuntor de custos a tirou do ar | [`gcloud-cli-scripts/religar-api.sh`](gcloud-cli-scripts/religar-api.sh) |
 | Mudar uma configuração (memória, limites, variáveis, permissões, orçamento) | O comando `gcloud` daquela configuração; depois, atualizar o `setup.sh` para ele continuar sendo o registro de tudo |
 

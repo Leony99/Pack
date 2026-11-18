@@ -16,6 +16,8 @@ import com.leonycosta.packapi.product.product_tag.ProductTag;
 import com.leonycosta.packapi.product.product_tag.ProductTagResponse;
 import com.leonycosta.packapi.product.product_tag.ProductTagService;
 import com.leonycosta.packapi.product.product_tag_link.ProductTagLink;
+import com.leonycosta.packapi.cart.cart_item.CartItemRepository;
+import com.leonycosta.packapi.product.inventory.InventoryMovementRepository;
 import com.leonycosta.packapi.product.product_variant.ProductVariantResponse;
 import com.leonycosta.packapi.product.color.ColorResponse;
 import com.leonycosta.packapi.product.size.SizeResponse;
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
@@ -40,6 +44,8 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductTagService productTagService;
     private final OrderItemRepository orderItemRepository;
+    private final CartItemRepository cartItemRepository;
+    private final InventoryMovementRepository movementRepository;
 
     private static final Sort ORDEM = Sort.by("nome", "id");
 
@@ -53,7 +59,31 @@ public class ProductService {
     private static final LocalDateTime DESDE_SEMPRE = LocalDateTime.of(2000, 1, 1, 0, 0);
 
     public Pagina<ProductResponse> findAll(int pagina, int tamanho) {
-        return Pagina.de(productRepository.findAll(Pagina.pedido(pagina, tamanho, ORDEM)).map(this::toResponse));
+        return catalogo(FiltroDoCatalogo.nenhum(), OrdemDoCatalogo.NOME, pagina, tamanho);
+    }
+
+    // O catálogo da loja: os filtros viram o WHERE da consulta e só a página pedida sai do banco
+    public Pagina<ProductResponse> catalogo(FiltroDoCatalogo filtro, OrdemDoCatalogo ordem, int pagina, int tamanho) {
+        Pageable pedido = Pagina.pedido(pagina, tamanho, ordem.sort());
+        return Pagina.de(productRepository.findAll(filtro.paraConsulta(), pedido).map(this::toResponse));
+    }
+
+    // O drop em destaque: a coleção da peça mais nova que está em alguma coleção, com as `limite` peças
+    // mais novas dela. São duas consultas pequenas (a coleção, com limite 1, e a página das peças), em vez de
+    // a loja buscar o catálogo inteiro para procurar
+    public static final int MAXIMO_DO_DROP = 24;
+
+    public DropEmDestaqueResponse dropEmDestaque(int limite) {
+        if (limite < 1 || limite > MAXIMO_DO_DROP) {
+            throw new ParametroInvalidoException("O limite do drop vai de 1 a " + MAXIMO_DO_DROP);
+        }
+        List<String> colecoes = productRepository.colecoesDasPecasMaisNovas(TagFiltro.COLECAO, PageRequest.of(0, 1));
+        if (colecoes.isEmpty()) {
+            return new DropEmDestaqueResponse(null, List.of());
+        }
+        String colecao = colecoes.getFirst();
+        FiltroDoCatalogo doDrop = new FiltroDoCatalogo(List.of(), List.of(), List.of(colecao), false, false);
+        return new DropEmDestaqueResponse(colecao, catalogo(doDrop, OrdemDoCatalogo.RECENTES, 0, limite).itens());
     }
 
     // O índice da busca trabalha com pedaços de 3 letras: com menos, o banco teria de ler a tabela inteira
@@ -80,11 +110,49 @@ public class ProductService {
     //   2. faltando, os mais vendidos desde sempre que ainda não estão na lista;
     //   3. faltando ainda, os cadastrados mais recentemente.
     // Só fica com menos de `limite` se a loja tiver menos produtos que isso.
+    //
+    // O ranking (a ordem dos ids) fica guardado na memória por 3 dias: somar todas as vendas a cada visita da
+    // home custaria mais a cada pedido novo, e os mais vendidos mudam devagar. Os produtos em si (preço,
+    // estoque, fotos) são lidos do banco a cada pedido, então aparecem sempre atualizados.
+    // A memória é da instância: se a API reiniciar (deploy, ou o Cloud Run desligou por falta de visitas),
+    // o ranking é refeito no primeiro pedido.
+    static final Duration VALIDADE_DO_RANKING = Duration.ofDays(3);
+
+    private record Ranking(List<UUID> ids, Instant valeAte) {}
+
+    private volatile Ranking ranking;
+
     public List<ProductResponse> maisVendidos(int limite) {
         if (limite < 1 || limite > MAXIMO_DOS_MAIS_VENDIDOS) {
             throw new ParametroInvalidoException(
                     "O limite dos mais vendidos vai de 1 a " + MAXIMO_DOS_MAIS_VENDIDOS);
         }
+        List<UUID> todos = rankingAtual().ids();
+        List<UUID> ids = todos.subList(0, Math.min(limite, todos.size()));
+        // busca os produtos de uma vez e devolve na ordem do ranking (um produto apagado depois do
+        // cálculo só sai da lista)
+        Map<UUID, Product> porId = productRepository.findAllById(ids).stream()
+                .collect(Collectors.toMap(p -> p.getId(), p -> p));
+        return ids.stream().map(id -> porId.get(id)).filter(p -> p != null && p.isAtivo())
+                .map(p -> toResponse(p)).toList();
+    }
+
+    // O ranking guardado, ou um novo se ainda não há ou se passou dos 3 dias
+    private Ranking rankingAtual() {
+        Ranking atual = ranking;
+        if (atual == null || Instant.now().isAfter(atual.valeAte())) {
+            atual = new Ranking(calcularRanking(MAXIMO_DOS_MAIS_VENDIDOS), Instant.now().plus(VALIDADE_DO_RANKING));
+            ranking = atual;
+        }
+        return atual;
+    }
+
+    // Esquece o ranking guardado: o próximo pedido calcula de novo (usado nos testes)
+    public void esquecerRanking() {
+        ranking = null;
+    }
+
+    private List<UUID> calcularRanking(int limite) {
         Set<UUID> ids = new LinkedHashSet<>();
         // pede `limite` a mais em cada etapa: os que já estão na lista não contam
         Pageable pedido = PageRequest.of(0, limite * 2);
@@ -93,13 +161,10 @@ public class ProductService {
         completar(ids, orderItemRepository.maisVendidos(VENDIDO, DESDE_SEMPRE, pedido), limite);
         if (ids.size() < limite) {
             Sort recentes = Sort.by(Sort.Order.desc("criadoEm"), Sort.Order.asc("id"));
-            completar(ids, productRepository.findAll(PageRequest.of(0, limite * 2, recentes)).stream()
+            completar(ids, productRepository.findAll(FiltroDoCatalogo.ativos(true), PageRequest.of(0, limite * 2, recentes)).stream()
                     .map(p -> p.getId()).toList(), limite);
         }
-        // busca os produtos de uma vez e devolve na ordem do ranking
-        Map<UUID, Product> porId = productRepository.findAllById(ids).stream()
-                .collect(Collectors.toMap(p -> p.getId(), p -> p));
-        return ids.stream().map(porId::get).map(this::toResponse).toList();
+        return List.copyOf(ids);
     }
 
     private static void completar(Set<UUID> ids, List<UUID> candidatos, int limite) {
@@ -107,6 +172,23 @@ public class ProductService {
             if (ids.size() >= limite) return;
             ids.add(id);
         }
+    }
+
+    // Coloca o produto na loja (ativo) ou tira dela (inativo). O ranking guardado é refeito: um desativado
+    // sai dos destaques, um ativado pode entrar
+    @Transactional
+    public ProductResponse mudarAtivo(UUID id, boolean ativo) {
+        Product product = findOrThrow(id);
+        product.setAtivo(ativo);
+        ProductResponse resposta = toResponse(productRepository.save(product));
+        esquecerRanking();
+        return resposta;
+    }
+
+    // Os produtos fora da loja, para o painel (GET /products/inativos, com CATALOG_WRITE)
+    public Pagina<ProductResponse> inativos(int pagina, int tamanho) {
+        Pageable pedido = Pagina.pedido(pagina, tamanho, OrdemDoCatalogo.RECENTES.sort());
+        return Pagina.de(productRepository.findAll(FiltroDoCatalogo.ativos(false), pedido).map(this::toResponse));
     }
 
     public ProductResponse findById(UUID id) {
@@ -130,6 +212,8 @@ public class ProductService {
         product.setPreco(request.getPreco());
         product.setSlug(slug);
         product.setCriadoEm(LocalDateTime.now());
+        // nasce fora da loja: aparece só depois de ativado (PATCH /products/{id}/ativar)
+        product.setAtivo(false);
         if (request.getTagIds() == null) {
             throw new ParametroInvalidoException(REGRA_DAS_TAGS);
         }
@@ -182,10 +266,27 @@ public class ProductService {
         }
     }
 
+    // Apaga o produto, só se ele nunca esteve em um pedido (um cadastrado por engano, por exemplo). Se já
+    // esteve, recusa (409): o caminho é desativar, que tira da loja sem mexer nos pedidos.
+    // O histórico de estoque continua, com o SKU, e os carrinhos perdem o item
+    @Transactional
     public void delete(UUID id) {
-        findOrThrow(id);
+        Product product = findOrThrow(id);
+        List<UUID> variantes = product.getVariantes().stream().map(v -> v.getId()).toList();
+        if (!variantes.isEmpty()) {
+            if (orderItemRepository.existsByVariantIdIn(variantes)) {
+                throw new ConflictException("Este produto já esteve em um pedido e não pode ser apagado. "
+                        + "Desative-o para tirá-lo da loja");
+            }
+            cartItemRepository.deleteByVariantIdIn(variantes);
+            movementRepository.soltarVariantes(variantes);
+        }
         // CascadeType.ALL remove variantes, imagens e tag links automaticamente
         productRepository.deleteById(id);
+        productRepository.flush();
+        // o produto podia estar no ranking guardado (pela parte das peças mais novas, que não têm venda):
+        // o próximo pedido refaz o ranking, e os destaques continuam com o número pedido de peças
+        esquecerRanking();
     }
 
     @Transactional
@@ -279,7 +380,8 @@ public class ProductService {
                 product.getCriadoEm(),
                 imagens,
                 tags,
-                variantes
+                variantes,
+                product.isAtivo()
         );
     }
 }

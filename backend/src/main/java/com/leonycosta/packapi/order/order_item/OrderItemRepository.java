@@ -13,12 +13,16 @@ import java.util.UUID;
 public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
     List<OrderItem> findByOrderId(UUID orderId);
 
+    // Alguma das variantes já esteve num pedido, de qualquer status? Então o produto não pode ser apagado,
+    // só desativado (ProductService.delete e ProductVariantService.delete)
+    boolean existsByVariantIdIn(Collection<UUID> variantes);
+
     // Ranking de vendas: os ids dos produtos com mais unidades vendidas nos pedidos feitos desde `desde`
     // e com um dos `status` (os que contam como venda). Empate: o id decide, para a ordem não mudar
-    // entre uma chamada e outra. Itens de variante apagada (variant null) ficam de fora.
+    // entre uma chamada e outra. Só produtos ativos: um desativado não aparece na loja.
     @Query("""
             SELECT v.product.id FROM OrderItem i JOIN i.variant v JOIN i.order o
-            WHERE o.status IN :status AND o.criadoEm >= :desde
+            WHERE o.status IN :status AND o.criadoEm >= :desde AND v.product.ativo = true
             GROUP BY v.product.id
             ORDER BY SUM(i.quantidade) DESC, v.product.id
             """)

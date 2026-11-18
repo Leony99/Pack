@@ -12,23 +12,28 @@ import {
   type Style,
 } from "@/data";
 import {
+  catalogoDaApi,
+  dropEmDestaqueDaApi,
   MAXIMO_DOS_MAIS_VENDIDOS,
   maisVendidosDaApi,
   produtoDaApiPorId,
   produtosDaApi,
+  type PaginaDoCatalogo,
 } from "./catalogo-api";
 import { USA_API } from "./modo";
 import { state } from "./simulacao";
 import {
   colecaoDoDrop,
-  colecoesDoProduto,
   maisRecentesPrimeiro,
+  normalizarTag,
   OPCOES_DA_DEMONSTRACAO,
   opcoesDoFiltro,
   tagDoDropEmDestaque,
   type Opcao,
 } from "./tags";
-import { tagsDaApi } from "./tags-api";
+import { colecoesDaApi, tagsDaApi } from "./tags-api";
+
+export type { PaginaDoCatalogo };
 
 export type ProductFilters = {
   style?: Style;
@@ -99,10 +104,56 @@ export async function getProducts(filters: ProductFilters = {}): Promise<Product
   }));
 }
 
+/** "Somente disponíveis": alguma variante (tamanho) com estoque. */
+function disponivel(p: Product): boolean {
+  return Object.values(p.stock ?? {}).some((qtd) => qtd > 0);
+}
+
+/** Recorta uma lista já filtrada na página pedida (demonstração e destaques). */
+function recortar(produtos: Product[], pagina: number, tamanho: number): PaginaDoCatalogo {
+  const inicio = pagina * tamanho;
+  return {
+    produtos: produtos.slice(inicio, inicio + tamanho),
+    total: produtos.length,
+    temMais: inicio + tamanho < produtos.length,
+  };
+}
+
+/**
+ * Uma página do catálogo (o "CARREGAR MAIS" pede a próxima). API: GET /api/v1/products com os filtros,
+ * a ordem e a página; o banco filtra e só a página vem. Destaques: os mais vendidos (até 48), filtrados
+ * aqui. Demonstração: os filtros sobre a lista simulada.
+ */
+export async function getPaginaDoCatalogo(
+  filters: ProductFilters & { disponiveis?: boolean },
+  pagina: number,
+  tamanho: number,
+): Promise<PaginaDoCatalogo> {
+  if (USA_API && filters.section !== "destaques" && !filters.search) {
+    return catalogoDaApi({
+      data: {
+        estilo: filters.style,
+        categoria: filters.type,
+        colecao: filters.collection,
+        novidades: filters.section === "novo-drop",
+        disponiveis: filters.disponiveis,
+        ordem: filters.sort,
+        pagina,
+        tamanho,
+      },
+    });
+  }
+  const produtos = (await getProducts(filters)).filter(
+    (p) => !filters.disponiveis || disponivel(p),
+  );
+  return recortar(produtos, pagina, tamanho);
+}
+
 /** Um produto. API: GET /api/v1/products/{id}; não existe → null. */
 export async function getProduct(id: string): Promise<Product | null> {
   if (USA_API) return produtoDaApiPorId({ data: id });
-  return state.products.find((p) => p.id === id && p.active !== false) ?? null;
+  // um produto inativo também abre: a página o mostra como indisponível, sem compra
+  return state.products.find((p) => p.id === id) ?? null;
 }
 
 /**
@@ -118,7 +169,9 @@ export async function getSection(section: Section, limit = 4): Promise<Product[]
 export async function getRelated(id: string, limit = 4): Promise<Product[]> {
   const base = await getProduct(id);
   if (!base) return [];
-  return (await getProducts({ type: base.type })).filter((p) => p.id !== id).slice(0, limit);
+  // pede um a mais: o próprio produto pode vir na página
+  const { produtos } = await getPaginaDoCatalogo({ type: base.type }, 0, limit + 1);
+  return produtos.filter((p) => p.id !== id).slice(0, limit);
 }
 
 /** Tabela de medidas: sempre da demonstração (a API não guarda as medidas). */
@@ -134,6 +187,12 @@ export async function getSizeChart(): Promise<SizeRow[]> {
 export type DropEmDestaque = { colecao: Collection; produtos: Product[] };
 
 export async function getDropEmDestaque(limit = 8): Promise<DropEmDestaque | null> {
+  if (USA_API) {
+    // a API acha o drop e as peças dele (GET /products/drop-em-destaque), sem a loja buscar o catálogo
+    const drop = await dropEmDestaqueDaApi({ data: limit });
+    if (!drop.colecao) return null;
+    return { colecao: colecaoDoDrop(normalizarTag(drop.colecao)), produtos: drop.produtos };
+  }
   const produtos = await getProducts();
   const tag = tagDoDropEmDestaque(produtos);
   if (!tag) return null;
@@ -153,23 +212,25 @@ export async function getOpcoesDoCatalogo(): Promise<{ estilos: Opcao[]; categor
 }
 
 /**
- * Coleções (os drops). API: as tags com filtro COLECAO ("drop-natal" → DROP NATAL), porque a API
- * não tem a entidade coleção. Ordem de lançamento: primeiro a coleção com a peça mais recente; as
- * que ainda não têm peças vão para o fim.
+ * Coleções (os drops). API: as tags com filtro COLECAO ("drop natal" → DROP NATAL), porque a API
+ * não tem a entidade coleção, já em ordem de lançamento (GET /api/v1/tags/colecoes): primeiro a
+ * coleção com a peça mais recente; as que ainda não têm peças vão para o fim.
  */
 export async function getCollections(): Promise<Collection[]> {
   if (USA_API) {
-    const [tags, produtos] = await Promise.all([tagsDaApi(), getProducts()]);
-    const lancadas = maisRecentesPrimeiro(produtos).flatMap(colecoesDoProduto);
-    const todas = opcoesDoFiltro(tags, "COLECAO").map((o) => o.valor);
-    const ordem = [...new Set([...lancadas.filter((t) => todas.includes(t)), ...todas])];
-    return ordem.map(colecaoDoDrop);
+    const tags = await colecoesDaApi();
+    return [...new Set(tags.map((t) => normalizarTag(t.tag)).filter(Boolean))].map(colecaoDoDrop);
   }
   return state.collections.map((c) => ({ ...c }));
 }
 
 /** Uma coleção pela tag ("drop-02"); não existe → null (a tela mostra o 404). */
 export async function getCollection(slug: string): Promise<Collection | null> {
-  if (USA_API) return (await getCollections()).find((c) => c.tag === slug) ?? null;
+  if (USA_API) {
+    // basta a tag existir com filtro COLECAO: não precisa buscar os produtos para a ordem
+    const tags = await tagsDaApi();
+    const existe = opcoesDoFiltro(tags, "COLECAO").some((o) => o.valor === slug);
+    return existe ? colecaoDoDrop(slug) : null;
+  }
   return state.collections.find((c) => c.tag === slug) ?? null;
 }

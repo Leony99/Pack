@@ -3,6 +3,8 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getCollection } from "@/lib/api";
 import { PaginaTopo } from "@/components/layout/PaginaTopo";
 import { CatalogView } from "@/components/catalog/CatalogView";
+import { catalogoQuery } from "@/components/catalog/consulta";
+import { catalogFilters } from "@/components/catalog/filtros";
 import { pageHead } from "@/lib/metadata";
 const query = (slug: string) =>
   queryOptions({
@@ -17,7 +19,17 @@ export const Route = createFileRoute("/colecao/$slug")({
   validateSearch: (s: Record<string, unknown>): { sort?: string } => ({
     sort: typeof s.sort === "string" ? s.sort : "recent",
   }),
-  loader: ({ context, params }) => context.queryClient.ensureQueryData(query(params.slug)),
+  loaderDeps: ({ search }) => ({ sort: search.sort }),
+  // a coleção e a primeira página das peças dela, as duas já do servidor
+  loader: async ({ context, params, deps }) => {
+    const [colecao] = await Promise.all([
+      context.queryClient.ensureQueryData(query(params.slug)),
+      context.queryClient.ensureInfiniteQueryData(
+        catalogoQuery(catalogFilters({ collection: params.slug, sort: deps.sort })),
+      ),
+    ]);
+    return colecao;
+  },
   head: ({ loaderData }) =>
     pageHead(
       loaderData?.name ?? "Coleção indisponível",

@@ -26,6 +26,8 @@ export type VarianteDaApi = {
 
 export type ProdutoDaApi = {
   id: string;
+  /** false: fora da loja (a página do produto mostra como indisponível) */
+  ativo?: boolean;
   nome: string;
   descricao: string | null;
   preco: number;
@@ -100,7 +102,7 @@ export function produtoDaApi(p: ProdutoDaApi): Product {
     tags: tags.todas,
     colecoes: tags.colecoes,
     stock,
-    active: true,
+    active: p.ativo ?? true,
     createdAt: p.criadoEm,
     novidadeEm: ultimaData([p.criadoEm, ...variantes.map((v) => v.criadoEm)]),
   };

@@ -33,6 +33,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
         "app.admin.senha=" + IntegrationTest.ADMIN_SENHA,
         "spring.datasource.password=definida-pelo-testcontainers",
         "spring.jpa.show-sql=false",
+        // conta as consultas ao banco (o CatalogoTest confere que uma página não faz uma consulta por produto)
+        "spring.jpa.properties.hibernate.generate_statistics=true",
+        "logging.level.org.hibernate.engine.internal.StatisticalLoggingSessionEventListener=WARN",
         // todas as requisições do MockMvc vêm do mesmo IP (127.0.0.1): com o limite real de 20 por IP,
         // os testes se bloqueariam entre si. O limite por e-mail + IP continua o real (5).
         "app.login.max-falhas-ip=1000000",
@@ -192,9 +195,15 @@ public abstract class IntegrationTest {
                 .esperar(201).str("$.id");
     }
 
+    // Produto já ativo (na loja): todo produto nasce inativo, e quase todo teste precisa dele à venda
     protected String novoProduto(Number preco) {
-        return post("/products", corpo("nome", "Produto " + unico(), "preco", preco, "tagIds", tagsObrigatorias()),
-                admin()).esperar(201).str("$.id");
+        return ativar(post("/products", corpo("nome", "Produto " + unico(), "preco", preco, "tagIds", tagsObrigatorias()),
+                admin()).esperar(201).str("$.id"));
+    }
+
+    protected String ativar(String produtoId) {
+        patch("/products/" + produtoId + "/ativar", admin()).esperar(200);
+        return produtoId;
     }
 
     // Produto novo com uma variante: preço do produto e estoque inicial informados

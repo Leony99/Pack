@@ -38,6 +38,12 @@ export function OrderDetail({ order }: { order: Order }) {
             <img src={item.image} alt={item.name} className="h-24 w-20 object-cover grayscale" />
             <div className="min-w-0 flex-1">
               <p className="text-sm">{item.name}</p>
+              {/* o produto foi desativado depois do pedido: saiu da loja */}
+              {item.disponivel === false && (
+                <p className="mt-1 text-[11px] tracking-[0.2em] text-muted-foreground">
+                  PRODUTO INDISPONÍVEL
+                </p>
+              )}
               <p className="mt-2 text-xs text-muted-foreground">
                 {item.size} · {item.qty} unidade(s)
               </p>

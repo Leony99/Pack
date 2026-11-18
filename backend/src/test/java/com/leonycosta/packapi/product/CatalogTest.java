@@ -68,7 +68,8 @@ class CatalogTest extends IntegrationTest {
     @ValueSource(strings = {"básica", "basica", "BÁSICA"})
     void buscaPorNomeIgnoraAcentoEMaiusculas(String termo) {
         String sufixo = unico();
-        post("/products", corpo("nome", "Camiseta Básica " + sufixo, "preco", 100, "tagIds", tagsObrigatorias()), admin()).esperar(201);
+        ativar(post("/products", corpo("nome", "Camiseta Básica " + sufixo, "preco", 100, "tagIds", tagsObrigatorias()), admin())
+                .esperar(201).str("$.id"));
 
         // .param() monta o ?nome=... já codificado, com o acento certo
         Resposta r = executar(MockMvcRequestBuilders.get("/api/v1/products").param("nome", termo + " " + sufixo))
@@ -428,7 +429,8 @@ class CatalogTest extends IntegrationTest {
     void listagemVemEmPaginasNaOrdemDoNome() {
         String sufixo = unico();
         for (String letra : new String[]{"C", "A", "B"}) {
-            post("/products", corpo("nome", "Paginado " + sufixo + " " + letra, "preco", 10, "tagIds", tagsObrigatorias()), admin()).esperar(201);
+            ativar(post("/products", corpo("nome", "Paginado " + sufixo + " " + letra, "preco", 10, "tagIds", tagsObrigatorias()), admin())
+                    .esperar(201).str("$.id"));
         }
 
         Resposta primeira = executar(MockMvcRequestBuilders.get("/api/v1/products")

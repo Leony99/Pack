@@ -110,7 +110,7 @@ public class GlobalExceptionHandler {
         return build(405, "Method Not Allowed", "Método " + ex.getMethod() + " não suportado nesta rota", req.getRequestURI());
     }
 
-    // O banco recusou por chave estrangeira ou valor único (ex.: apagar produto que já foi vendido) → 409
+    // O banco recusou por chave estrangeira ou valor único (ex.: apagar um tamanho em uso) → 409
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleIntegrity(DataIntegrityViolationException ex, HttpServletRequest req) {
         return build(409, "Conflict",

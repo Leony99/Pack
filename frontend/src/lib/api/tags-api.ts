@@ -1,5 +1,6 @@
 // Tags na Pack API: funções de servidor (createServerFn), no padrão BFF.
 //   GET    /api/v1/tags        lista (pública)
+//   GET    /api/v1/tags/colecoes  as coleções em ordem de lançamento (pública)
 //   POST   /api/v1/tags        { tag, filtro }  cria     (CATALOG_WRITE)
 //   PUT    /api/v1/tags/{id}   { tag, filtro }  edita    (CATALOG_WRITE; o filtro só muda sem produtos)
 //   DELETE /api/v1/tags/{id}                          apaga    (CATALOG_WRITE; os produtos só perdem a tag)
@@ -34,6 +35,11 @@ function validarTag(entrada: unknown): TagParaSalvar {
 
 export const tagsDaApi = createServerFn({ method: "GET" }).handler(async (): Promise<TagDaApi[]> =>
   chamarApi<TagDaApi[]>("/api/v1/tags"),
+);
+
+/** As coleções (tags COLECAO), da lançada mais recentemente para a mais antiga: a API ordena. */
+export const colecoesDaApi = createServerFn({ method: "GET" }).handler(
+  async (): Promise<TagDaApi[]> => chamarApi<TagDaApi[]>("/api/v1/tags/colecoes"),
 );
 
 export const salvarTagNaApi = createServerFn({ method: "POST" })

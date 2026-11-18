@@ -44,7 +44,7 @@ public class SecurityConfig {
                         // ── público ──
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login",
                                 "/api/v1/auth/staff/login").permitAll()
-                        .requestMatchers("/error", "/actuator/health").permitAll()
+                        .requestMatchers("/error", "/actuator/health", "/actuator/health/liveness").permitAll()
                         // documentação: a página do Swagger e o JSON que ela lê
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
@@ -54,6 +54,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/inventory/**").hasAuthority(INVENTORY_MANAGE.name())
 
                         // ── catálogo: qualquer um vê, só quem tem CATALOG_WRITE altera ──
+                        // (a lista de inativos é do painel: antes da leitura pública)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/products/inativos").hasAuthority(CATALOG_WRITE.name())
                         .requestMatchers(HttpMethod.GET, CATALOGO).permitAll()
                         .requestMatchers(CATALOGO).hasAuthority(CATALOG_WRITE.name())
                         .requestMatchers("/api/v1/images/**").hasAuthority(CATALOG_WRITE.name())
