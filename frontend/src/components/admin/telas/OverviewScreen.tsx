@@ -20,7 +20,7 @@ export function OverviewScreen({ data }: { data: AdminData }) {
     0,
   );
   const atalhos = adminNav.filter(
-    (n) => n.to !== "/admin/painel" && staff && canStaff(staff.role, n.resource),
+    (n) => n.to !== "/admin/painel" && staff && canStaff(staff, n.resource),
   );
 
   return (

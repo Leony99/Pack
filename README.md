@@ -217,6 +217,10 @@ curl -X POST localhost:8080/api/v1/auth/register -H "Content-Type: application/j
 
 # rota protegida, usando o token recebido
 curl localhost:8080/api/v1/auth/me -H "Authorization: Bearer <token>"
+
+# trocar a senha (pede a atual; errada → 422)
+curl -X PATCH localhost:8080/api/v1/auth/senha -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" -d '{"senhaAtual":"minhasenha1","novaSenha":"outrasenha2"}'
 ```
 
 ## Testes
@@ -246,7 +250,7 @@ Eles também rodam sozinhos a cada envio ao GitHub (ver [CI/CD](#cicd)).
 
 ## Frontend: loja PACK
 
-A loja fica em [`frontend/`](frontend/), feita com **TanStack Start** (React 19 com renderização no servidor), TanStack Router e Query, Tailwind CSS 4 e GSAP. Tem a loja completa, a compra (carrinho, cupom e checkout), a área do cliente e o painel administrativo. O `npm run dev` usa a API local e o build de produção usa a API do Cloud Run (cada modo tem o seu `.env`); o `npm run dev:demo` usa só dados de demonstração. Com a API, o catálogo vem dela pelo servidor do frontend (o navegador nunca chama a API direto nem vê o token), e o site mostra avisos de "em breve" enquanto o banco estiver vazio. Login, carrinho, checkout e painel ainda estão na demonstração.
+A loja fica em [`frontend/`](frontend/), feita com **TanStack Start** (React 19 com renderização no servidor), TanStack Router e Query, Tailwind CSS 4 e GSAP. Tem a loja completa, a compra (carrinho, cupom e checkout), a área do cliente e o painel administrativo. O `npm run dev` usa a API local e o build de produção usa a API do Cloud Run (cada modo tem o seu `.env`); o `npm run dev:demo` usa só dados de demonstração. Com a API, o catálogo e o login (cliente e equipe) vêm dela pelo servidor do frontend (o navegador nunca chama a API direto nem vê o token, que fica num cookie `httpOnly`), e o site mostra avisos de "em breve" enquanto o banco estiver vazio. Conta, carrinho, checkout e painel ainda estão na demonstração.
 
 **Visual:** preto e branco, com Anton nos títulos e um laranja só nos detalhes.
 
@@ -298,7 +302,7 @@ Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do pr
 - [x] CI/CD com GitHub Actions
 - [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
 - [x] Frontend (TanStack Start / React 19), com dados de demonstração
-- [ ] Ligar o resto do frontend à API: o catálogo já está ligado; faltam login, conta, carrinho, checkout e painel (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
+- [ ] Ligar o resto do frontend à API: o catálogo e o login já estão ligados; faltam conta, carrinho, checkout e painel (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
 - [ ] Migrações do banco com Flyway, no lugar do `ddl-auto=update`
 - [ ] Cloud Armor na frente da API, para barrar ataques de volume antes do Cloud Run
 

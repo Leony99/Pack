@@ -2,7 +2,7 @@
 
 A loja da Pack em **TanStack Start** (React 19 com renderização no servidor). Tem a loja completa, a área do cliente e o painel administrativo.
 
-**Estado atual:** o `npm run dev` e o build de produção usam a [Pack API](../README.md#backend-pack-api) no **catálogo** (produtos, busca, drops e página do produto); o resto (login, conta, carrinho, checkout e painel) continua na demonstração. O `npm run dev:demo` usa só a demonstração. A seção [Ligação com a Pack API](#ligação-com-a-pack-api) explica como funciona e o que falta.
+**Estado atual:** o `npm run dev` e o build de produção usam a [Pack API](../README.md#backend-pack-api) no **catálogo** (produtos, busca, drops e página do produto) e no **login** (cliente e equipe); o resto (conta, carrinho, checkout e painel) continua na demonstração. O `npm run dev:demo` usa só a demonstração. A seção [Ligação com a Pack API](#ligação-com-a-pack-api) explica como funciona e o que falta.
 
 O visual é próprio, com animações na rolagem e detalhes em laranja: veja [Visual](#visual).
 
@@ -30,7 +30,7 @@ O visual é próprio, com animações na rolagem e detalhes em laranja: veja [Vi
 | **Painel administrativo** | Visão geral, produtos, coleções, tags (com o filtro do catálogo de cada uma), estoque, pedidos, cupons, clientes, colaboradores, mensagens, newsletter e trocas, com busca, filtros, ordenação e exportação em CSV |
 | **Conteúdo**              | Contato, FAQ, tabela de medidas, políticas, newsletter e página 404                                                                                                                                                |
 
-Na demonstração, o botão **ACESSAR DEMONSTRAÇÃO** do `/login` e do `/admin` entra sem senha. O painel mostra só as seções do cargo:
+Na demonstração, o botão **ACESSAR DEMONSTRAÇÃO** do `/login` e do `/admin` entra sem senha. Com a API, o login é real: o botão, os avisos de demonstração e o "Esqueci minha senha" (a API ainda não manda e-mail) não aparecem, e o painel mostra as seções pelas **permissões do papel** da API (ver [O que já está ligado](#o-que-já-está-ligado)). Na demonstração, o painel mostra só as seções do cargo:
 
 | Cargo       | Acessa                                      |
 | ----------- | ------------------------------------------- |
@@ -179,7 +179,7 @@ tela ──► lib/api (getProducts...) ──┬─ demonstração: src/data, n
                                          └─► servidor do frontend ──► Pack API (PACK_API_URL)
 ```
 
-O navegador nunca chama a API direto: ele chama uma **função de servidor** do TanStack Start, e o servidor do frontend chama a API. É o padrão **BFF** (_backend for frontend_). Assim, o endereço da API e, quando o login for ligado, o token ficam só no servidor.
+O navegador nunca chama a API direto: ele chama uma **função de servidor** do TanStack Start, e o servidor do frontend chama a API. É o padrão **BFF** (_backend for frontend_). Assim, o endereço da API e o token do login ficam só no servidor.
 
 | Arquivo (`src/lib/api/`)      | O que faz                                                                                                                                                                                       |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -235,19 +235,20 @@ Se a API estiver fora do ar, a home abre mesmo assim (sem as linhas de produtos)
 
 ### O que já está ligado
 
-| Área                                     | No modo API                                                                                                                                                                                                     |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Catálogo, busca e produto                | **Ligado.** `GET /api/v1/products` (com os filtros e em páginas) e `GET /api/v1/products/{id}`. A busca por nome vai para a API quando tem 3 letras ou mais, o mínimo dela                                      |
-| Drops (coleções)                         | **Ligado**, a partir das tags (`GET /api/v1/tags/colecoes` e `GET /api/v1/products/drop-em-destaque`)                                                                                                           |
-| Tabela de medidas                        | Continua na demonstração: a API só tem os nomes dos tamanhos, sem as medidas                                                                                                                                    |
-| Login, conta, carrinho, checkout, painel | Continuam na demonstração. O caminho de cada função está no comentário `PACK API:` dela. Enquanto isso, um produto da API até entra no carrinho, mas o checkout de demonstração não o conhece e recusa o pedido |
+| Área                                | No modo API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Catálogo, busca e produto           | **Ligado.** `GET /api/v1/products` (com os filtros e em páginas) e `GET /api/v1/products/{id}`. A busca por nome vai para a API quando tem 3 letras ou mais, o mínimo dela                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Drops (coleções)                    | **Ligado**, a partir das tags (`GET /api/v1/tags/colecoes` e `GET /api/v1/products/drop-em-destaque`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Tabela de medidas                   | Continua na demonstração: a API só tem os nomes dos tamanhos, sem as medidas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Login e cadastro (cliente e equipe) | **Ligado** (`autenticacao-api.ts`). Entrar e criar conta chamam `POST /api/v1/auth/login`, `/auth/staff/login` ou `/auth/register` e guardam o token num cookie `httpOnly` (`pack_token_cliente` ou `pack_token_equipe`, duas sessões separadas) que vence junto com ele (60 min). Quem está logado vem do `GET /api/v1/auth/me`; token vencido ou inválido apaga o cookie e a pessoa volta a ver o "entrar". Sair apaga o cookie (a API não tem logout). A troca de senha vai para `PATCH /api/v1/auth/senha`. A recuperação por e-mail ainda não existe: a tela manda falar com o suporte |
+| Abas do painel                      | **Pelas permissões da API** (`canStaff`, em `autenticacao.ts`): Produtos, Coleções e Tags com `CATALOG_WRITE`; Estoque com `INVENTORY_MANAGE`; Pedidos e Trocas com `ORDER_MANAGE`; Clientes e Atendimento com `CUSTOMER_READ`; Cupons com `COUPON_MANAGE`; Colaboradores e Newsletter com `STAFF_MANAGE`. Um papel novo criado na API funciona sem mudar o site. O topo mostra o nome do papel                                                                                                                                                                                             |
+| Conta, carrinho, checkout, painel   | Continuam na demonstração. O caminho de cada função está no comentário `PACK API:` dela. Enquanto isso, um produto da API até entra no carrinho, mas o checkout de demonstração não o conhece e recusa o pedido                                                                                                                                                                                                                                                                                                                                                                             |
 
 ### O que falta no frontend
 
-1. **Login (cliente e equipe):** uma função de servidor que chama `POST /api/v1/auth/login` (ou `/auth/staff/login`) e grava o token num cookie `httpOnly`, `Secure` e `SameSite=Strict` (os nomes estão em `COOKIE_DO_TOKEN`, em `server/http.ts`); `GET /api/v1/auth/me` para saber quem está logado; sair apaga o cookie, porque a API não tem logout.
-2. **Área do cliente:** dados, endereços e pedidos pelas rotas `/api/v1/customers/{id}/...`, com o id vindo do `/auth/me`. As listas da API vêm em páginas.
-3. **Carrinho e checkout:** a tela precisa escolher a **variante** (tamanho + cor), e não só o tamanho. O carrinho passa a ser o da API, item por item. O pedido sai do carrinho guardado (`POST .../orders { addressId, codigoCupom }`), e o pagamento é outra chamada.
-4. **Painel:** cada recurso pela rota dele, com os papéis da API (ADMIN, ESTOQUISTA, ATENDENTE, SUPERVISOR) no lugar dos cargos da demonstração.
+1. **Área do cliente:** dados, endereços e pedidos pelas rotas `/api/v1/customers/{id}/...`, com o id vindo do `/auth/me`. As listas da API vêm em páginas.
+2. **Carrinho e checkout:** a tela precisa escolher a **variante** (tamanho + cor), e não só o tamanho. O carrinho passa a ser o da API, item por item. O pedido sai do carrinho guardado (`POST .../orders { addressId, codigoCupom }`), e o pagamento é outra chamada.
+3. **Painel:** cada recurso pela rota dele (as abas já seguem as permissões do papel).
 
 ### O que falta na API
 
@@ -265,7 +266,7 @@ Continua simulado até a API ganhar o equivalente:
 
 O frontend não protege dados: quem confere token, dono do recurso, permissões, preço, estoque, cupom e frete é a API, em toda requisição. As travas de cargo e de sessão das telas são só experiência de uso. O que o frontend faz:
 
-- **Token fora do navegador:** no modo API, o JWT vai ficar num cookie `httpOnly` (o JavaScript da página não consegue ler), `Secure` e `SameSite=Strict` (outro site não consegue usá-lo). Nunca no `localStorage`.
+- **Token fora do navegador:** no modo API, o JWT fica num cookie `httpOnly` (o JavaScript da página não consegue ler), `Secure` fora do `npm run dev` (só vai por HTTPS) e `SameSite=Lax`: outro site não consegue mandá-lo num POST (as funções de servidor que alteram dados são POST), mas quem chega por um link de fora (e-mail, rede social) já abre a página logado, o que o `Strict` não deixaria. Nunca no `localStorage`.
 - **Endereço da API só no servidor:** `PACK_API_URL` não tem `VITE_`, e o build proíbe o código da pasta `server/` no navegador. Conferido no build: nem o endereço nem o nome do cookie aparecem nos arquivos da página.
 - **Entrada conferida no servidor:** as funções de servidor validam o que o navegador manda (id no formato UUID, busca curta) e só chamam caminhos que começam em `/api/v1/`.
 - **Erros sem detalhes internos:** um erro 5xx da API vira uma mensagem genérica; os 4xx mostram a mensagem da API, que é escrita para o usuário.
@@ -292,7 +293,8 @@ Os testes ficam ao lado do código testado (`*.test.ts`):
 
 ## Pendências
 
-- **Ligar o resto da Pack API** (login, conta, carrinho, checkout e painel), como em [O que falta no frontend](#o-que-falta-no-frontend).
+- **Ligar o resto da Pack API** (conta, carrinho, checkout e painel), como em [O que falta no frontend](#o-que-falta-no-frontend).
+- **Recuperar senha por e-mail:** precisa de um serviço de envio de e-mail na API.
 - **Compra de verdade:**
   - pagamento real (Pix e cartão) e o retorno do pagamento;
   - frete real por CEP;

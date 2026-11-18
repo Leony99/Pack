@@ -11,8 +11,14 @@ export type StaffMember = {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "operacao" | "atendimento";
+  /**
+   * Na demonstração: admin, operacao ou atendimento. Com a API: o nome do papel (admin, estoquista,
+   * atendente, supervisor ou um criado no painel), só para mostrar.
+   */
+  role: string;
   active: boolean;
+  /** Com a API: as permissões do papel (CATALOG_WRITE...), que decidem as abas do painel. */
+  permissoes?: string[];
 };
 export type SavedAddress = CheckoutAddress & { id: string; label: string; primary: boolean };
 export type Collection = { id: string; name: string; tag: string; description: string };

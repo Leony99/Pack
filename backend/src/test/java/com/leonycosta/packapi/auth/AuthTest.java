@@ -186,6 +186,54 @@ class AuthTest extends IntegrationTest {
         get("/auth/me", null).esperar(401);
     }
 
+    @Test
+    void meDoFuncionarioTrazONomeDoPapel() {
+        assertThat(get("/auth/me", admin()).esperar(200).str("$.papel")).isEqualTo("ADMIN");
+        Cliente ana = novoCliente();
+        assertThat(get("/auth/me", ana.token()).esperar(200).<Object>ler("$.papel")).isNull();
+    }
+
+    // ------------------------------------------------------------------ troca de senha
+
+    @Test
+    void clienteTrocaASenhaEEntraComANova() {
+        Cliente ana = novoCliente();
+
+        trocarSenha(ana.token(), ana.senha(), "novaSenha123").esperar(204);
+
+        post("/auth/login", corpo("email", ana.email(), "senha", ana.senha()), null).esperar(401);
+        post("/auth/login", corpo("email", ana.email(), "senha", "novaSenha123"), null).esperar(200);
+    }
+
+    @Test
+    void trocaComASenhaAtualErradaERecusada() {
+        Cliente ana = novoCliente();
+
+        // 422, e não 401: o site não deve tratar como sessão expirada
+        trocarSenha(ana.token(), "errada123", "novaSenha123").esperar(422);
+        post("/auth/login", corpo("email", ana.email(), "senha", ana.senha()), null).esperar(200);
+    }
+
+    @Test
+    void novaSenhaSegueAsRegrasDoCadastro() {
+        Cliente ana = novoCliente();
+
+        trocarSenha(ana.token(), ana.senha(), "curta").esperar(400);
+        trocarSenha(ana.token(), ana.senha(), "x".repeat(33)).esperar(400);
+    }
+
+    @Test
+    void trocaDeSenhaExigeLogin() {
+        trocarSenha(null, "qualquer1", "novaSenha123").esperar(401);
+    }
+
+    private Resposta trocarSenha(String token, String atual, String nova) {
+        var req = MockMvcRequestBuilders.patch("/api/v1/auth/senha").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"senhaAtual\":\"" + atual + "\",\"novaSenha\":\"" + nova + "\"}");
+        if (token != null) req.header("Authorization", "Bearer " + token);
+        return executar(req);
+    }
+
     // ------------------------------------------------------------------ senhas
 
     @Test

@@ -3,11 +3,12 @@ import { Link } from "@tanstack/react-router";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { FormField } from "@/components/common/FormField";
 import { Button } from "@/components/ui/button";
-import { recoverPassword, resetPassword } from "@/lib/api";
+import { RECUPERACAO_INDISPONIVEL, recoverPassword, resetPassword, USA_API } from "@/lib/api";
 
 /**
  * Recuperação de senha em duas telas: pedir o link por e-mail (/login/recuperar) e definir a nova
- * senha com o token do link (/login/redefinir, com reset=true). Na demonstração, nada é enviado.
+ * senha com o token do link (/login/redefinir, com reset=true). Na demonstração, nada é enviado. Com
+ * a API, ainda não existe (precisa de um serviço de e-mail): a tela só avisa.
  */
 export function PasswordForm({ reset = false, token = "" }: { reset?: boolean; token?: string }) {
   const [message, setMessage] = useState("");
@@ -35,6 +36,21 @@ export function PasswordForm({ reset = false, token = "" }: { reset?: boolean; t
       setBusy(false);
     }
   }
+
+  if (USA_API)
+    return (
+      <PageLayout title={reset ? "NOVA SENHA" : "RECUPERAR SENHA"} eyebrow="CONTA">
+        <div className="mx-auto max-w-md space-y-5 border border-ink/10 p-6 md:p-8">
+          <p className="text-sm">{RECUPERACAO_INDISPONIVEL}</p>
+          <Button asChild variant="outline">
+            <Link to="/suporte/contato">FALAR COM O SUPORTE</Link>
+          </Button>
+          <Button asChild variant="link">
+            <Link to="/login">VOLTAR AO LOGIN</Link>
+          </Button>
+        </div>
+      </PageLayout>
+    );
 
   return (
     <PageLayout title={reset ? "NOVA SENHA" : "RECUPERAR SENHA"} eyebrow="CONTA">

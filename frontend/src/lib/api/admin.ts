@@ -45,7 +45,7 @@ export async function getAdminData() {
   // GET /api/v1/variants/estoque-baixo...). Cada uma exige a permissão do papel.
   const colaborador = sessao.colaborador;
   if (!colaborador) throw new Error("Entre no painel de demonstração.");
-  const pode = (resource: AdminResource) => canStaff(colaborador.role, resource);
+  const pode = (resource: AdminResource) => canStaff(colaborador, resource);
   return {
     staffSession: { ...colaborador },
     products: pode("products") ? state.products.map((p) => ({ ...p, stock: { ...p.stock } })) : [],

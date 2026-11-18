@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Save } from "lucide-react";
 import { FormField } from "@/components/common/FormField";
 import { Button } from "@/components/ui/button";
-import { changePassword, updateProfile } from "@/lib/api";
+import { changePassword, SENHA_MAXIMA, SENHA_MINIMA, updateProfile, USA_API } from "@/lib/api";
 import type { AccountData, AccountScreenProps } from "../tipos";
 
 type Perfil = AccountData["customer"];
@@ -41,16 +41,21 @@ export function ProfileScreen({
             onError("As novas senhas não coincidem.");
             return;
           }
-          void run(async () => {
-            await changePassword(String(campos.get("current")), String(campos.get("next")));
-            form.reset();
-          }, "Alteração de senha simulada; nenhuma credencial foi armazenada.");
+          void run(
+            async () => {
+              await changePassword(String(campos.get("current")), String(campos.get("next")));
+              form.reset();
+            },
+            USA_API
+              ? "Senha alterada."
+              : "Alteração de senha simulada; nenhuma credencial foi armazenada.",
+          );
         }}
       >
         <h2 className="mb-5 text-2xl">ALTERAR SENHA</h2>
         <div className="grid gap-4">
           <FormField
-            label="Senha atual (demonstração)"
+            label={USA_API ? "Senha atual" : "Senha atual (demonstração)"}
             name="current"
             type="password"
             autoComplete="current-password"
@@ -61,7 +66,8 @@ export function ProfileScreen({
             name="next"
             type="password"
             autoComplete="new-password"
-            minLength={6}
+            minLength={SENHA_MINIMA}
+            maxLength={SENHA_MAXIMA}
             required
           />
           <FormField
@@ -69,7 +75,8 @@ export function ProfileScreen({
             name="confirm"
             type="password"
             autoComplete="new-password"
-            minLength={6}
+            minLength={SENHA_MINIMA}
+            maxLength={SENHA_MAXIMA}
             required
           />
         </div>

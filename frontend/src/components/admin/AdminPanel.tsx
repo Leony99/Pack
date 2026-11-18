@@ -103,7 +103,7 @@ export function AdminPanel({ view, orderId }: { view: AdminView; orderId?: strin
       void run(() => deleteAdminRecord(resource, id), "Registro excluído.");
   }
 
-  const allowed = !!staff && (view === "overview" || canStaff(staff.role, view));
+  const allowed = !!staff && (view === "overview" || canStaff(staff, view));
   const novo = !orderId ? NOVO[view] : undefined;
 
   function conteudo(props: AdminScreenProps) {
