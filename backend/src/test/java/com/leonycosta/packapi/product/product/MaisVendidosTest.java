@@ -3,6 +3,7 @@ package com.leonycosta.packapi.product.product;
 import com.leonycosta.packapi.order.order.Order;
 import com.leonycosta.packapi.order.order.OrderRepository;
 import com.leonycosta.packapi.support.IntegrationTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,6 +20,15 @@ class MaisVendidosTest extends IntegrationTest {
 
     @Autowired
     OrderRepository orderRepository;
+
+    @Autowired
+    ProductService productService;
+
+    // o ranking fica guardado por 3 dias: cada teste começa com ele recalculado, para ver as próprias vendas
+    @BeforeEach
+    void recalcularRanking() {
+        productService.esquecerRanking();
+    }
 
     @Test
     void quemVendeuMaisVemPrimeiro() {
@@ -79,6 +89,35 @@ class MaisVendidosTest extends IntegrationTest {
         List<String> ranking = maisVendidos(2);
 
         assertThat(ranking).hasSize(2).doesNotHaveDuplicates();
+    }
+
+    @Test
+    void rankingFicaGuardadoAteSerRecalculado() {
+        // o produto é criado antes de a lista ser guardada
+        Variante nova = novaVariante(10, 2000);
+        List<String> antes = maisVendidos(48);
+        pedidoPago(nova, 99);
+
+        // a venda nova só conta quando o ranking for refeito (passados os 3 dias)
+        assertThat(maisVendidos(48)).isEqualTo(antes);
+        productService.esquecerRanking();
+        List<String> depois = maisVendidos(48);
+        assertThat(depois).isNotEqualTo(antes).contains(nova.produtoId());
+    }
+
+    @Test
+    void produtoApagadoSaiDoRankingSemDiminuirALista() {
+        novoProduto(10);
+        String apagado = novoProduto(10);
+        // as duas peças mais novas, sem venda, entram pela parte que completa o ranking
+        assertThat(maisVendidos(48)).contains(apagado);
+        int tamanho = maisVendidos(2).size();
+
+        delete("/products/" + apagado, admin()).esperar(204);
+
+        // o ranking guardado é refeito: o apagado sai e outro produto ocupa o lugar dele
+        assertThat(maisVendidos(48)).doesNotContain(apagado);
+        assertThat(maisVendidos(2)).hasSize(tamanho);
     }
 
     @Test

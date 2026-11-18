@@ -24,6 +24,13 @@ public class ProductTagController {
         return productTagService.findAll();
     }
 
+    // GET /tags/colecoes: o filtro COLEÇÃO da loja, sem precisar buscar os produtos para saber a ordem
+    @Operation(summary = "Lista as coleções (tags COLECAO) em ordem de lançamento: a da peça mais nova primeiro")
+    @GetMapping("/colecoes")
+    public List<ProductTagResponse> colecoes() {
+        return productTagService.colecoes();
+    }
+
     @Operation(summary = "Busca uma tag")
     @GetMapping("/{id}")
     public ProductTagResponse findById(@PathVariable UUID id) {

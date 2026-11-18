@@ -20,11 +20,21 @@ public class ProductController {
 
     private final ProductService productService;
 
-    // GET /products, /products?nome=camiseta ou /products?tag=verao, em páginas: &pagina=1&tamanho=20
-    @Operation(summary = "Lista os produtos em páginas, com filtro opcional por nome ou tag")
+    // GET /products, em páginas (&pagina=1&tamanho=20), com um destes modos:
+    //   - ?nome=camiseta: busca por nome;
+    //   - ?tag=verao: produtos com aquela tag;
+    //   - o catálogo: ?estilo=treino&categoria=camisa&colecao=drop natal&novidades=true&disponiveis=true
+    //     &ordem=recentes|menor-preco|maior-preco|nome. Todos opcionais; sem nenhum, lista tudo por nome.
+    @Operation(summary = "Lista os produtos em páginas: busca por nome, por tag ou com os filtros do catálogo")
     @GetMapping
     public Pagina<ProductResponse> findAll(@RequestParam(required = false) String nome,
                                            @RequestParam(required = false) String tag,
+                                           @RequestParam(required = false) List<String> estilo,
+                                           @RequestParam(required = false) List<String> categoria,
+                                           @RequestParam(required = false) List<String> colecao,
+                                           @RequestParam(defaultValue = "false") boolean novidades,
+                                           @RequestParam(defaultValue = "false") boolean disponiveis,
+                                           @RequestParam(required = false) String ordem,
                                            @RequestParam(defaultValue = "0") int pagina,
                                            @RequestParam(defaultValue = Pagina.TAMANHO_PADRAO) int tamanho) {
         if (tag != null && !tag.isBlank()) {
@@ -33,7 +43,15 @@ public class ProductController {
         if (nome != null && !nome.isBlank()) {
             return productService.search(nome, pagina, tamanho);
         }
-        return productService.findAll(pagina, tamanho);
+        FiltroDoCatalogo filtro = new FiltroDoCatalogo(estilo, categoria, colecao, novidades, disponiveis);
+        return productService.catalogo(filtro, OrdemDoCatalogo.daUrl(ordem), pagina, tamanho);
+    }
+
+    // GET /products/drop-em-destaque?limite=8: o card e a seção do drop na home
+    @Operation(summary = "O drop em destaque: a coleção da peça mais nova que está em uma, com as peças dela")
+    @GetMapping("/drop-em-destaque")
+    public DropEmDestaqueResponse dropEmDestaque(@RequestParam(defaultValue = "8") int limite) {
+        return productService.dropEmDestaque(limite);
     }
 
     // GET /products/mais-vendidos?limite=4: a linha DESTAQUES da loja

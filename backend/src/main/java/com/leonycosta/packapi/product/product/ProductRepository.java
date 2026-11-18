@@ -3,12 +3,16 @@ package com.leonycosta.packapi.product.product;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import com.leonycosta.packapi.enums.TagFiltro;
+import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ProductRepository extends JpaRepository<Product, UUID> {
+// JpaSpecificationExecutor: a listagem do catálogo monta o WHERE com os filtros pedidos (FiltroDoCatalogo)
+public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
     Optional<Product> findBySlug(String slug);
     boolean existsBySlug(String slug);
     // Busca por nome: ignora maiúsculas e acentos dos dois lados ("basica" encontra "Camiseta Básica").
@@ -27,4 +31,13 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     @Query("SELECT DISTINCT p FROM Product p JOIN p.tags tl WHERE tl.tag.tag = :tag")
     Page<Product> findByTag(String tag, Pageable pedido);
+
+    // As coleções das peças, da peça mais nova para a mais velha: a primeira é o drop em destaque.
+    // Pedida com limite 1, o banco para na primeira linha (índices em products.criado_em e product_tag_link.tag_id)
+    @Query("""
+            SELECT t.tag FROM ProductTagLink l JOIN l.tag t JOIN l.product p
+            WHERE t.filtro = :filtro
+            ORDER BY p.criadoEm DESC, p.id, t.tag
+            """)
+    List<String> colecoesDasPecasMaisNovas(TagFiltro filtro, Pageable limite);
 }

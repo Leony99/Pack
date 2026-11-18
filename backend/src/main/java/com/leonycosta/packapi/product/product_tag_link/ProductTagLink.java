@@ -10,7 +10,10 @@ import com.leonycosta.packapi.product.product_tag.ProductTag;
 @Entity
 @Table(
     name = "product_tag_link",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"product_id", "tag_id"})
+    uniqueConstraints = @UniqueConstraint(columnNames = {"product_id", "tag_id"}),
+    // a restrição acima já serve de índice para "as tags de um produto" (começa por product_id);
+    // este é o caminho inverso, "os produtos de uma tag" (filtros do catálogo e o drop em destaque)
+    indexes = @Index(name = "idx_product_tag_link_tag_id", columnList = "tag_id")
 )
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class ProductTagLink {

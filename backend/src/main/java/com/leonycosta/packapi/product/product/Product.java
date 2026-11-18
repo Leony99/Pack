@@ -11,7 +11,8 @@ import com.leonycosta.packapi.product.product_tag_link.ProductTagLink;
 import com.leonycosta.packapi.product.product_variant.ProductVariant;
 
 @Entity
-@Table(name = "products")
+// Índice em criado_em: a ordem "recentes" do catálogo e a busca do drop em destaque (a peça mais nova)
+@Table(name = "products", indexes = @Index(name = "idx_products_criado_em", columnList = "criado_em"))
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Product {
 

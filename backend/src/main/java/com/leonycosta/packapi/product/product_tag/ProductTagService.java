@@ -24,6 +24,13 @@ public class ProductTagService {
                 .toList();
     }
 
+    // As coleções (os drops), da lançada mais recentemente para a mais antiga: o filtro COLEÇÃO da loja
+    public List<ProductTagResponse> colecoes() {
+        return productTagRepository.emOrdemDeLancamento(TagFiltro.COLECAO).stream()
+                .map(t -> ProductTagResponse.de(t))
+                .toList();
+    }
+
     public ProductTagResponse findById(UUID id) {
         return toResponse(findOrThrow(id));
     }
