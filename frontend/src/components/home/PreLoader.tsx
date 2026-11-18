@@ -27,7 +27,7 @@ const TECLAS_DE_ROLAGEM = new Set([
  *   3. a camada some num fade rápido. A foto aberta é a mesma, no mesmo lugar, do fundo do topo
  *      da home, então ela "fica": só os elementos das laterais aparecem (avisados por
  *      `abertura.concluir()`).
- * Enquanto roda, a rolagem fica travada. Só roda quando a visita começa pela home, e uma vez:
+ * Dura cerca de 2,5 s. Enquanto roda, a rolagem fica travada. Só roda quando a visita começa pela home, e uma vez:
  * não volta ao navegar pelo site, só ao recarregar. Para quem pediu menos movimento no sistema, ela nem aparece (motion-reduce).
  */
 export function PreLoader({ imagem, retrato }: { imagem: string; retrato: string }) {
@@ -75,24 +75,24 @@ export function PreLoader({ imagem, retrato }: { imagem: string; retrato: string
           .fromTo(
             moldura,
             { clipPath: "inset(50% 50% 50% 50%)" },
-            { clipPath: celular ? JANELA.celular : JANELA.computador, duration: 1.6, ease: CURVA },
+            { clipPath: celular ? JANELA.celular : JANELA.computador, duration: 1, ease: CURVA },
           )
-          .fromTo(foto, { scale: 1.7 }, { scale: 1.25, duration: 2, ease: "expo.out" }, 0)
-          .from(letras, { yPercent: 110, duration: 1.2, ease: "expo.out", stagger: 0.03 }, 0.35)
+          .fromTo(foto, { scale: 1.7 }, { scale: 1.25, duration: 1.3, ease: "expo.out" }, 0)
+          .from(letras, { yPercent: 110, duration: 0.8, ease: "expo.out", stagger: 0.02 }, 0.15)
           // 2. depois de uma pausa, a janela ocupa a tela e as frases saem para os lados
-          .addLabel("abrir", 2.1)
+          .addLabel("abrir", 1.25)
           .fromTo(
             moldura,
             { clipPath: celular ? JANELA.celular : JANELA.computador },
-            { clipPath: "inset(0% 0% 0% 0%)", duration: 1.3, ease: CURVA, immediateRender: false },
+            { clipPath: "inset(0% 0% 0% 0%)", duration: 0.9, ease: CURVA, immediateRender: false },
             "abrir",
           )
-          .to(foto, { scale: 1, duration: 1.5, ease: "expo.inOut" }, "abrir")
-          .to(linhaA, { xPercent: -60, opacity: 0, duration: 1, ease: "power2.in" }, "abrir")
-          .to(linhaB, { xPercent: 60, opacity: 0, duration: 1, ease: "power2.in" }, "abrir")
+          .to(foto, { scale: 1, duration: 1, ease: "expo.inOut" }, "abrir")
+          .to(linhaA, { xPercent: -60, opacity: 0, duration: 0.7, ease: "power2.in" }, "abrir")
+          .to(linhaB, { xPercent: 60, opacity: 0, duration: 0.7, ease: "power2.in" }, "abrir")
           // 3. a camada some e os elementos do topo da home aparecem nas laterais
-          .call(abertura.concluir, [], "abrir+=1.3")
-          .to(el, { autoAlpha: 0, duration: 0.6, ease: "power2.out" }, "abrir+=1.3");
+          .call(abertura.concluir, [], "abrir+=0.85")
+          .to(el, { autoAlpha: 0, duration: 0.4, ease: "power2.out" }, "abrir+=0.85");
 
         // saiu da página no meio da abertura: devolve a rolagem
         return destravar;

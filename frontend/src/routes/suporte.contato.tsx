@@ -2,7 +2,7 @@ import { pageHead } from "@/lib/metadata";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { sendContact } from "@/lib/api";
-import hero from "@/assets/hero.jpg";
+import hero from "@/assets/hero.avif";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { CardAviso, ROTULO } from "@/components/layout/PaginaTopo";
 import { FormField } from "@/components/common/FormField";

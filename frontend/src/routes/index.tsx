@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import heroRetrato from "@/assets/hero.jpg";
-import hero from "@/assets/pack-hero-athlete.png";
+import heroRetrato from "@/assets/hero.avif";
+import hero from "@/assets/pack-hero-athlete.avif";
+import heroCompartilhado from "@/assets/pack-hero-athlete.jpg";
 import { SectionRow } from "@/components/catalog/SectionRow";
 import { NewsletterForm } from "@/components/common/NewsletterForm";
 import { DropHorizontal } from "@/components/home/DropHorizontal";
@@ -37,9 +38,9 @@ export const Route = createFileRoute("/")({
         "Treino e casual",
         "PACK: roupas de treino e casual em preto e branco. Conheça os destaques e o novo drop.",
       ).meta,
-      // a foto do destaque é a imagem do link compartilhado nas redes
-      { property: "og:image", content: hero },
-      { name: "twitter:image", content: hero },
+      // a foto do destaque é a imagem do link compartilhado nas redes (em JPG: as redes não leem AVIF)
+      { property: "og:image", content: heroCompartilhado },
+      { name: "twitter:image", content: heroCompartilhado },
     ],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(sectionsQuery),
