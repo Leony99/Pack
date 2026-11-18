@@ -23,7 +23,6 @@ export type CartItem = Product & {
   itemId?: string;
 };
 
-
 type CartContext = {
   cart: CartItem[];
   /** Gaveta lateral do carrinho aberta. */

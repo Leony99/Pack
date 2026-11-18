@@ -6,3 +6,4 @@ dist
 .tanstack
 package-lock.json
 routeTree.gen.ts
+.wrangler

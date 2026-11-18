@@ -5,6 +5,8 @@
 #   CI (todo push e pull request para a main): testes da API + imagem Docker + Trivy → .github/actions/ci-backend
 #   CodeQL (junto com o CI): procura falhas de segurança no código                → .github/actions/codeql
 #   CD (só push na main, e só se o CI passar): publica no Google Cloud Run     → .github/actions/deploy
+#   CI do site (todo push e pull request): ESLint + tipos + testes + build      → .github/actions/ci-frontend
+#   CD do site (só push na main, e só se o CI do site passar): Cloudflare       → .github/actions/deploy-site
 
 name: CI/CD
 
@@ -25,6 +27,16 @@ jobs:
 
       - name: CI do backend
         uses: ./.github/actions/ci-backend
+
+  frontend:
+    name: Frontend (testes + build)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: CI do frontend
+        uses: ./.github/actions/ci-frontend
 
   codeql:
     name: CodeQL (falhas de segurança no código)
@@ -60,3 +72,25 @@ jobs:
           regiao: ${{ vars.GCP_REGION }}
           provedor-wif: ${{ vars.GCP_WIF_PROVIDER }}
           conta-deploy: ${{ vars.GCP_DEPLOY_SA }}
+
+  deploy-site:
+    name: Deploy do site na Cloudflare
+    needs: frontend                     # só roda se o código, os testes e o build do site passaram
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency: deploy-site            # um deploy do site por vez
+    permissions:
+      contents: read
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # monta o build de novo neste job (cada job começa numa máquina limpa) e confere tudo outra vez
+      - name: CI do frontend
+        uses: ./.github/actions/ci-frontend
+
+      - name: Deploy na Cloudflare
+        uses: ./.github/actions/deploy-site
+        with:
+          token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          conta: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
