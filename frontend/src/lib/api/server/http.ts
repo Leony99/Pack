@@ -6,7 +6,7 @@
 //   PACK_API_URL  endereço da API, sem barra no fim (ex.: http://localhost:8080)
 // Vem do .env do modo (.env.development, .env.production) e pode ser trocado pela variável de
 // ambiente de mesmo nome no servidor (a da hospedagem vale mais que a gravada no build).
-import { getCookie } from "@tanstack/react-start/server";
+import { getCookie, getRequestHeader, getRequestIP } from "@tanstack/react-start/server";
 import { ErroDaApi, type ErroDaApiJson } from "../erros";
 
 /** Quanto esperar a API antes de desistir (a API no Cloud Run pode levar até 1 min para acordar). */
@@ -29,6 +29,25 @@ function enderecoDaApi(): string {
   return url.replace(/\/+$/, "");
 }
 
+/**
+ * O IP real do visitante, para os limites por IP da API (o navegador não fala com a API: quem chama é
+ * este servidor, e sem isto todos os visitantes dividiriam os limites). Na Cloudflare, onde o site fica, o
+ * IP vem do CF-Connecting-IP, que ela mesma preenche; fora dela, o IP da conexão (nunca o X-Forwarded-For,
+ * que o navegador pode inventar). Vai com a chave combinada (PACK_BFF_CHAVE, só do servidor): a API só
+ * aceita o IP informado quando a chave confere (config/IpDoVisitante). Sem a chave, nada é enviado.
+ */
+function cabecalhosDoVisitante(): Record<string, string> {
+  const chave = typeof process === "undefined" ? undefined : process.env["PACK_BFF_CHAVE"];
+  if (!chave) return {};
+  let ip: string | undefined;
+  try {
+    ip = getRequestHeader("cf-connecting-ip") || getRequestIP();
+  } catch {
+    // fora de uma requisição (não acontece nas funções de servidor): sem IP
+  }
+  return ip ? { "X-Pack-Ip-Visitante": ip, "X-Pack-Bff-Chave": chave } : {};
+}
+
 type Opcoes = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
@@ -44,7 +63,10 @@ type Opcoes = {
 export async function chamarApi<T>(caminho: string, opcoes: Opcoes = {}): Promise<T> {
   if (!caminho.startsWith("/api/v1/")) throw new Error(`Caminho fora da API: ${caminho}`);
 
-  const headers: Record<string, string> = { Accept: "application/json" };
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    ...cabecalhosDoVisitante(),
+  };
   if (opcoes.body !== undefined) headers["Content-Type"] = "application/json";
   if (opcoes.sessao) {
     const token = getCookie(COOKIE_DO_TOKEN[opcoes.sessao]);
@@ -112,6 +134,7 @@ export async function enviarArquivoParaApi<T>(
       method: "POST",
       headers: {
         Accept: "application/json",
+        ...cabecalhosDoVisitante(),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: formulario,

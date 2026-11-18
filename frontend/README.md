@@ -2,7 +2,7 @@
 
 A loja da Pack em **TanStack Start** (React 19 com renderização no servidor). Tem a loja completa, a área do cliente e o painel administrativo.
 
-**Estado atual:** o `npm run dev` e o build de produção usam a [Pack API](../README.md#backend-pack-api) no **catálogo** (produtos, busca, drops e página do produto), no **login** (cliente e equipe), na **área do cliente** e na **newsletter**; o resto (carrinho, checkout e painel) continua na demonstração. O `npm run dev:demo` usa só a demonstração. A seção [Ligação com a Pack API](#ligação-com-a-pack-api) explica como funciona e o que falta.
+**Estado atual:** o `npm run dev` e o build de produção usam a [Pack API](../README.md#backend-pack-api) em toda a loja: **catálogo**, **login** (cliente e equipe), **área do cliente**, **carrinho e checkout**, **painel da equipe**, **newsletter** e **contato**. Continuam fixos no site só os textos (FAQ, termos, tabela de medidas e as promoções do topo). O `npm run dev:demo` usa só a demonstração. A seção [Ligação com a Pack API](#ligação-com-a-pack-api) explica como funciona e o que falta.
 
 O visual é próprio, com animações na rolagem e detalhes em laranja: veja [Visual](#visual).
 
@@ -91,10 +91,11 @@ O que muda entre os modos é o arquivo `.env` de cada um, que o Vite escolhe soz
 
 Os três arquivos vão para o git, porque só têm o endereço da API, que não é segredo. As variáveis:
 
-| Variável        | Onde vale            | O que faz                                                                                                        |
-| --------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `VITE_USAR_API` | Navegador e servidor | `true` busca os dados na API; `false` usa a demonstração                                                         |
-| `PACK_API_URL`  | Só no servidor       | Endereço da API. Não tem `VITE_`, então nunca vai para a página (o build confere: só o código do servidor o tem) |
+| Variável         | Onde vale            | O que faz                                                                                                                             |
+| ---------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_USAR_API`  | Navegador e servidor | `true` busca os dados na API; `false` usa a demonstração                                                                              |
+| `PACK_BFF_CHAVE` | Só no servidor       | A chave do IP do visitante (ver [O IP real do visitante](#o-ip-real-do-visitante)). Na produção, vem só da hospedagem, nunca do build |
+| `PACK_API_URL`   | Só no servidor       | Endereço da API. Não tem `VITE_`, então nunca vai para a página (o build confere: só o código do servidor o tem)                      |
 
 - **API local no `npm run dev`:** é preciso subir o backend antes, de dentro de `backend/`: `docker compose up -d` (para desligar, `docker compose stop`). Com a API fora do ar, a home abre sem as linhas de produtos, e o catálogo mostra o erro com o botão TENTAR DE NOVO.
 - **Mudar só na sua máquina:** crie um `.env.development.local` (fica fora do git), com base no `.env.example`. Ele vale mais que o `.env.development`.
@@ -249,9 +250,14 @@ Se a API estiver fora do ar, a home abre mesmo assim (sem as linhas de produtos)
 | Checkout e confirmação              | **Ligado.** Pede login (e volta ao checkout depois de entrar), começa pelo endereço principal, salva o endereço digitado na conta, cria o pedido (`POST .../orders { addressId, frete, codigoCupom }`) e registra o pagamento pelo total da API. O pagamento é **aprovado na hora, simulado pela API** (sem cobrança), até entrar um gateway                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | Painel                              | **Ligado** (`components/admin/api/` e `painel-api.ts`). Cada aba busca os próprios dados pela ponte do painel, uma função de servidor que chama a API com o token da equipe: ela só aceita caminhos da API, e quem decide o que cada colaborador pode fazer é a própria API. **Visão geral** (`GET /painel/resumo`, para toda a equipe); **Produtos** (ativos e inativos, ativar e desativar, e o editor com dados, tags, variantes com tamanho, cor, SKU e estoque inicial, e fotos enviadas para o bucket, reduzidas no navegador para até 1600 px em WebP); **Coleções** (as tags de coleção, as peças de cada uma, pôr e tirar peças, criar, renomear e apagar); **Estoque** (cada variante, com o filtro de estoque baixo, os movimentos e o histórico); **Pedidos** (todos, e no detalhe o pagamento, o envio, o rastreio e o cancelamento); **Cupons**, **Clientes**, **Colaboradores** (com o papel e as permissões), **Atendimento** (as mensagens do Contato) e **Newsletter**. Trocas são pelo Contato: com a API, a aba não aparece. A aba Tags é a mesma da demonstração |
 
-### O que falta no frontend
+### O IP real do visitante
 
-1. **IP real do visitante:** pelo servidor do frontend, todos os visitantes chegam à API com o mesmo IP, e dividem os limites por IP (120 requisições por minuto, cadastro, newsletter e contato).
+O navegador não fala com a API: quem chama é o servidor do frontend. Sem cuidado, todos os visitantes chegariam à API com o IP dele e dividiriam os limites por IP (120 requisições por minuto, tentativas de login, cadastro, newsletter e contato). Por isso, em toda chamada, o servidor do frontend (`cabecalhosDoVisitante`, em `server/http.ts`) manda:
+
+- `X-Pack-Ip-Visitante`: o IP do visitante. Na Cloudflare, o `CF-Connecting-IP`, que ela mesma preenche; fora dela, o IP da conexão (nunca o `X-Forwarded-For`, que o navegador pode inventar);
+- `X-Pack-Bff-Chave`: a chave combinada com a API (`PACK_BFF_CHAVE`, só do servidor). A API só aceita o IP informado quando a chave confere.
+
+No `npm run dev`, a chave é a do `.env.development`, a mesma do `backend/docker-compose.yml`, um valor público que só vale na sua máquina. Na produção, ela fica no segredo `pack-bff-chave` (etapa `ipreal` do [`setup.sh`](../google-cloud/gcloud-cli-scripts/setup.sh)) e, na hospedagem do site, na variável `PACK_BFF_CHAVE`. Ela nunca vai para o build.
 
 ### O que falta na API
 
@@ -263,7 +269,7 @@ Continua simulado até a API ganhar o equivalente:
 - conteúdo: FAQ, termos e as promoções do topo da home;
 - os números do painel.
 
-**O IP do visitante:** com o BFF, toda chamada chega à API com o IP do servidor do frontend, e o limite de 120 requisições por minuto por IP (`LimitePorIp`) passaria a valer para o site inteiro. Antes de pôr o modo API em produção, a API precisa receber o IP real (por exemplo, num cabeçalho que só o servidor do frontend pode mandar, com um segredo compartilhado) ou deixar o IP do frontend fora desse limite.
+**O IP do visitante:** a API recebe o IP real de cada visitante, com a chave combinada (ver [O IP real do visitante](#o-ip-real-do-visitante)), e os limites por IP valem por pessoa, e não para o site inteiro.
 
 ## Segurança
 
@@ -296,7 +302,7 @@ Os testes ficam ao lado do código testado (`*.test.ts`):
 
 ## Pendências
 
-- **IP real do visitante na API** (o último passo da ligação), como em [O que falta no frontend](#o-que-falta-no-frontend).
+- **Publicar o site** na Cloudflare, com `PACK_API_URL` e `PACK_BFF_CHAVE` na hospedagem (ver [O IP real do visitante](#o-ip-real-do-visitante)).
 - **Recuperar senha por e-mail:** precisa de um serviço de envio de e-mail na API.
 - **Compra de verdade:**
   - pagamento real (Pix e cartão) e o retorno do pagamento;

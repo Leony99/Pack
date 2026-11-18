@@ -246,6 +246,7 @@ O [`gcloud-cli-scripts/setup.sh`](gcloud-cli-scripts/setup.sh) é o registro de 
 | `agendador` | Tarefa do Cloud Scheduler que aciona a medição da cota de hora em hora |
 | `despertador` | Tarefa do Cloud Scheduler que chama a API a cada 12 minutos, para ela não desligar (ver [Despertador](#despertador)) |
 | `orcamento` | Orçamento de R$ 1 ligado ao tópico (cria ou atualiza) |
+| `ipreal` | Segredo `pack-bff-chave` (aleatório), lido pela API como `BFF_CHAVE`: com ele, a API aceita o IP do visitante que o servidor do frontend informa. A hospedagem do site recebe a mesma chave em `PACK_BFF_CHAVE` (copie do console do Secret Manager) |
 | `fotos` | Bucket das fotos dos produtos (`us-central1`, leitura pública, gravação só da API) e a variável `IMAGENS_BUCKET` no Cloud Run (ver [Fotos dos produtos](#fotos-dos-produtos)). Depois dela, rode `disjuntor` de novo |
 
 ```bash

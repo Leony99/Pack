@@ -119,6 +119,7 @@ Bloqueado, a API responde **429** com o cabeçalho `Retry-After` (os segundos qu
 **Limite geral por IP**, em todas as rotas: no máximo 120 requisições por minuto do mesmo IP. Para IPv6, conta o bloco /64 inteiro, porque cada casa recebe um bloco e poderia trocar de endereço à vontade. Passou disso, a API responde 429 com `Retry-After` até o minuto acabar.
 - O filtro ([`LimitePorIp`](backend/src/main/java/com/leonycosta/packapi/config/LimitePorIp.java)) roda antes da segurança e dos controllers: uma requisição recusada não confere token nem consulta o banco.
 - Sem ele, um único IP poderia disparar buscas no catálogo, que é público e fazia cada busca ler a tabela inteira (agora tem índice), até gastar a cota grátis de CPU e o [disjuntor de custos](google-cloud/README.md#disjuntor-de-custos) tirar a API do ar.
+- **O IP é o do visitante, mesmo pelo site:** o site chama a API pelo próprio servidor (BFF), então todos os visitantes chegariam com o IP dele e dividiriam os limites. O servidor do frontend manda o IP de cada visitante num cabeçalho, junto com uma chave combinada (`BFF_CHAVE`, no Secret Manager), e o filtro [`IpDoVisitante`](backend/src/main/java/com/leonycosta/packapi/config/IpDoVisitante.java), que roda antes de todos, só aceita esse IP quando a chave confere (comparada em tempo constante). Sem a chave, o cabeçalho é ignorado: quem chama a API direto não consegue fingir ser outro IP.
 - **O que ele não resolve:** o Cloud Run conta cada requisição antes de ela chegar à API, então um ataque grande ou vindo de muitos IPs ainda gasta a cota de requisições. Barrar antes exige o [Cloud Armor](#por-que-usar-o-cloud-armor).
 - **Cuidado com o frontend:** se ele chamar a API pelo próprio servidor (renderização no servidor do TanStack Start), todos os visitantes chegam com o IP desse servidor. Nesse caso, esse IP precisa de um limite próprio.
 
@@ -311,7 +312,8 @@ Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do pr
 - [x] CI/CD com GitHub Actions
 - [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
 - [x] Frontend (TanStack Start / React 19), com dados de demonstração
-- [ ] Ligar o resto do frontend à API: falta o IP real do visitante para os limites por IP (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
+- [x] Ligar o frontend à API: catálogo, login, área do cliente, carrinho, checkout, painel e o IP real do visitante (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
+- [ ] Publicar o site (o build já sai para a Cloudflare), com a variável `PACK_BFF_CHAVE` igual ao segredo `pack-bff-chave`
 - [ ] **Frete real por um serviço externo** (Melhor Envio, que junta Correios e transportadoras, ou a API dos Correios): a tabela de hoje é por região do CEP e não olha peso nem medidas, então o preço sai aproximado. O serviço pede conta e chave, e cada produto passa a precisar de peso e dimensões
 - [ ] **Gateway de pagamento** (Mercado Pago, Stripe ou Pagar.me): no lugar da aprovação simulada, o cliente paga de verdade (Pix com QR Code, cartão) e o gateway avisa a API (webhook) quando o pagamento é aprovado
 - [ ] Migrações do banco com Flyway, no lugar do `ddl-auto=update`

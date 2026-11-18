@@ -13,6 +13,10 @@ export default defineConfig(({ command, mode }) => {
   // do servidor (__PACK_API_URL__), e a variável PACK_API_URL da hospedagem, se existir, vale mais.
   const env = loadEnv(mode, process.cwd(), "");
   if (env["PACK_API_URL"]) process.env["PACK_API_URL"] ??= env["PACK_API_URL"];
+  // a chave do IP do visitante (ver server/http.ts): só no dev ela vem do .env; no build, nunca entra no
+  // código, e o servidor publicado a lê da variável PACK_BFF_CHAVE da hospedagem
+  if (command === "serve" && env["PACK_BFF_CHAVE"])
+    process.env["PACK_BFF_CHAVE"] ??= env["PACK_BFF_CHAVE"];
 
   return {
     plugins: [

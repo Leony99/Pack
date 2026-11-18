@@ -33,6 +33,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
         "app.pagamento.aprovacao-simulada=false",
         // fotos enviadas nos testes: numa pasta do target, servidas pela própria API
         "app.imagens.pasta=target/test-uploads",
+        // o servidor do frontend informa o IP do visitante com esta chave (IpDoVisitanteTest)
+        "app.bff.chave=" + IntegrationTest.CHAVE_DO_BFF,
         "app.admin.email=" + IntegrationTest.ADMIN_EMAIL,
         "app.admin.senha=" + IntegrationTest.ADMIN_SENHA,
         "spring.datasource.password=definida-pelo-testcontainers",
@@ -55,6 +57,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Import(TestcontainersConfig.class)
 public abstract class IntegrationTest {
 
+    protected static final String CHAVE_DO_BFF = "chave-do-bff-dos-testes";
     protected static final String JWT_SECRET = "chave-usada-so-nos-testes-com-mais-de-32-caracteres";
     protected static final String ADMIN_EMAIL = "admin@teste.com";
     protected static final String ADMIN_SENHA = "senha-do-admin-de-teste";

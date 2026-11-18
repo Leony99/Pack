@@ -3,7 +3,7 @@
 # É o registro de tudo o que foi criado no projeto, e serve para refazer do zero num projeto novo.
 #
 # Uso (da raiz do repositório, com o gcloud logado):  bash google-cloud/gcloud-cli-scripts/setup.sh <etapa>
-# Etapas, nesta ordem: apis imagens segredos contas github api disjuntor agendador despertador orcamento fotos
+# Etapas, nesta ordem: apis imagens segredos contas github api disjuntor agendador despertador orcamento fotos ipreal
 # (a etapa "fotos" cria o bucket das fotos do painel; depois dela, rode "disjuntor" de novo)
 #
 # Precisa do backend/.env.prod (fora do git) com NEON_URL, ADMIN_EMAIL e ADMIN_PASSWORD.
@@ -77,6 +77,8 @@ etapa_segredos() {
     guardar_segredo pack-admin-password "$(prod ADMIN_PASSWORD)"
     # chave do JWT gerada aqui, aleatória; ninguém precisa conhecê-la
     guardar_segredo pack-jwt-secret "$(openssl rand -base64 48 | tr -d '\n')"
+    # chave do IP do visitante, combinada entre a API e o servidor do frontend (ver etapa ipreal)
+    gc secrets describe pack-bff-chave >/dev/null 2>&1 || guardar_segredo pack-bff-chave "$(openssl rand -hex 32)"
 }
 
 etapa_contas() {
@@ -84,7 +86,7 @@ etapa_contas() {
     gc iam service-accounts create "$CONTA_DEPLOY" --display-name="GitHub Actions (deploy)" || true
 
     # a API só lê os próprios segredos
-    for s in pack-db-password pack-admin-password pack-jwt-secret; do
+    for s in pack-db-password pack-admin-password pack-jwt-secret pack-bff-chave; do
         gc secrets add-iam-policy-binding "$s" --member="serviceAccount:$(sa $CONTA_API)" \
             --role=roles/secretmanager.secretAccessor >/dev/null
     done
@@ -143,7 +145,7 @@ etapa_api() {
         --min-instances=0 --max-instances=1 --memory=1Gi --cpu=1 --cpu-boost \
         --timeout=60 --concurrency=80 \
         --set-env-vars="SPRING_PROFILES_ACTIVE=prod,DB_URL=jdbc:postgresql://$NEON_HOST/$NEON_BANCO?sslmode=require,DB_USERNAME=$NEON_USUARIO,ADMIN_EMAIL=$(prod ADMIN_EMAIL),IMAGENS_BUCKET=$BUCKET_FOTOS" \
-        --set-secrets="DB_PASSWORD=pack-db-password:latest,JWT_SECRET=pack-jwt-secret:latest,ADMIN_PASSWORD=pack-admin-password:latest" \
+        --set-secrets="DB_PASSWORD=pack-db-password:latest,JWT_SECRET=pack-jwt-secret:latest,ADMIN_PASSWORD=pack-admin-password:latest,BFF_CHAVE=pack-bff-chave:latest" \
         --allow-unauthenticated
 }
 
@@ -182,6 +184,17 @@ etapa_agendador() {
         --schedule="0 * * * *" --time-zone="America/Sao_Paulo" \
         --topic="$TOPICO" --message-body='{"verificar": "cota"}' \
         --description="Mede a cota grátis do Cloud Run e desliga a API em 85%"
+}
+
+etapa_ipreal() {
+    # O IP real do visitante: o servidor do frontend chama a API por todos os visitantes e manda o IP de cada
+    # um junto com esta chave; a API só aceita o IP informado quando a chave confere (config/IpDoVisitante).
+    # A chave é gerada aqui, aleatória, e ninguém precisa vê-la: no Secret Manager ela vai para a API, e a
+    # hospedagem do site recebe a mesma chave na variável PACK_BFF_CHAVE (copie do console do Secret Manager).
+    gc secrets describe pack-bff-chave >/dev/null 2>&1 || guardar_segredo pack-bff-chave "$(openssl rand -hex 32)"
+    gc secrets add-iam-policy-binding pack-bff-chave --member="serviceAccount:$(sa $CONTA_API)" \
+        --role=roles/secretmanager.secretAccessor >/dev/null
+    gc run services update "$SERVICO" --region="$REGIAO" --update-secrets="BFF_CHAVE=pack-bff-chave:latest"
 }
 
 etapa_fotos() {
@@ -246,6 +259,6 @@ etapa_orcamento() {
 
 etapa=${1:-}
 case "$etapa" in
-    apis|imagens|segredos|contas|github|api|disjuntor|agendador|despertador|orcamento|fotos) "etapa_$etapa" ;;
-    *) echo "Uso: bash google-cloud/gcloud-cli-scripts/setup.sh <apis|imagens|segredos|contas|github|api|disjuntor|agendador|despertador|orcamento|fotos>"; exit 1 ;;
+    apis|imagens|segredos|contas|github|api|disjuntor|agendador|despertador|orcamento|fotos|ipreal) "etapa_$etapa" ;;
+    *) echo "Uso: bash google-cloud/gcloud-cli-scripts/setup.sh <apis|imagens|segredos|contas|github|api|disjuntor|agendador|despertador|orcamento|fotos|ipreal>"; exit 1 ;;
 esac
