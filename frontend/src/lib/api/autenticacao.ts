@@ -21,12 +21,11 @@ export const SENHA_MINIMA = 8;
 export const SENHA_MAXIMA = 32;
 
 /**
- * A permissão da API que libera cada parte do painel. Atendimento e trocas ficam com quem cuida dos
- * clientes e dos pedidos (o papel ATENDENTE); a newsletter, só com quem gerencia a equipe (admin).
+ * A permissão da API que libera cada parte do painel. Atendimento fica com quem cuida dos clientes (o
+ * papel ATENDENTE); a newsletter, só com quem gerencia a equipe (admin).
  */
 const PERMISSAO_DO_RECURSO: Record<string, string> = {
   orders: "ORDER_MANAGE",
-  returns: "ORDER_MANAGE",
   products: "CATALOG_WRITE",
   collections: "CATALOG_WRITE",
   tags: "CATALOG_WRITE",
@@ -47,7 +46,10 @@ export function canStaff(
   staff: Pick<StaffMember, "role" | "permissoes">,
   resource: string,
 ): boolean {
+  // a visão geral é de toda a equipe: cada um vê os números das próprias permissões
+  if (resource === "overview") return true;
   if (staff.permissoes) {
+    // trocas e devoluções chegam pelo Contato (aba Atendimento): com a API, não há aba própria
     const permissao = PERMISSAO_DO_RECURSO[resource];
     return !!permissao && staff.permissoes.includes(permissao);
   }

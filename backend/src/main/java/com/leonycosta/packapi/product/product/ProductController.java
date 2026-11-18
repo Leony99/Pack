@@ -61,6 +61,16 @@ public class ProductController {
         return productService.maisVendidos(limite);
     }
 
+    // GET /products/painel?nome=&tag=: todos os produtos, ativos e inativos (exige CATALOG_WRITE)
+    @Operation(summary = "Lista todos os produtos para o painel (ativos e inativos), com busca por nome e tag")
+    @GetMapping("/painel")
+    public Pagina<ProductResponse> doPainel(@RequestParam(required = false) String nome,
+                                            @RequestParam(required = false) String tag,
+                                            @RequestParam(defaultValue = "0") int pagina,
+                                            @RequestParam(defaultValue = Pagina.TAMANHO_PADRAO) int tamanho) {
+        return productService.doPainel(nome, tag, pagina, tamanho);
+    }
+
     // GET /products/inativos: os produtos fora da loja, para o painel (exige CATALOG_WRITE)
     @Operation(summary = "Lista os produtos inativos (fora da loja), os mais novos primeiro")
     @GetMapping("/inativos")

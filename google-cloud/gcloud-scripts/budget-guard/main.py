@@ -1,6 +1,7 @@
 # Disjuntor de custos da Pack.
 #
-# Tira o acesso público da API (ela passa a responder 403; nada é apagado) em dois casos:
+# Tira o acesso público da API (ela passa a responder 403) e o das fotos do painel (o bucket deixa de ser
+# público; as fotos somem do site) em dois casos. Nada é apagado:
 #
 #   1. Cota grátis quase no fim (a principal): de hora em hora o Cloud Scheduler publica
 #      {"verificar": "cota"} no tópico "budget-alerts". A função soma o uso do Cloud Run no mês
@@ -17,12 +18,15 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 import functions_framework
-from google.cloud import monitoring_v3, run_v2
+from google.cloud import monitoring_v3, run_v2, storage
 
 PROJETO = os.environ["PROJETO"]
 # projects/<projeto>/locations/<região>/services/<serviço>
 SERVICO = os.environ["SERVICO"]
 PAPEL_PUBLICO = "roles/run.invoker"
+# o bucket das fotos do painel (vazio: não há bucket a desligar)
+BUCKET_FOTOS = os.environ.get("BUCKET_FOTOS", "")
+LEITURA_PUBLICA = "roles/storage.objectViewer"
 QUALQUER_PESSOA = "allUsers"
 
 # desliga em 85% da cota grátis (a variável LIMITE permite outro valor, por exemplo para testar)
@@ -119,7 +123,25 @@ def desligar_api(motivo):
 
     if not removido:
         print(f"{motivo}: a API já estava fora do ar.")
-        return
+    else:
+        cliente.set_iam_policy(request={"resource": SERVICO, "policy": politica})
+        print(f"{motivo}: acesso público da API REMOVIDO.")
+    desligar_fotos(motivo)
 
-    cliente.set_iam_policy(request={"resource": SERVICO, "policy": politica})
-    print(f"{motivo}: acesso público da API REMOVIDO.")
+
+def desligar_fotos(motivo):
+    # Tira a leitura pública do bucket das fotos: ninguém de fora lê (nem gasta leitura ou transferência)
+    if not BUCKET_FOTOS:
+        return
+    bucket = storage.Client(project=PROJETO).bucket(BUCKET_FOTOS)
+    politica = bucket.get_iam_policy(requested_policy_version=3)
+    antes = len(politica.bindings)
+    politica.bindings = [
+        regra for regra in politica.bindings
+        if not (regra["role"] == LEITURA_PUBLICA and QUALQUER_PESSOA in regra["members"])
+    ]
+    if len(politica.bindings) == antes:
+        print(f"{motivo}: as fotos já estavam fora do ar.")
+        return
+    bucket.set_iam_policy(politica)
+    print(f"{motivo}: leitura pública das fotos REMOVIDA.")

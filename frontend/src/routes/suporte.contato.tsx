@@ -1,7 +1,7 @@
 import { pageHead } from "@/lib/metadata";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { sendContact } from "@/lib/api";
+import { sendContact, USA_API } from "@/lib/api";
 import hero from "@/assets/hero.avif";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { CardAviso, ROTULO } from "@/components/layout/PaginaTopo";
@@ -26,7 +26,11 @@ function Contato() {
       title="CONTATO"
       eyebrow="SUPORTE / CONTATO"
       imagem={hero}
-      texto="Fale com a PACK sobre pedidos, trocas e peças. Atendimento demonstrativo — nenhum e-mail é enviado."
+      texto={
+        USA_API
+          ? "Fale com a PACK sobre pedidos, trocas, devoluções e peças. Para trocar, informe o número do pedido."
+          : "Fale com a PACK sobre pedidos, trocas e peças. Atendimento demonstrativo — nenhum e-mail é enviado."
+      }
       lado={
         <>
           <CardAviso rotulo="ASSUNTOS" valor="PEDIDOS" texto="trocas e dúvidas sobre peças" />
@@ -55,7 +59,11 @@ function Contato() {
               email: String(f.get("email")),
               message: String(f.get("message")),
             });
-            setMessage("Mensagem registrada na demonstração. Nenhum envio real foi realizado.");
+            setMessage(
+              USA_API
+                ? "Mensagem enviada. Respondemos pelo seu e-mail."
+                : "Mensagem registrada na demonstração. Nenhum envio real foi realizado.",
+            );
             form.reset();
           } catch (err) {
             setError(err instanceof Error ? err.message : "Não foi possível enviar.");

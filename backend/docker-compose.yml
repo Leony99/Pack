@@ -37,6 +37,9 @@ services:
       # Dentro do Compose cada serviço é encontrado pelo nome: o banco é "db", não "localhost"
       DB_URL: jdbc:postgresql://db:5432/pack-db
       SPRING_JPA_SHOW_SQL: "false"
+    # Fotos enviadas pelo painel: sem bucket, ficam neste volume e a própria API as serve em /imagens
+    volumes:
+      - pack-uploads:/app/uploads
     ports:
       - "8080:8080"
     depends_on:
@@ -45,3 +48,4 @@ services:
 
 volumes:
   pack-db-data:
+  pack-uploads:

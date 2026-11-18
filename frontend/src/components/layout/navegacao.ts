@@ -9,7 +9,7 @@ export const accountNav = [
 ] as const;
 
 export const adminNav = [
-  { to: "/admin/painel", label: "Visão geral", resource: "orders" },
+  { to: "/admin/painel", label: "Visão geral", resource: "overview" },
   { to: "/admin/produtos", label: "Produtos", resource: "products" },
   { to: "/admin/colecoes", label: "Coleções", resource: "collections" },
   { to: "/admin/tags", label: "Tags", resource: "tags" },

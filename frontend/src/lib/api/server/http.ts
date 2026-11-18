@@ -94,3 +94,37 @@ export function idDaSessao(sessao: Sessao): string | null {
     return null;
   }
 }
+
+/**
+ * Envia um arquivo para a Pack API (multipart/form-data), com o token da sessão. Usado pelo upload das
+ * fotos do painel; os erros seguem o mesmo formato de chamarApi.
+ */
+export async function enviarArquivoParaApi<T>(
+  caminho: string,
+  formulario: FormData,
+  sessao: Sessao,
+): Promise<T> {
+  if (!caminho.startsWith("/api/v1/")) throw new Error(`Caminho fora da API: ${caminho}`);
+  const token = getCookie(COOKIE_DO_TOKEN[sessao]);
+  let res: Response;
+  try {
+    res = await fetch(`${enderecoDaApi()}${caminho}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formulario,
+      signal: AbortSignal.timeout(60_000),
+    });
+  } catch (erro) {
+    console.error("Pack API inacessível:", erro);
+    throw new ErroDaApi(
+      503,
+      "Não foi possível falar com a loja agora. Tente de novo em instantes.",
+    );
+  }
+  if (res.ok) return (await res.json()) as T;
+  const corpo = (await res.json().catch(() => null)) as ErroDaApiJson | null;
+  throw ErroDaApi.daResposta(res.status, corpo);
+}

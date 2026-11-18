@@ -80,6 +80,9 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 - **Pagamento simulado (provisório):** com `app.pagamento.aprovacao-simulada=true` (o padrão; a variável `PAGAMENTO_SIMULADO=false` desliga), o pagamento que o cliente registra já nasce aprovado e o pedido vira pago, sem cobrança. O método `OUTRO`, da equipe, continua pendente até a aprovação. Sai quando entrar um gateway;
 - **Carrinho e cupom:** o cliente muda a quantidade de um item (`PATCH .../cart/items/{itemId}`) e confere o cupom antes de fechar (`GET /coupons/validar?codigo=`, com o mesmo limite de 5 erros por 15 minutos do checkout). Os itens do carrinho trazem o produto, o nome e a foto;
 - **Endereço:** tem bairro, apelido (Casa, Trabalho) e um endereço principal por cliente. O primeiro cadastrado vira o principal; marcar outro troca; apagar o principal passa para outro. O pedido guarda o bairro e o complemento junto com o resto do endereço;
+- **Painel da equipe:** a lista de todos os pedidos (`GET /orders`, com filtro de status), a de produtos com ativos e inativos (`GET /products/painel`, com busca por nome e tag), a edição de funcionário (`PUT /staff/{id}`; ninguém tira de si o acesso à equipe) e o resumo da visão geral (`GET /painel/resumo`), contado no banco numa chamada só e com só as áreas das permissões de quem pede;
+- **Contato:** o formulário da loja grava a mensagem (`POST /contato`, com o limite por IP do cadastro), e quem tem `CUSTOMER_READ` lê a caixa de entrada e marca como respondida. Trocas e devoluções chegam por aqui;
+- **Fotos dos produtos:** o painel envia a foto (`POST /products/{id}/images/upload`, até 5 MB). A API confere o tipo pelos primeiros bytes (JPEG, PNG, WebP ou AVIF; um HTML com nome .jpg é recusado), dá um nome novo e guarda no bucket do Cloud Storage (`IMAGENS_BUCKET`), pela API REST dele, com a identidade do Cloud Run (sem chave guardada). Sem o bucket (desenvolvimento e testes), guarda na pasta `IMAGENS_PASTA` e serve em `/imagens/...`. Apagar a foto ou o produto apaga o arquivo;
 - **Newsletter:** qualquer pessoa se inscreve (`POST /newsletter`, com o limite por IP do cadastro, e a mesma resposta para quem já estava na lista). O cliente entra e sai pela área dele, sempre com o e-mail da conta. A lista e as mudanças nela exigem `STAFF_MANAGE`; sair da lista não apaga a inscrição, só a desativa;
 - **Banco:** na partida, a API atualiza as regras do banco que limitam os valores de cada enum. O Hibernate cria essas regras com a tabela, mas não as atualiza depois, então um valor novo seria recusado num banco já existente. Esta solução é provisória: ver [Próximos passos](#próximos-passos).
 - **Conta do cliente:** sem pedidos, apagar a conta apaga o cadastro. Com pedidos, os dados pessoais são anonimizados e os pedidos ficam como histórico.
@@ -130,7 +133,7 @@ Os pacotes seguem o modelo *package-by-feature*, agrupados por categoria. Cada d
 ```
 backend/src/main/java/com/leonycosta/packapi/
 ├── staff/      staff, role, permission, role_permission
-├── customer/   customer, address, newsletter
+├── customer/   customer, address, newsletter, contato
 ├── cart/       cart, cart_item
 ├── order/      order, order_item, payment, shipment, coupon
 ├── product/    product, product_variant, product_image, product_tag, size, color, inventory
@@ -256,7 +259,7 @@ Eles também rodam sozinhos a cada envio ao GitHub (ver [CI/CD](#cicd)).
 
 ## Frontend: loja PACK
 
-A loja fica em [`frontend/`](frontend/), feita com **TanStack Start** (React 19 com renderização no servidor), TanStack Router e Query, Tailwind CSS 4 e GSAP. Tem a loja completa, a compra (carrinho, cupom e checkout), a área do cliente e o painel administrativo. O `npm run dev` usa a API local e o build de produção usa a API do Cloud Run (cada modo tem o seu `.env`); o `npm run dev:demo` usa só dados de demonstração. Com a API, o catálogo, o login (cliente e equipe), a área do cliente, a newsletter, o carrinho e o checkout vêm dela pelo servidor do frontend (o navegador nunca chama a API direto nem vê o token, que fica num cookie `httpOnly`), e o site mostra avisos de "em breve" enquanto o banco estiver vazio. O painel ainda está na demonstração.
+A loja fica em [`frontend/`](frontend/), feita com **TanStack Start** (React 19 com renderização no servidor), TanStack Router e Query, Tailwind CSS 4 e GSAP. Tem a loja completa, a compra (carrinho, cupom e checkout), a área do cliente e o painel administrativo. O `npm run dev` usa a API local e o build de produção usa a API do Cloud Run (cada modo tem o seu `.env`); o `npm run dev:demo` usa só dados de demonstração. Com a API, o catálogo, o login (cliente e equipe), a área do cliente, a newsletter, o carrinho e o checkout vêm dela pelo servidor do frontend (o navegador nunca chama a API direto nem vê o token, que fica num cookie `httpOnly`), e o site mostra avisos de "em breve" enquanto o banco estiver vazio. O painel da equipe também, com as abas pelas permissões do papel e as fotos dos produtos num bucket do Cloud Storage.
 
 **Visual:** preto e branco, com Anton nos títulos e um laranja só nos detalhes.
 
@@ -308,7 +311,7 @@ Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do pr
 - [x] CI/CD com GitHub Actions
 - [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
 - [x] Frontend (TanStack Start / React 19), com dados de demonstração
-- [ ] Ligar o resto do frontend à API: falta o painel (catálogo, login, área do cliente, carrinho e checkout já estão ligados) (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
+- [ ] Ligar o resto do frontend à API: falta o IP real do visitante para os limites por IP (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
 - [ ] **Frete real por um serviço externo** (Melhor Envio, que junta Correios e transportadoras, ou a API dos Correios): a tabela de hoje é por região do CEP e não olha peso nem medidas, então o preço sai aproximado. O serviço pede conta e chave, e cada produto passa a precisar de peso e dimensões
 - [ ] **Gateway de pagamento** (Mercado Pago, Stripe ou Pagar.me): no lugar da aprovação simulada, o cliente paga de verdade (Pix com QR Code, cartão) e o gateway avisa a API (webhook) quando o pagamento é aprovado
 - [ ] Migrações do banco com Flyway, no lugar do `ddl-auto=update`

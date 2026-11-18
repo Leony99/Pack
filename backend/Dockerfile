@@ -24,6 +24,8 @@ WORKDIR /app
 
 # Não roda como root: se alguém invadir a aplicação, não tem poder sobre o container.
 RUN addgroup -S pack && adduser -S -G pack pack
+# pasta das fotos do painel quando não há bucket (desenvolvimento): do usuário da aplicação, que não é root
+RUN mkdir -p /app/uploads && chown pack:pack /app/uploads
 USER pack
 
 COPY --from=build /build/target/*.jar app.jar

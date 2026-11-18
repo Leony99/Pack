@@ -56,6 +56,13 @@ public class OrderService {
         return Pagina.de(orderRepository.findByCustomerId(customerId, pedido).map(this::toResponse));
     }
 
+    // Todos os pedidos, o mais novo primeiro (o painel da equipe), com o filtro opcional de status
+    public Pagina<OrderResponse> listar(OrderStatus status, int pagina, int tamanho) {
+        Pageable pedido = Pagina.pedido(pagina, tamanho, Sort.by(Sort.Order.desc("criadoEm"), Sort.Order.asc("id")));
+        var pagina_ = status == null ? orderRepository.findAll(pedido) : orderRepository.findByStatus(status, pedido);
+        return Pagina.de(pagina_.map(this::toResponse));
+    }
+
     public OrderResponse findById(UUID id) {
         return toResponse(findOrThrow(id));
     }

@@ -1,6 +1,6 @@
 // Conteúdo institucional, newsletter e contato.
 import { faq, terms } from "@/data";
-import { inscreverNaNewsletterDaApi } from "./conta-api";
+import { enviarContatoNaApi, inscreverNaNewsletterDaApi } from "./conta-api";
 import { USA_API } from "./modo";
 import { emailValido, novoId, simularLatencia, state } from "./simulacao";
 
@@ -31,9 +31,16 @@ export async function sendContact(data: {
   email: string;
   message: string;
 }): Promise<void> {
-  // PACK API: não tem contato (falta na API).
+  // PACK API: POST /api/v1/contato { nome, email, mensagem } (a equipe lê na aba Atendimento).
   if (!data.name.trim() || !data.message.trim() || !emailValido(data.email))
     throw new Error("Preencha nome, e-mail válido e mensagem.");
+  if (data.message.length > 2000) throw new Error("A mensagem pode ter até 2.000 letras.");
+  if (USA_API) {
+    await enviarContatoNaApi({
+      data: { nome: data.name, email: data.email, mensagem: data.message },
+    });
+    return;
+  }
   state.messages.push({ id: novoId(), ...data, status: "Aberto" });
   await simularLatencia(300);
 }

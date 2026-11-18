@@ -206,3 +206,17 @@ export const inscreverNaNewsletterDaApi = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await chamarApi<void>("/api/v1/newsletter", { method: "POST", body: { email: data } });
   });
+
+/** Mensagem do formulário de Contato (pública; a API limita por IP). */
+export const enviarContatoNaApi = createServerFn({ method: "POST" })
+  .validator((entrada: unknown) => {
+    const e = (entrada ?? {}) as Record<string, unknown>;
+    return {
+      nome: texto(e["nome"], 100).trim(),
+      email: texto(e["email"], 254).trim(),
+      mensagem: texto(e["mensagem"], 2000).trim(),
+    };
+  })
+  .handler(async ({ data }) => {
+    await chamarApi<void>("/api/v1/contato", { method: "POST", body: data });
+  });

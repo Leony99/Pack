@@ -3,7 +3,8 @@
 # É o registro de tudo o que foi criado no projeto, e serve para refazer do zero num projeto novo.
 #
 # Uso (da raiz do repositório, com o gcloud logado):  bash google-cloud/gcloud-cli-scripts/setup.sh <etapa>
-# Etapas, nesta ordem: apis imagens segredos contas github api disjuntor agendador despertador orcamento
+# Etapas, nesta ordem: apis imagens segredos contas github api disjuntor agendador despertador orcamento fotos
+# (a etapa "fotos" cria o bucket das fotos do painel; depois dela, rode "disjuntor" de novo)
 #
 # Precisa do backend/.env.prod (fora do git) com NEON_URL, ADMIN_EMAIL e ADMIN_PASSWORD.
 
@@ -20,6 +21,8 @@ ORCAMENTO=1                        # segunda camada, na moeda da conta de fatura
 CONTA_API=pack-api-run             # identidade da API rodando
 CONTA_DEPLOY=github-deploy         # identidade do GitHub Actions
 CONTA_DISJUNTOR=budget-guard       # identidade da função disjuntor
+BUCKET_FOTOS="$PROJETO-fotos"      # fotos dos produtos enviadas pelo painel (nome único no mundo todo)
+REGIAO_FOTOS=us-central1           # a cota grátis do Cloud Storage só vale nos EUA
 
 sa() { echo "$1@$PROJETO.iam.gserviceaccount.com"; }
 IMAGEM_BASE="$REGIAO-docker.pkg.dev/$PROJETO/$REPO_IMAGENS/$SERVICO"
@@ -139,7 +142,7 @@ etapa_api() {
         --service-account="$(sa $CONTA_API)" \
         --min-instances=0 --max-instances=1 --memory=1Gi --cpu=1 --cpu-boost \
         --timeout=60 --concurrency=80 \
-        --set-env-vars="SPRING_PROFILES_ACTIVE=prod,DB_URL=jdbc:postgresql://$NEON_HOST/$NEON_BANCO?sslmode=require,DB_USERNAME=$NEON_USUARIO,ADMIN_EMAIL=$(prod ADMIN_EMAIL)" \
+        --set-env-vars="SPRING_PROFILES_ACTIVE=prod,DB_URL=jdbc:postgresql://$NEON_HOST/$NEON_BANCO?sslmode=require,DB_USERNAME=$NEON_USUARIO,ADMIN_EMAIL=$(prod ADMIN_EMAIL),IMAGENS_BUCKET=$BUCKET_FOTOS" \
         --set-secrets="DB_PASSWORD=pack-db-password:latest,JWT_SECRET=pack-jwt-secret:latest,ADMIN_PASSWORD=pack-admin-password:latest" \
         --allow-unauthenticated
 }
@@ -162,7 +165,7 @@ etapa_disjuntor() {
         --trigger-service-account="$(sa $CONTA_DISJUNTOR)" \
         --memory=256Mi --max-instances=1 \
         --ingress-settings=internal-only \
-        --set-env-vars="PROJETO=$PROJETO,SERVICO=projects/$PROJETO/locations/$REGIAO/services/$SERVICO"
+        --set-env-vars="PROJETO=$PROJETO,SERVICO=projects/$PROJETO/locations/$REGIAO/services/$SERVICO,BUCKET_FOTOS=$BUCKET_FOTOS"
 
     # o Google guarda a imagem de cada versão da função num repositório próprio: mesma limpeza das imagens da API
     gc artifacts repositories set-cleanup-policies gcf-artifacts --location="$REGIAO" \
@@ -179,6 +182,26 @@ etapa_agendador() {
         --schedule="0 * * * *" --time-zone="America/Sao_Paulo" \
         --topic="$TOPICO" --message-body='{"verificar": "cota"}' \
         --description="Mede a cota grátis do Cloud Run e desliga a API em 85%"
+}
+
+etapa_fotos() {
+    # O bucket das fotos dos produtos enviadas pelo painel. Fica nos EUA (us-central1), onde vale a cota grátis
+    # do Cloud Storage: 5 GB guardados e 5.000 envios e 50.000 leituras por mês. Fora dos EUA, cobra desde o 1º GB.
+    #   - leitura pública: o site mostra cada foto direto de https://storage.googleapis.com/<bucket>/<nome>;
+    #   - gravação só da API (pack-api-run), que envia as fotos pela API REST do Cloud Storage;
+    #   - o disjuntor pode tirar a leitura pública quando o orçamento estoura (e o religar-api.sh devolve).
+    # Depois desta etapa, rode "disjuntor" de novo: a função passa a cuidar também do bucket.
+    gc storage buckets create "gs://$BUCKET_FOTOS" --location="$REGIAO_FOTOS" \
+        --uniform-bucket-level-access --default-storage-class=STANDARD || true
+    gc storage buckets add-iam-policy-binding "gs://$BUCKET_FOTOS" \
+        --member=allUsers --role=roles/storage.objectViewer >/dev/null
+    gc storage buckets add-iam-policy-binding "gs://$BUCKET_FOTOS" \
+        --member="serviceAccount:$(sa $CONTA_API)" --role=roles/storage.objectAdmin >/dev/null
+    # o disjuntor muda quem pode ler o bucket (só neste bucket)
+    gc storage buckets add-iam-policy-binding "gs://$BUCKET_FOTOS" \
+        --member="serviceAccount:$(sa $CONTA_DISJUNTOR)" --role=roles/storage.admin >/dev/null
+    # a API passa a guardar as fotos no bucket (o deploy do GitHub só troca a imagem: a variável fica)
+    gc run services update "$SERVICO" --region="$REGIAO" --update-env-vars="IMAGENS_BUCKET=$BUCKET_FOTOS"
 }
 
 etapa_despertador() {
@@ -223,6 +246,6 @@ etapa_orcamento() {
 
 etapa=${1:-}
 case "$etapa" in
-    apis|imagens|segredos|contas|github|api|disjuntor|agendador|despertador|orcamento) "etapa_$etapa" ;;
-    *) echo "Uso: bash google-cloud/gcloud-cli-scripts/setup.sh <apis|imagens|segredos|contas|github|api|disjuntor|agendador|despertador|orcamento>"; exit 1 ;;
+    apis|imagens|segredos|contas|github|api|disjuntor|agendador|despertador|orcamento|fotos) "etapa_$etapa" ;;
+    *) echo "Uso: bash google-cloud/gcloud-cli-scripts/setup.sh <apis|imagens|segredos|contas|github|api|disjuntor|agendador|despertador|orcamento|fotos>"; exit 1 ;;
 esac

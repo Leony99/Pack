@@ -46,6 +46,7 @@ public class ProductService {
     private final OrderItemRepository orderItemRepository;
     private final CartItemRepository cartItemRepository;
     private final InventoryMovementRepository movementRepository;
+    private final com.leonycosta.packapi.product.product_image.ArmazenamentoDeImagens armazenamento;
 
     private static final Sort ORDEM = Sort.by("nome", "id");
 
@@ -185,6 +186,29 @@ public class ProductService {
         return resposta;
     }
 
+    // Todos os produtos para o painel (ativos e inativos), os mais novos primeiro, com busca opcional pelo
+    // nome e pela tag (qualquer filtro: a aba Coleções lista as peças de uma coleção)
+    public Pagina<ProductResponse> doPainel(String nome, String tag, int pagina, int tamanho) {
+        java.util.List<org.springframework.data.jpa.domain.Specification<Product>> condicoes = new java.util.ArrayList<>();
+        if (nome != null && !nome.isBlank()) {
+            String busca = "%" + nome.strip().toLowerCase(java.util.Locale.ROOT) + "%";
+            condicoes.add((p, q, cb) -> cb.like(cb.lower(p.get("nome")), busca));
+        }
+        if (tag != null && !tag.isBlank()) {
+            String nomeDaTag = tag.strip().toLowerCase(java.util.Locale.ROOT);
+            condicoes.add((p, q, cb) -> {
+                var sub = q.subquery(Integer.class);
+                var link = sub.from(com.leonycosta.packapi.product.product_tag_link.ProductTagLink.class);
+                sub.select(cb.literal(1)).where(cb.equal(link.get("product"), p),
+                        cb.equal(link.join("tag").get("tag"), nomeDaTag));
+                return cb.exists(sub);
+            });
+        }
+        Pageable pedido = Pagina.pedido(pagina, tamanho, OrdemDoCatalogo.RECENTES.sort());
+        return Pagina.de(productRepository.findAll(org.springframework.data.jpa.domain.Specification.allOf(condicoes), pedido)
+                .map(this::toResponse));
+    }
+
     // Os produtos fora da loja, para o painel (GET /products/inativos, com CATALOG_WRITE)
     public Pagina<ProductResponse> inativos(int pagina, int tamanho) {
         Pageable pedido = Pagina.pedido(pagina, tamanho, OrdemDoCatalogo.RECENTES.sort());
@@ -273,6 +297,8 @@ public class ProductService {
     public void delete(UUID id) {
         Product product = findOrThrow(id);
         List<UUID> variantes = product.getVariantes().stream().map(v -> v.getId()).toList();
+        // lidas antes das atualizações em massa abaixo, que limpam o contexto do Hibernate
+        List<String> fotos = product.getImagens().stream().map(i -> i.getUrl()).toList();
         if (!variantes.isEmpty()) {
             if (orderItemRepository.existsByVariantIdIn(variantes)) {
                 throw new ConflictException("Este produto já esteve em um pedido e não pode ser apagado. "
@@ -284,6 +310,8 @@ public class ProductService {
         // CascadeType.ALL remove variantes, imagens e tag links automaticamente
         productRepository.deleteById(id);
         productRepository.flush();
+        // as fotos enviadas pelo painel saem do bucket (as de link externo ficam onde estão)
+        fotos.forEach(url -> armazenamento.apagar(url));
         // o produto podia estar no ranking guardado (pela parte das peças mais novas, que não têm venda):
         // o próximo pedido refaz o ranking, e os destaques continuam com o número pedido de peças
         esquecerRanking();

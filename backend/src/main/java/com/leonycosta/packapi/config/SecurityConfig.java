@@ -54,7 +54,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/inventory/**").hasAuthority(INVENTORY_MANAGE.name())
 
                         // ── catálogo: qualquer um vê, só quem tem CATALOG_WRITE altera ──
-                        // (a lista de inativos é do painel: antes da leitura pública)
+                        // (a lista de inativos e a do painel são da equipe: antes da leitura pública)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/products/painel").hasAuthority(CATALOG_WRITE.name())
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/inativos").hasAuthority(CATALOG_WRITE.name())
                         .requestMatchers(HttpMethod.GET, CATALOGO).permitAll()
                         .requestMatchers(CATALOGO).hasAuthority(CATALOG_WRITE.name())
@@ -62,6 +63,13 @@ public class SecurityConfig {
 
                         // ── newsletter: qualquer um se inscreve; a lista é de quem gerencia a equipe ──
                         .requestMatchers(HttpMethod.POST, "/api/v1/newsletter").permitAll()
+                        // contato: qualquer um manda; a caixa de entrada é de quem atende os clientes
+                        .requestMatchers(HttpMethod.POST, "/api/v1/contato").permitAll()
+                        .requestMatchers("/api/v1/contato/**").hasAuthority(CUSTOMER_READ.name())
+                        // fotos guardadas na pasta local (desenvolvimento, sem o bucket): públicas
+                        .requestMatchers(HttpMethod.GET, "/imagens/**").permitAll()
+                        // resumo do painel: só funcionários (cada um vê as partes das suas permissões)
+                        .requestMatchers("/api/v1/painel/**").access(funcionario())
                         .requestMatchers(HttpMethod.GET, "/api/v1/frete").permitAll()
                         .requestMatchers("/api/v1/newsletter/**").hasAuthority(STAFF_MANAGE.name())
 
@@ -103,6 +111,13 @@ public class SecurityConfig {
     private AuthorizationManager<RequestAuthorizationContext> proprioClienteOu(Permissao permissao) {
         return (auth, ctx) -> new AuthorizationDecision(
                 guard.isSelf(auth.get(), ctx.getVariables().get("customerId")) || guard.has(auth.get(), permissao.name()));
+    }
+
+    // qualquer funcionário logado (o token diz o tipo; as permissões decidem o resto)
+    private AuthorizationManager<RequestAuthorizationContext> funcionario() {
+        return (auth, ctx) -> new AuthorizationDecision(auth.get()
+                instanceof org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken jwt
+                && "STAFF".equals(jwt.getToken().getClaimAsString("tipo")));
     }
 
     private AuthorizationManager<RequestAuthorizationContext> donoDoPedido() {

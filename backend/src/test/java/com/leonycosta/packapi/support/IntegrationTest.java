@@ -31,6 +31,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
         "jwt.secret=" + IntegrationTest.JWT_SECRET,
         // os testes do pagamento aprovam pelo painel (a aprovação simulada tem a própria classe de teste)
         "app.pagamento.aprovacao-simulada=false",
+        // fotos enviadas nos testes: numa pasta do target, servidas pela própria API
+        "app.imagens.pasta=target/test-uploads",
         "app.admin.email=" + IntegrationTest.ADMIN_EMAIL,
         "app.admin.senha=" + IntegrationTest.ADMIN_SENHA,
         "spring.datasource.password=definida-pelo-testcontainers",
@@ -82,7 +84,7 @@ public abstract class IntegrationTest {
         return executar(req);
     }
 
-    protected Resposta executar(MockHttpServletRequestBuilder req) {
+    protected Resposta executar(org.springframework.test.web.servlet.RequestBuilder req) {
         try {
             MvcResult r = mvc.perform(req).andReturn();
             return new Resposta(r.getResponse().getStatus(), r.getResponse().getContentAsString(StandardCharsets.UTF_8));
