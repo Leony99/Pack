@@ -1,6 +1,8 @@
 import { pageHead } from "@/lib/metadata";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { CatalogView } from "@/components/catalog/CatalogView";
+import { catalogoQuery } from "@/components/catalog/consulta";
+import { catalogFilters } from "@/components/catalog/filtros";
 import { CardAviso, PaginaTopo } from "@/components/layout/PaginaTopo";
 import { freeShippingFrom } from "@/data/shipping";
 import { getOpcoesDoCatalogo, nomeDaOpcao, SLUG } from "@/lib/api";
@@ -20,6 +22,12 @@ export const Route = createFileRoute("/catalogo/$style/$type")({
     if (!existe(opcoes.estilos, params.style) || !existe(opcoes.categorias, params.type))
       throw notFound();
   },
+  // a primeira página já vem do servidor (a mesma consulta que a grade faz)
+  loaderDeps: ({ search }) => ({ sort: search.sort }),
+  loader: ({ context, params, deps }) =>
+    context.queryClient.ensureInfiniteQueryData(
+      catalogoQuery(catalogFilters({ style: params.style, type: params.type, sort: deps.sort })),
+    ),
   head: ({ params }) =>
     pageHead(`${params.type} / ${params.style}`, "Explore peças PACK por categoria e estilo."),
   component: CatalogPage,

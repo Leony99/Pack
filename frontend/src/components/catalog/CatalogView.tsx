@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { selectClass } from "@/components/common/classes";
 import { ROTULO } from "@/components/layout/PaginaTopo";
 import { Vazio } from "@/components/common/Vazio";
 import { Button } from "@/components/ui/button";
-import { getCollections, getOpcoesDoCatalogo, getProducts } from "@/lib/api";
+import { getCollections, getOpcoesDoCatalogo } from "@/lib/api";
+import { catalogoQuery } from "./consulta";
 import { catalogFilters, type CatalogSearch } from "./filtros";
-
-/** Quantos produtos aparecem de cada vez (o "CARREGAR MAIS" mostra o próximo lote). */
-const LOTE = 8;
 
 const SEM_FILTROS: CatalogSearch = {
   style: "all",
@@ -24,6 +22,8 @@ const SEM_FILTROS: CatalogSearch = {
  * Grade do catálogo com filtros e ordenação. Os filtros ficam na URL (a rota é dona deles e recebe
  * as mudanças por onChange). "locked" esconde os filtros nas páginas que já são um recorte fixo
  * (categoria/estilo, coleção), deixando só a ordenação.
+ * Os produtos vêm em páginas de 8 (consulta.ts): o "CARREGAR MAIS" pede a próxima à API, e o total
+ * de peças vem junto da primeira.
  */
 export function CatalogView({
   search,
@@ -35,22 +35,19 @@ export function CatalogView({
   locked?: boolean;
 }) {
   const filters = catalogFilters(search);
-  const query = useQuery({ queryKey: ["products", filters], queryFn: () => getProducts(filters) });
+  const [stockOnly, setStockOnly] = useState(false);
+  const query = useInfiniteQuery(catalogoQuery(filters, stockOnly));
   const collections = useQuery({ queryKey: ["collections"], queryFn: getCollections });
   // as opções de estilo e categoria são as tags da API com esses filtros (aba Tags do painel)
   const opcoes = useQuery({ queryKey: ["collections", "opcoes"], queryFn: getOpcoesDoCatalogo });
-  const [limit, setLimit] = useState(LOTE);
-  const [stockOnly, setStockOnly] = useState(false);
-  const products = (query.data ?? []).filter(
-    (p) => !stockOnly || Object.values(p.stock ?? {}).some((qtd) => qtd > 0),
-  );
+  const products = query.data?.pages.flatMap((p) => p.produtos) ?? [];
+  const total = query.data?.pages[0]?.total ?? 0;
   // vazio por causa de um filtro (dá para limpar) ou porque ainda não há nada cadastrado
   const filtrado =
     stockOnly || Object.entries(filters).some(([chave, valor]) => chave !== "sort" && valor);
 
-  // mudou o filtro, volta a mostrar só o primeiro lote
+  // mudou o filtro: a consulta muda junto e começa da primeira página
   function filtrar(patch: CatalogSearch) {
-    setLimit(LOTE);
     onChange(patch);
   }
 
@@ -105,18 +102,14 @@ export function CatalogView({
       <div className="my-8 flex flex-wrap items-end justify-between gap-5">
         <div>
           <p className={`${ROTULO} mb-3 flex items-center gap-2`}>
-            <span className="h-1.5 w-1.5 bg-destaque" /> {String(products.length).padStart(2, "0")}{" "}
-            PEÇAS
+            <span className="h-1.5 w-1.5 bg-destaque" /> {String(total).padStart(2, "0")} PEÇAS
           </p>
           <label className="flex cursor-pointer items-center gap-2 text-xs">
             <input
               type="checkbox"
               className="h-4 w-4 accent-ink"
               checked={stockOnly}
-              onChange={(e) => {
-                setStockOnly(e.target.checked);
-                setLimit(LOTE);
-              }}
+              onChange={(e) => setStockOnly(e.target.checked)}
             />
             Somente disponíveis
           </label>
@@ -207,18 +200,19 @@ export function CatalogView({
       ) : (
         <>
           <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4 md:gap-x-6">
-            {products.slice(0, limit).map((p) => (
+            {products.map((p) => (
               <ProductCard key={p.id} p={p} />
             ))}
           </div>
-          {products.length > limit && (
+          {query.hasNextPage && (
             <div className="mt-10 text-center">
               <Button
                 variant="outline"
                 className="h-12 rounded-none px-8 text-[11px] tracking-[0.2em]"
-                onClick={() => setLimit((n) => n + LOTE)}
+                disabled={query.isFetchingNextPage}
+                onClick={() => void query.fetchNextPage()}
               >
-                CARREGAR MAIS
+                {query.isFetchingNextPage ? "CARREGANDO..." : "CARREGAR MAIS"}
               </Button>
             </div>
           )}

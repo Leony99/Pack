@@ -75,6 +75,15 @@ describe("coleções e operações simuladas", () => {
     expect((await api.getProducts({ collection: "drop-02" })).map((p) => p.id)).toEqual(["p1"]);
     expect(await api.getProducts({ collection: "outra" })).toEqual([]);
   });
+  test("catálogo vem em páginas, com o total e se há mais", async () => {
+    const todos = await api.getProducts();
+    const primeira = await api.getPaginaDoCatalogo({}, 0, 1);
+    expect(primeira.total).toBe(todos.length);
+    expect(primeira.produtos.map((p) => p.id)).toEqual([todos[0]!.id]);
+    expect(primeira.temMais).toBe(todos.length > 1);
+    const ultima = await api.getPaginaDoCatalogo({}, todos.length - 1, 1);
+    expect(ultima.temMais).toBe(false);
+  });
   test("operação não recebe acesso administrativo a colaboradores e cupons", () => {
     expect(api.canStaff("operacao", "stock")).toBe(true);
     expect(api.canStaff("operacao", "staff")).toBe(false);
