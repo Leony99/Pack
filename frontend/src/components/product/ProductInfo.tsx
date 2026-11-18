@@ -5,6 +5,7 @@ import { ShippingCalc } from "@/components/cart/ShippingCalc";
 import { Button } from "@/components/ui/button";
 import { colecoesDoProduto } from "@/lib/api";
 import { useCart } from "@/lib/cart";
+import { money } from "@/lib/checkout";
 import type { Product, VarianteDoProduto } from "@/data/types";
 
 /** Coleções que ganham link na página do produto: os drops ("drop-02") e estas; as outras tags são internas. */
@@ -72,10 +73,10 @@ export function ProductInfo({ product }: { product: Product }) {
         {product.type.toUpperCase()} · {cor ? cor.toUpperCase() : product.color}
       </p>
       <h1 className="mt-2 font-display text-4xl leading-tight md:text-5xl">{product.name}</h1>
-      <p className="mt-4 text-2xl font-medium">R$ {product.price}</p>
+      <p className="mt-4 text-2xl font-medium">{money(variante?.preco ?? product.price)}</p>
       <p className="mt-1 text-xs text-muted-foreground">
         {/* uma string só: em pedaços, o navegador perde o ajuste de espaço entre "6" e "x" */}
-        {`Em até ${PARCELAS}x de R$ ${(product.price / PARCELAS).toFixed(2)} sem juros`}
+        {`Em até ${PARCELAS}x de ${money((variante?.preco ?? product.price) / PARCELAS)} sem juros`}
       </p>
 
       {cores.length > 1 && (

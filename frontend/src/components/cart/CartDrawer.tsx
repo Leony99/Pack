@@ -6,7 +6,7 @@ import { CouponField } from "@/components/cart/CouponField";
 import { OrderSummary } from "@/components/cart/OrderSummary";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
-import { chaveDaLinha } from "@/lib/checkout";
+import { chaveDaLinha, money } from "@/lib/checkout";
 
 /** Duração da animação de abrir e fechar (a mesma do duration-300 das classes). */
 const ANIMACAO_MS = 300;
@@ -109,7 +109,7 @@ export function CartDrawer() {
                           <Plus className="h-3 w-3" />
                         </button>
                       </div>
-                      <p className="text-sm font-medium">R$ {i.qty * i.price}</p>
+                      <p className="text-sm font-medium">{money(i.qty * i.price)}</p>
                     </div>
                   </div>
                 </li>
