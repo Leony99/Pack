@@ -152,7 +152,8 @@ export async function getPaginaDoCatalogo(
 /** Um produto. API: GET /api/v1/products/{id}; não existe → null. */
 export async function getProduct(id: string): Promise<Product | null> {
   if (USA_API) return produtoDaApiPorId({ data: id });
-  return state.products.find((p) => p.id === id && p.active !== false) ?? null;
+  // um produto inativo também abre: a página o mostra como indisponível, sem compra
+  return state.products.find((p) => p.id === id) ?? null;
 }
 
 /**

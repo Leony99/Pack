@@ -16,7 +16,8 @@ export function newRecord(view: AdminView, data: AdminData): AdminRecord {
       type: "camisa",
       tags: [],
       stock: { PP: 0, P: 0, M: 0, G: 0, GG: 0 },
-      active: true,
+      // nasce fora da loja, como na API: aparece depois de ativado
+      active: false,
       description: "",
     };
   if (view === "collections") return { id: "", name: "", tag: "", description: "" };

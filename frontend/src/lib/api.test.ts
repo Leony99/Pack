@@ -211,3 +211,26 @@ describe("aba Tags (demonstração)", () => {
     expect(contagem.get("b")).toBe(1);
   });
 });
+
+// Fica por último: desativa o produto p1, que os testes de cima usam
+describe("produto desativado e exclusão (demonstração)", () => {
+  test("produto que esteve em pedido não é apagado; desativado sai da loja", async () => {
+    await api.enterDemo("customer");
+    const { orderId } = await api.createOrder({
+      items: [{ productId: "p1", size: "M", qty: 1 }],
+      address,
+      shipping: "PAC",
+      payment: "pix",
+    });
+    await api.enterDemo("staff");
+    await api.updateOrder(orderId, "Cancelado", "");
+    // nem cancelado: o caminho é desativar
+    await expect(api.deleteAdminRecord("products", "p1")).rejects.toThrow(/Desative/);
+
+    const p1 = (await api.getAdminData()).products.find((p) => p.id === "p1")!;
+    await api.saveAdminRecord("products", { ...p1, active: false });
+    expect((await api.getProducts()).map((p) => p.id)).not.toContain("p1");
+    // a página do produto ainda abre, como indisponível
+    expect((await api.getProduct("p1"))?.active).toBe(false);
+  });
+});

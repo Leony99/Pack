@@ -26,7 +26,9 @@ export function ProductInfo({ product }: { product: Product }) {
   const { addToCart, setCartOpen } = useCart();
   const navigate = useNavigate();
   const [size, setSize] = useState("M");
-  const disponivel = (product.stock?.[size] ?? 0) > 0;
+  // inativo: fora da loja (desativado no painel); a página abre, mas sem compra
+  const ativo = product.active !== false;
+  const disponivel = ativo && (product.stock?.[size] ?? 0) > 0;
 
   return (
     <div className="order-3 flex flex-col">
@@ -91,7 +93,11 @@ export function ProductInfo({ product }: { product: Product }) {
           onClick={() => addToCart(product, size)}
           className="h-12 rounded-none cursor-pointer bg-destaque py-4 text-sm font-semibold tracking-wider text-destaque-foreground transition hover:bg-destaque/90"
         >
-          {disponivel ? "ADICIONAR AO CARRINHO" : "TAMANHO ESGOTADO"}
+          {!ativo
+            ? "PRODUTO INDISPONÍVEL"
+            : disponivel
+              ? "ADICIONAR AO CARRINHO"
+              : "TAMANHO ESGOTADO"}
         </Button>
         <Button
           type="button"

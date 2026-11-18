@@ -82,7 +82,8 @@ export type CheckoutAddress = {
 export type Order = {
   id: string;
   customer: { name: string; email: string };
-  items: (Product & { size: string; qty: number })[];
+  // disponivel: false quando o produto foi desativado depois do pedido (vem da API: itens[].disponivel)
+  items: (Product & { size: string; qty: number; disponivel?: boolean })[];
   address: CheckoutAddress;
   shipping: ShippingOption;
   payment: "pix" | "card";
