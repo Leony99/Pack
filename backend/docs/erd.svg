@@ -157,6 +157,31 @@
   <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">permission_id</text>
   <text x="202" y="83" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#79c0ff">FK</text>
 </g>
+<g transform="translate(540,124)">
+  <rect x="3" y="3" width="210" height="111" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="111" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect width="210" height="27" rx="6" fill="#1a3358"/>
+  <rect y="21" width="210" height="6" fill="#1a3358"/>
+  <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">NEWSLETTER_INSCRITO</text>
+  <rect y="27" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="27" x2="209" y2="27" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">uuid</text>
+  <text x="68" y="41" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">id</text>
+  <text x="202" y="41" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#ffa657">PK</text>
+  <rect y="48" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="48" x2="209" y2="48" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="62" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">email</text>
+  <text x="202" y="62" text-anchor="end" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" font-weight="700" fill="#a5d6ff">UK</text>
+  <rect y="69" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="69" x2="209" y2="69" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">bool</text>
+  <text x="68" y="83" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">ativo</text>
+  <path d="M0,90 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <line x1="1" y1="90" x2="209" y2="90" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
+  <text x="68" y="104" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">criado_em</text>
+</g>
 <g transform="translate(540,280)">
   <rect x="3" y="3" width="210" height="153" rx="6" fill="rgba(0,0,0,0.3)"/>
   <rect width="210" height="153" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
@@ -191,8 +216,8 @@
   <text x="68" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">criado_em</text>
 </g>
 <g transform="translate(540,470)">
-  <rect x="3" y="3" width="210" height="195" rx="6" fill="rgba(0,0,0,0.3)"/>
-  <rect width="210" height="195" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect x="3" y="3" width="210" height="258" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="258" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
   <rect width="210" height="27" rx="6" fill="#1a3358"/>
   <rect y="21" width="210" height="6" fill="#1a3358"/>
   <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">ADDRESS</text>
@@ -225,11 +250,23 @@
   <rect y="153" width="210" height="21" fill="#0f1925"/>
   <line x1="1" y1="153" x2="209" y2="153" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
-  <text x="68" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">cidade</text>
-  <path d="M0,174 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <text x="68" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">bairro</text>
+  <rect y="174" width="210" height="21" fill="#111e2b"/>
   <line x1="1" y1="174" x2="209" y2="174" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="188" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
-  <text x="68" y="188" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">estado</text>
+  <text x="68" y="188" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">cidade</text>
+  <rect y="195" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="195" x2="209" y2="195" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="209" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="209" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">estado</text>
+  <rect y="216" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="216" x2="209" y2="216" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="230" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="230" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">apelido</text>
+  <path d="M0,237 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="237" x2="209" y2="237" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="251" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">bool</text>
+  <text x="68" y="251" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">principal</text>
 </g>
 <g transform="translate(810,124)">
   <rect x="3" y="3" width="210" height="90" rx="6" fill="rgba(0,0,0,0.3)"/>
@@ -308,8 +345,8 @@
   <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">validade</text>
 </g>
 <g transform="translate(810,476)">
-  <rect x="3" y="3" width="210" height="258" rx="6" fill="rgba(0,0,0,0.3)"/>
-  <rect width="210" height="258" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect x="3" y="3" width="210" height="300" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="300" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
   <rect width="210" height="27" rx="6" fill="#1a3358"/>
   <rect y="21" width="210" height="6" fill="#1a3358"/>
   <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">ORDER</text>
@@ -351,15 +388,23 @@
   <rect y="195" width="210" height="21" fill="#0f1925"/>
   <line x1="1" y1="195" x2="209" y2="195" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="209" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
-  <text x="68" y="209" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_cidade</text>
+  <text x="68" y="209" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_complemento</text>
   <rect y="216" width="210" height="21" fill="#111e2b"/>
   <line x1="1" y1="216" x2="209" y2="216" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="230" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
-  <text x="68" y="230" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_estado</text>
-  <path d="M0,237 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <text x="68" y="230" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_bairro</text>
+  <rect y="237" width="210" height="21" fill="#0f1925"/>
   <line x1="1" y1="237" x2="209" y2="237" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
-  <text x="8" y="251" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
-  <text x="68" y="251" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">criado_em</text>
+  <text x="8" y="251" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="251" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_cidade</text>
+  <rect y="258" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="258" x2="209" y2="258" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="272" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="272" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_estado</text>
+  <path d="M0,279 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <line x1="1" y1="279" x2="209" y2="279" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="293" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
+  <text x="68" y="293" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">criado_em</text>
 </g>
 <g transform="translate(1050,314)">
   <rect x="3" y="3" width="210" height="132" rx="6" fill="rgba(0,0,0,0.3)"/>

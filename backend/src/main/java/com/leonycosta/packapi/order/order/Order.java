@@ -47,6 +47,13 @@ public class Order {
     @Column(name = "endereco_numero", nullable = false)
     private String enderecoNumero;
 
+    // complemento e bairro: pedidos de antes destas colunas ficam sem
+    @Column(name = "endereco_complemento")
+    private String enderecoComplemento;
+
+    @Column(name = "endereco_bairro")
+    private String enderecoBairro;
+
     @Column(name = "endereco_cidade", nullable = false)
     private String enderecoCidade;
 

@@ -10,7 +10,13 @@ type Perfil = AccountData["customer"];
 const CAMPOS_DO_PERFIL = [
   { campo: "name", rotulo: "Nome completo", tipo: "text", obrigatorio: true },
   { campo: "email", rotulo: "E-mail", tipo: "email", obrigatorio: true },
-  { campo: "phone", rotulo: "Telefone (opcional)", tipo: "tel", obrigatorio: false },
+  // a API exige telefone; na demonstração, é opcional
+  {
+    campo: "phone",
+    rotulo: USA_API ? "Telefone" : "Telefone (opcional)",
+    tipo: "tel",
+    obrigatorio: USA_API,
+  },
 ] as const;
 
 /** Dados pessoais e troca de senha. */
@@ -28,7 +34,10 @@ export function ProfileScreen({
         profile={data.customer}
         busy={busy}
         onSave={(value) =>
-          void run(() => updateProfile(value), "Dados atualizados na demonstração.")
+          void run(
+            () => updateProfile(value),
+            USA_API ? "Dados atualizados." : "Dados atualizados na demonstração.",
+          )
         }
       />
       <form

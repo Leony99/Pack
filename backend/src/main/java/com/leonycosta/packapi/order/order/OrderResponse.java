@@ -24,6 +24,8 @@ public class OrderResponse {
     private String enderecoCep;
     private String enderecoRua;
     private String enderecoNumero;
+    private String enderecoComplemento;
+    private String enderecoBairro;
     private String enderecoCidade;
     private String enderecoEstado;
 

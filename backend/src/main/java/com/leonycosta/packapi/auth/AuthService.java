@@ -67,6 +67,17 @@ public class AuthService {
         return tokenService.gerar(s.getId(), s.getNome(), s.getEmail(), TipoUsuario.STAFF, permissoes, s.getRole().getNome());
     }
 
+    // Os dados atuais de quem está logado (GET /auth/me). Apagado depois do login: 401, como um token inválido
+    @Transactional(readOnly = true)
+    public UsuarioResponse quemSou(UUID id, TipoUsuario tipo, List<String> permissoes) {
+        if (tipo == TipoUsuario.CUSTOMER) {
+            Customer c = customerRepository.findById(id).orElseThrow(UnauthorizedException::credenciaisInvalidas);
+            return new UsuarioResponse(c.getId(), c.getNome(), c.getEmail(), tipo, permissoes, null);
+        }
+        Staff s = staffRepository.findById(id).orElseThrow(UnauthorizedException::credenciaisInvalidas);
+        return new UsuarioResponse(s.getId(), s.getNome(), s.getEmail(), tipo, permissoes, s.getRole().getNome());
+    }
+
     // Troca a senha de quem está logado. A senha atual errada conta como tentativa de login (o mesmo limite
     // por e-mail e IP), para o token roubado de alguém não servir para adivinhar a senha dele.
     // O token atual continua valendo até expirar (a API não guarda sessões).

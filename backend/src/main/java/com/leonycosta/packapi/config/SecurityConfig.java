@@ -60,6 +60,10 @@ public class SecurityConfig {
                         .requestMatchers(CATALOGO).hasAuthority(CATALOG_WRITE.name())
                         .requestMatchers("/api/v1/images/**").hasAuthority(CATALOG_WRITE.name())
 
+                        // ── newsletter: qualquer um se inscreve; a lista é de quem gerencia a equipe ──
+                        .requestMatchers(HttpMethod.POST, "/api/v1/newsletter").permitAll()
+                        .requestMatchers("/api/v1/newsletter/**").hasAuthority(STAFF_MANAGE.name())
+
                         // ── cupons, funcionários e papéis ──
                         .requestMatchers("/api/v1/coupons/**").hasAuthority(COUPON_MANAGE.name())
                         .requestMatchers("/api/v1/staff/**", "/api/v1/roles/**", "/api/v1/permissions/**")
@@ -76,6 +80,8 @@ public class SecurityConfig {
                         // ── pedidos: o dono consulta e paga; funcionário com ORDER_MANAGE gerencia e registra pagamentos ──
                         .requestMatchers(HttpMethod.GET, "/api/v1/orders/{orderId}", "/api/v1/orders/{orderId}/payment",
                                 "/api/v1/orders/{orderId}/shipment").access(donoDoPedidoOu(ORDER_MANAGE))
+                        // só o dono cancela pelo atalho (a equipe usa o PATCH .../status)
+                        .requestMatchers(HttpMethod.POST, "/api/v1/orders/{orderId}/cancelar").access(donoDoPedido())
                         // o funcionário registra pagamentos recebidos por fora (método OUTRO)
                         .requestMatchers(HttpMethod.POST, "/api/v1/orders/{orderId}/payment")
                                 .access(donoDoPedidoOu(ORDER_MANAGE))
@@ -94,6 +100,10 @@ public class SecurityConfig {
     private AuthorizationManager<RequestAuthorizationContext> proprioClienteOu(Permissao permissao) {
         return (auth, ctx) -> new AuthorizationDecision(
                 guard.isSelf(auth.get(), ctx.getVariables().get("customerId")) || guard.has(auth.get(), permissao.name()));
+    }
+
+    private AuthorizationManager<RequestAuthorizationContext> donoDoPedido() {
+        return (auth, ctx) -> new AuthorizationDecision(guard.ownsOrder(auth.get(), ctx.getVariables().get("orderId")));
     }
 
     private AuthorizationManager<RequestAuthorizationContext> donoDoPedidoOu(Permissao permissao) {

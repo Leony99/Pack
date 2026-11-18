@@ -193,6 +193,27 @@ class AuthTest extends IntegrationTest {
         assertThat(get("/auth/me", ana.token()).esperar(200).<Object>ler("$.papel")).isNull();
     }
 
+    @Test
+    void meMostraONomeEOEmailAtuaisDepoisDeMudar() {
+        Cliente ana = novoCliente();
+        String novoEmail = "ana-nova-" + unico() + "@teste.com";
+        put("/customers/" + ana.id(), corpo("nome", "Ana Nova", "email", novoEmail, "telefone", "21999990000"),
+                ana.token()).esperar(200);
+
+        // o token é o de antes da mudança, mas o /auth/me lê do banco
+        Resposta r = get("/auth/me", ana.token()).esperar(200);
+        assertThat(r.str("$.nome")).isEqualTo("Ana Nova");
+        assertThat(r.str("$.email")).isEqualTo(novoEmail);
+    }
+
+    @Test
+    void meDeContaApagadaDa401() {
+        Cliente ana = novoCliente();
+        delete("/customers/" + ana.id(), ana.token()).esperar(204);
+
+        get("/auth/me", ana.token()).esperar(401);
+    }
+
     // ------------------------------------------------------------------ troca de senha
 
     @Test

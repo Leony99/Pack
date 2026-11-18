@@ -41,6 +41,13 @@ public class OrderController {
         return orderService.findById(id);
     }
 
+    // O cliente cancela o próprio pedido, antes de a loja começar a separar
+    @Operation(summary = "O cliente cancela o próprio pedido (aguardando pagamento ou pago; o estoque volta)")
+    @PostMapping("/orders/{id}/cancelar")
+    public OrderResponse cancelar(@PathVariable UUID id) {
+        return orderService.cancelarPeloCliente(id);
+    }
+
     @Operation(summary = "Muda o status do pedido (cancelar devolve o estoque)")
     @PatchMapping("/orders/{id}/status")
     public OrderResponse updateStatus(@PathVariable UUID id, @RequestParam OrderStatus status) {

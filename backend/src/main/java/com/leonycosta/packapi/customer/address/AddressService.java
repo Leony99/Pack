@@ -32,29 +32,32 @@ public class AddressService {
         Customer customer = customerService.findEntityById(customerId);
         Address address = new Address();
         address.setCustomer(customer);
-        address.setCep(request.getCep());
-        address.setRua(request.getRua());
-        address.setNumero(request.getNumero());
-        address.setComplemento(request.getComplemento());
-        address.setCidade(request.getCidade());
-        address.setEstado(request.getEstado().toUpperCase());
+        preencher(address, request);
+        // o primeiro endereço do cliente é o principal, mesmo sem pedir
+        boolean primeiro = addressRepository.findByCustomerId(customerId).isEmpty();
+        if (request.querSerPrincipal() || primeiro) tornarPrincipal(customerId, address);
         return toResponse(addressRepository.save(address));
     }
 
     public AddressResponse update(UUID customerId, UUID addressId, AddressRequest request) {
         Address address = findOrThrow(customerId, addressId);
-        address.setCep(request.getCep());
-        address.setRua(request.getRua());
-        address.setNumero(request.getNumero());
-        address.setComplemento(request.getComplemento());
-        address.setCidade(request.getCidade());
-        address.setEstado(request.getEstado().toUpperCase());
+        preencher(address, request);
+        // principal=false no principal atual não o desmarca: sempre há um (marque outro para trocar)
+        if (request.querSerPrincipal()) tornarPrincipal(customerId, address);
         return toResponse(addressRepository.save(address));
     }
 
     public void delete(UUID customerId, UUID addressId) {
-        findOrThrow(customerId, addressId);
-        addressRepository.deleteById(addressId);
+        Address address = findOrThrow(customerId, addressId);
+        addressRepository.delete(address);
+        addressRepository.flush();
+        // apagou o principal: um dos que sobraram passa a ser
+        if (address.isPrincipal()) {
+            addressRepository.findByCustomerId(customerId).stream().findFirst().ifPresent(a -> {
+                a.setPrincipal(true);
+                addressRepository.save(a);
+            });
+        }
     }
 
     // Usado pelo OrderService no checkout
@@ -71,8 +74,31 @@ public class AddressService {
         return address;
     }
 
+    private void preencher(Address address, AddressRequest request) {
+        address.setCep(request.getCep());
+        address.setRua(request.getRua());
+        address.setNumero(request.getNumero());
+        address.setComplemento(request.getComplemento());
+        address.setBairro(request.getBairro());
+        address.setCidade(request.getCidade());
+        address.setEstado(request.getEstado().toUpperCase());
+        address.setApelido(request.getApelido() == null || request.getApelido().isBlank()
+                ? null : request.getApelido().strip());
+    }
+
+    // Só um principal por cliente: os outros deixam de ser
+    private void tornarPrincipal(UUID customerId, Address novo) {
+        for (Address outro : addressRepository.findByCustomerId(customerId)) {
+            if (outro.isPrincipal() && !outro.getId().equals(novo.getId())) {
+                outro.setPrincipal(false);
+                addressRepository.save(outro);
+            }
+        }
+        novo.setPrincipal(true);
+    }
+
     private AddressResponse toResponse(Address a) {
         return new AddressResponse(a.getId(), a.getCep(), a.getRua(), a.getNumero(),
-                a.getComplemento(), a.getCidade(), a.getEstado());
+                a.getComplemento(), a.getBairro(), a.getCidade(), a.getEstado(), a.getApelido(), a.isPrincipal());
     }
 }

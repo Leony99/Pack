@@ -75,6 +75,9 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
   - o pagamento segue PENDENTE → APROVADO → ESTORNADO, ou PENDENTE → RECUSADO, sem voltar atrás;
   - o envio só é aceito depois do pagamento aprovado e segue PREPARANDO → DESPACHADO → ENTREGUE. Quando o pacote volta para a loja (a transportadora não entregou ou o cliente devolveu), o envio vira DEVOLVIDO: o pedido fica devolvido, o estoque volta e o pagamento é estornado;
   - o funcionário muda o status do pedido direto só para cancelar. Os outros status vêm do pagamento e do envio, que registram como foi pago e por onde foi entregue;
+  - o próprio cliente cancela o pedido (`POST /orders/{id}/cancelar`) enquanto ele está aguardando pagamento ou pago. Em separação, o pacote já está sendo montado, e o cancelamento é pelo atendimento;
+- **Endereço:** tem bairro, apelido (Casa, Trabalho) e um endereço principal por cliente. O primeiro cadastrado vira o principal; marcar outro troca; apagar o principal passa para outro. O pedido guarda o bairro e o complemento junto com o resto do endereço;
+- **Newsletter:** qualquer pessoa se inscreve (`POST /newsletter`, com o limite por IP do cadastro, e a mesma resposta para quem já estava na lista). O cliente entra e sai pela área dele, sempre com o e-mail da conta. A lista e as mudanças nela exigem `STAFF_MANAGE`; sair da lista não apaga a inscrição, só a desativa;
 - **Banco:** na partida, a API atualiza as regras do banco que limitam os valores de cada enum. O Hibernate cria essas regras com a tabela, mas não as atualiza depois, então um valor novo seria recusado num banco já existente. Esta solução é provisória: ver [Próximos passos](#próximos-passos).
 - **Conta do cliente:** sem pedidos, apagar a conta apaga o cadastro. Com pedidos, os dados pessoais são anonimizados e os pedidos ficam como histórico.
 - **Listagens paginadas:** produtos, clientes, funcionários, cupons, pedidos e movimentos de estoque vêm em páginas (`?pagina=0&tamanho=20`, no máximo 100 por página), com os totais para montar a navegação:
@@ -124,7 +127,7 @@ Os pacotes seguem o modelo *package-by-feature*, agrupados por categoria. Cada d
 ```
 backend/src/main/java/com/leonycosta/packapi/
 ├── staff/      staff, role, permission, role_permission
-├── customer/   customer, address
+├── customer/   customer, address, newsletter
 ├── cart/       cart, cart_item
 ├── order/      order, order_item, payment, shipment, coupon
 ├── product/    product, product_variant, product_image, product_tag, size, color, inventory
@@ -250,7 +253,7 @@ Eles também rodam sozinhos a cada envio ao GitHub (ver [CI/CD](#cicd)).
 
 ## Frontend: loja PACK
 
-A loja fica em [`frontend/`](frontend/), feita com **TanStack Start** (React 19 com renderização no servidor), TanStack Router e Query, Tailwind CSS 4 e GSAP. Tem a loja completa, a compra (carrinho, cupom e checkout), a área do cliente e o painel administrativo. O `npm run dev` usa a API local e o build de produção usa a API do Cloud Run (cada modo tem o seu `.env`); o `npm run dev:demo` usa só dados de demonstração. Com a API, o catálogo e o login (cliente e equipe) vêm dela pelo servidor do frontend (o navegador nunca chama a API direto nem vê o token, que fica num cookie `httpOnly`), e o site mostra avisos de "em breve" enquanto o banco estiver vazio. Conta, carrinho, checkout e painel ainda estão na demonstração.
+A loja fica em [`frontend/`](frontend/), feita com **TanStack Start** (React 19 com renderização no servidor), TanStack Router e Query, Tailwind CSS 4 e GSAP. Tem a loja completa, a compra (carrinho, cupom e checkout), a área do cliente e o painel administrativo. O `npm run dev` usa a API local e o build de produção usa a API do Cloud Run (cada modo tem o seu `.env`); o `npm run dev:demo` usa só dados de demonstração. Com a API, o catálogo, o login (cliente e equipe), a área do cliente e a newsletter vêm dela pelo servidor do frontend (o navegador nunca chama a API direto nem vê o token, que fica num cookie `httpOnly`), e o site mostra avisos de "em breve" enquanto o banco estiver vazio. Carrinho, checkout e painel ainda estão na demonstração.
 
 **Visual:** preto e branco, com Anton nos títulos e um laranja só nos detalhes.
 
@@ -302,7 +305,7 @@ Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do pr
 - [x] CI/CD com GitHub Actions
 - [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
 - [x] Frontend (TanStack Start / React 19), com dados de demonstração
-- [ ] Ligar o resto do frontend à API: o catálogo e o login já estão ligados; faltam conta, carrinho, checkout e painel (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
+- [ ] Ligar o resto do frontend à API: o catálogo, o login e a área do cliente já estão ligados; faltam carrinho, checkout e painel (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
 - [ ] Migrações do banco com Flyway, no lugar do `ddl-auto=update`
 - [ ] Cloud Armor na frente da API, para barrar ataques de volume antes do Cloud Run
 

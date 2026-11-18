@@ -88,7 +88,7 @@ class CheckoutTest extends IntegrationTest {
 
         // a Ana muda o endereço depois de comprar
         put("/customers/" + ana.id() + "/addresses/" + endereco, corpo("cep", "99999-999", "rua", "Nova",
-                "numero", "9", "cidade", "Rio de Janeiro", "estado", "RJ"), ana.token()).esperar(200);
+                "numero", "9", "bairro", "Centro", "cidade", "Rio de Janeiro", "estado", "RJ"), ana.token()).esperar(200);
 
         assertThat(get("/orders/" + pedido, ana.token()).str("$.enderecoCep")).isEqualTo("20040-020");
     }

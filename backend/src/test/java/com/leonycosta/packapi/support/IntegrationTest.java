@@ -228,7 +228,8 @@ public abstract class IntegrationTest {
 
     protected String novoEndereco(Cliente c) {
         return post("/customers/" + c.id() + "/addresses",
-                corpo("cep", "20040-020", "rua", "Rua Teste", "numero", "1", "cidade", "Rio de Janeiro", "estado", "RJ"),
+                corpo("cep", "20040-020", "rua", "Rua Teste", "numero", "1", "bairro", "Centro", "cidade", "Rio de Janeiro",
+                        "estado", "RJ"),
                 c.token()).esperar(201).str("$.id");
     }
 

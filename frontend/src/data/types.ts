@@ -87,6 +87,8 @@ export type Order = {
   address: CheckoutAddress;
   shipping: ShippingOption;
   payment: "pix" | "card";
+  /** Com a API: o método e a situação do pagamento ("Pix · aprovado"). */
+  paymentLabel?: string;
   subtotal: number;
   discount: number;
   total: number;

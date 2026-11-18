@@ -75,3 +75,22 @@ export async function chamarApi<T>(caminho: string, opcoes: Opcoes = {}): Promis
   const espera = Number(res.headers.get("Retry-After")) || undefined;
   throw ErroDaApi.daResposta(res.status, corpo, espera);
 }
+
+/**
+ * O id do usuário da sessão (o "sub" do token no cookie), ou null sem sessão. Não confere a
+ * assinatura: quem confere é a API, em toda chamada, e ela só deixa o dono mexer nos próprios dados
+ * (um id trocado no cookie só leva a um 401 ou 403).
+ */
+export function idDaSessao(sessao: Sessao): string | null {
+  const token = getCookie(COOKIE_DO_TOKEN[sessao]);
+  const parte = token?.split(".")[1];
+  if (!parte) return null;
+  try {
+    const base64 = parte.replace(/-/g, "+").replace(/_/g, "/");
+    const json = atob(base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "="));
+    const sub = (JSON.parse(json) as { sub?: unknown }).sub;
+    return typeof sub === "string" && /^[0-9a-f-]{36}$/i.test(sub) ? sub : null;
+  } catch {
+    return null;
+  }
+}

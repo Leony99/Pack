@@ -19,10 +19,14 @@ export function OrderDetail({ order }: { order: Order }) {
           <p className="mt-2 text-sm">{order.status}</p>
         </div>
         <p className="text-xs text-muted-foreground">
-          Pagamento não processado · {order.payment === "pix" ? "Pix" : "Cartão"}
+          {order.paymentLabel ??
+            `Pagamento não processado · ${order.payment === "pix" ? "Pix" : "Cartão"}`}
         </p>
       </div>
-      <ol className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {/* 4 etapas na demonstração, 5 com a API (o pagamento entra no fluxo) */}
+      <ol
+        className={`mb-8 grid grid-cols-2 gap-3 ${ETAPAS_DO_PEDIDO.length > 4 ? "sm:grid-cols-5" : "sm:grid-cols-4"}`}
+      >
         {ETAPAS_DO_PEDIDO.map((etapa, i) => (
           <li
             key={etapa}
@@ -58,12 +62,12 @@ export function OrderDetail({ order }: { order: Order }) {
           <p className="mt-3 text-sm leading-7">
             {order.address.street}, {order.address.number}
             <br />
-            {order.address.complement}
+            {[order.address.complement, order.address.neighborhood].filter(Boolean).join(" · ")}
             <br />
             {order.address.city}/{order.address.state} · {order.address.cep}
           </p>
           <p className="mt-3 text-sm">
-            {order.shipping.label} · {order.shipping.days}
+            {[order.shipping.label, order.shipping.days].filter(Boolean).join(" · ")}
           </p>
           <p className="mt-2 break-all text-xs">
             Rastreio: {order.tracking || "Ainda não disponível"}
