@@ -46,6 +46,10 @@ class IndiceDaBuscaPorNomeTest extends IntegrationTest {
                     insert into products (id, nome, preco, slug, criado_em)
                     select gen_random_uuid(), 'Produto de teste ' || n, 10, 'indice-teste-' || n, now()
                     from generate_series(1, 10000) as n""");
+            // As linhas novas entram primeiro na "lista pendente" do índice GIN, que o VACUUM automático integra
+            // depois; enquanto ela está cheia, o planejador estima o índice caro e às vezes prefere ler a tabela,
+            // e o teste ficava ora verde, ora vermelho. Integra a lista agora, como o banco faria sozinho
+            jdbc.queryForObject("SELECT gin_clean_pending_list(?::regclass)", Long.class, IndiceDaBuscaPorNome.NOME);
             // atualiza as estatísticas que o planejador usa para escolher entre ler tudo e usar o índice
             jdbc.execute("ANALYZE products");
             return planoDaBusca("zqxj");
