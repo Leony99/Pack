@@ -44,7 +44,7 @@ public class SecurityConfig {
                         // ── público ──
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login",
                                 "/api/v1/auth/staff/login").permitAll()
-                        .requestMatchers("/error", "/actuator/health").permitAll()
+                        .requestMatchers("/error", "/actuator/health", "/actuator/health/liveness").permitAll()
                         // documentação: a página do Swagger e o JSON que ela lê
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 

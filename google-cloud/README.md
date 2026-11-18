@@ -125,6 +125,21 @@ A API está hospedada de graça, dentro da cota gratuita do Google Cloud e do Ne
 | Deploy | **um por vez, só da `main`** | Dois envios seguidos não publicam ao mesmo tempo |
 | Permissões | **mínimas por conta** | `pack-api-run` só lê os próprios segredos; `github-deploy` não mexe em permissões; `budget-guard` só mexe no serviço da API |
 
+## Despertador
+
+Sem visitas por uns 15 minutos, o Cloud Run desliga a API (`--min-instances=0`). Quem chega depois espera ela ligar de novo: de 10 a 30 segundos, o tempo de o Spring Boot subir. O despertador evita isso sem custo:
+
+```
+ Cloud Scheduler ──a cada 12 min──► GET /actuator/health/liveness ──► a instância continua ligada
+ (pack-despertador)                  (não consulta o banco)
+```
+
+- **Quantas chamadas:** 5 por hora, cerca de 3.600 por mês, perto de 0,2% dos 2 milhões de requisições grátis. Cada uma dura milissegundos, então o tempo de CPU também fica bem abaixo de 1% da cota.
+- **Por que não custa:** na cobrança por requisição, a instância parada entre uma chamada e outra não é cobrada. Já `--min-instances=1` cobraria a instância o mês inteiro, e o disjuntor tiraria a API do ar.
+- **Por que essa rota:** a `/actuator/health/liveness` só diz se a aplicação está de pé. A `/actuator/health` completa consulta o banco e acordaria o Neon a cada chamada, gastando a cota de horas dele. Com o Neon dormindo, a primeira consulta depois de um tempo parado espera menos de 1 segundo.
+- **Não é garantido:** o Google pode desligar uma instância parada a qualquer momento. Na prática, ela quase sempre fica ligada.
+- **Tarefas do Cloud Scheduler:** são duas (`pack-verificar-cota` e `pack-despertador`), dentro das 3 grátis por conta.
+
 ## Disjuntor de custos
 
 O objetivo é **nunca pagar nada**: a API sai do ar antes de a cota grátis do Cloud Run acabar. O orçamento do Google Cloud sozinho não serve para isso. Ele mede dinheiro cobrado, e o uso dentro da cota custa R$ 0, então ele só perceberia depois de a cota acabar. Por isso o disjuntor tem duas camadas, as duas no mesmo tópico do Pub/Sub e na mesma [função](gcloud-scripts/budget-guard/main.py):
@@ -212,6 +227,7 @@ O [`gcloud-cli-scripts/setup.sh`](gcloud-cli-scripts/setup.sh) é o registro de 
 | `api` | Primeiro deploy do serviço no Cloud Run, com os limites |
 | `disjuntor` | Tópico do Pub/Sub, conta e função do disjuntor (com permissão de ler as métricas de uso) |
 | `agendador` | Tarefa do Cloud Scheduler que aciona a medição da cota de hora em hora |
+| `despertador` | Tarefa do Cloud Scheduler que chama a API a cada 12 minutos, para ela não desligar (ver [Despertador](#despertador)) |
 | `orcamento` | Orçamento de R$ 1 ligado ao tópico (cria ou atualiza) |
 
 ```bash
