@@ -18,9 +18,10 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     long countByAtivo(boolean ativo);
     boolean existsBySlug(String slug);
     // Busca por nome: ignora maiúsculas e acentos dos dois lados ("basica" encontra "Camiseta Básica").
-    // A expressão fica em constantes porque o índice da busca (IndiceDaBuscaPorNome) precisa ser dela,
-    // letra por letra: se as duas forem diferentes, o banco ignora o índice sem avisar e lê a tabela inteira.
-    // O IndiceDaBuscaPorNomeTest confere que a consulta abaixo usa o índice.
+    // A expressão fica em constantes porque o índice da busca (criado pela migração V1, com pg_trgm) é desta
+    // expressão, letra por letra: se as duas forem diferentes, o banco ignora o índice sem avisar e lê a tabela
+    // inteira. Mudou a expressão? O índice muda numa migração nova. O IndiceDaBuscaPorNomeTest confere que a
+    // consulta abaixo usa o índice.
     String SEM_ACENTO_ANTES = "translate(lower(";
     String SEM_ACENTO_DEPOIS = "), 'áàâãäéèêëíìîïóòôõöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')";
     String NOME_SEM_ACENTO = SEM_ACENTO_ANTES + "nome" + SEM_ACENTO_DEPOIS;
