@@ -12,6 +12,7 @@ O visual é próprio, com animações na rolagem e detalhes em laranja: veja [Vi
 - [Stack](#stack)
 - [Visual](#visual)
 - [Como rodar](#como-rodar)
+- [Publicação (Cloudflare)](#publicação-cloudflare)
 - [Organização](#organização)
 - [Como o código funciona](#como-o-código-funciona)
 - [Ligação com a Pack API](#ligação-com-a-pack-api)
@@ -99,7 +100,7 @@ Os três arquivos vão para o git, porque só têm o endereço da API, que não 
 
 - **API local no `npm run dev`:** é preciso subir o backend antes, de dentro de `backend/`: `docker compose up -d` (para desligar, `docker compose stop`). Com a API fora do ar, a home abre sem as linhas de produtos, e o catálogo mostra o erro com o botão TENTAR DE NOVO.
 - **Mudar só na sua máquina:** crie um `.env.development.local` (fica fora do git), com base no `.env.example`. Ele vale mais que o `.env.development`.
-- **Produção:** o endereço do `.env.production` fica gravado no código do servidor no build. Se a hospedagem tiver a variável de ambiente `PACK_API_URL`, ela vale mais.
+- **Produção:** o endereço do `.env.production` fica gravado no código do servidor no build. A variável `PACK_API_URL` da hospedagem vale mais: na Cloudflare, ela fica no `wrangler.jsonc` (ver [Publicação](#publicação-cloudflare)).
 
 | Script              | O que faz                                                        |
 | ------------------- | ---------------------------------------------------------------- |
@@ -111,6 +112,48 @@ Os três arquivos vão para o git, porque só têm o endereço da API, que não 
 | `npm run typecheck` | Checagem de tipos do TypeScript                                  |
 | `npm run lint`      | ESLint                                                           |
 | `npm run format`    | Formata o código com o Prettier                                  |
+
+## Publicação (Cloudflare)
+
+O site fica na **Cloudflare Workers**: o servidor (o BFF, que monta as páginas e conversa com a API) e os arquivos da página ficam num Worker chamado `pack-loja`, em `https://pack-loja.<conta>.workers.dev`. O plano grátis cobre 100 mil acessos por dia, sem cartão: se passar, o site para de responder naquele dia, mas nada é cobrado. O HTTPS é automático, e o Worker não "dorme" quando fica parado.
+
+**Como o build vira um Worker:** o Nitro (preset `cloudflare-module`, no `vite.config.ts`) empacota o servidor em `.output/server/` e os arquivos da página em `.output/public/`, e junta o [`wrangler.jsonc`](wrangler.jsonc) à configuração que ele mesmo gera. O `wrangler`, a ferramenta da Cloudflare, publica esse resultado. Ele é uma dependência de desenvolvimento, com a versão fixa no `package.json`: nada é instalado fora do projeto.
+
+**O que fica onde:**
+
+| O quê                                                | Onde                   | Observação                                                                                                                                      |
+| ---------------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nome, data de compatibilidade, `nodejs_compat`, logs | `wrangler.jsonc` (git) | O `nodejs_compat` dá ao servidor o `process.env`, de onde ele lê as variáveis                                                                   |
+| `PACK_API_URL`                                       | `wrangler.jsonc` (git) | O endereço público da API. Também fica gravado no build, pelo `.env.production`                                                                 |
+| `PACK_BFF_CHAVE`                                     | Segredo na Cloudflare  | O mesmo valor do segredo `pack-bff-chave` do Secret Manager do Google. Nunca vai para o git nem para o build, e continua guardado a cada deploy |
+| `CLOUDFLARE_API_TOKEN`                               | Segredo do GitHub      | Token que deixa o GitHub Actions publicar o Worker (e só isso)                                                                                  |
+| `CLOUDFLARE_ACCOUNT_ID`                              | Variável do GitHub     | O ID da conta na Cloudflare. Não é segredo                                                                                                      |
+
+**Deploy automático:** a cada envio para a `main`, o job "Deploy do site na Cloudflare" do [CI/CD](../.github/workflows/README.md#cd-do-site-cloudflare) confere o código, roda os testes, monta o build e publica. Se algo falha, a versão no ar continua a anterior.
+
+**Comandos** (de dentro de `frontend/`):
+
+```bash
+npx wrangler login                       # entra na conta (abre o navegador); só para os comandos à mão
+npm run build && npx wrangler dev        # roda o build como na Cloudflare, em http://localhost:8787
+npm run build && npx wrangler deploy     # publica à mão (o normal é o deploy automático)
+npx wrangler secret put PACK_BFF_CHAVE   # grava ou troca o segredo (pede o valor, sem mostrar)
+npx wrangler tail                        # logs do site no ar, ao vivo
+npx wrangler rollback                    # volta para a versão publicada anterior
+```
+
+**Configuração inicial** (feita uma vez):
+
+1. Criar a conta na Cloudflare (grátis) e entrar com `npx wrangler login`.
+2. Publicar a primeira vez: `npm run build && npx wrangler deploy`.
+3. Gravar a chave do IP do visitante, copiada do Google sem aparecer na tela (o `gcloud` é temporário, ver [`google-cloud/FERRAMENTAS.md`](../google-cloud/FERRAMENTAS.md)):
+   `gcloud secrets versions access latest --secret=pack-bff-chave | npx wrangler secret put PACK_BFF_CHAVE`
+4. Criar o token para o GitHub no painel da Cloudflare (_My Profile → API Tokens → Create Token_, modelo **Edit Cloudflare Workers**) e guardá-lo no GitHub como o segredo `CLOUDFLARE_API_TOKEN`. O ID da conta (na página inicial do painel) vira a variável `CLOUDFLARE_ACCOUNT_ID`.
+
+**Cuidados:**
+
+- **Data de compatibilidade:** a do `wrangler.jsonc` não pode passar da que o `wrangler` do `package.json` suporta, senão o `wrangler dev` não sobe. Ao mudar a data, confira o site de novo.
+- **Trocar a chave do IP:** troque nos dois lados (o segredo `pack-bff-chave` no Google e o `PACK_BFF_CHAVE` na Cloudflare). Com chaves diferentes, a API não aceita o IP enviado pelo site, e os limites por IP voltam a valer para o site inteiro.
 
 ## Organização
 
@@ -135,6 +178,7 @@ src/
 | `package.json` / `package-lock.json` | Dependências e scripts / versões exatas instaladas (os dois vão para o git)                                                                                   |
 | `tsconfig.json`                      | Regras do TypeScript e o atalho `@/` para `src/`                                                                                                              |
 | `vite.config.ts`                     | Build e servidor de desenvolvimento: plugins do Tailwind, TanStack Start, React e Nitro (destino Cloudflare)                                                  |
+| `wrangler.jsonc`                     | Configuração do site na Cloudflare: nome do Worker, compatibilidade e o `PACK_API_URL` (ver [Publicação](#publicação-cloudflare))                             |
 | `vitest.config.ts`                   | Configuração dos testes                                                                                                                                       |
 | `eslint.config.js`                   | Regras de qualidade do código                                                                                                                                 |
 | `.prettierrc` / `.prettierignore`    | Regras de formatação / o que o Prettier não formata                                                                                                           |
@@ -280,16 +324,18 @@ O frontend não protege dados: quem confere token, dono do recurso, permissões,
 - **Entrada conferida no servidor:** as funções de servidor validam o que o navegador manda (id no formato UUID, busca curta) e só chamam caminhos que começam em `/api/v1/`.
 - **Erros sem detalhes internos:** um erro 5xx da API vira uma mensagem genérica; os 4xx mostram a mensagem da API, que é escrita para o usuário.
 - **Imagens:** só URLs `http(s)` vindas da API viram imagem.
-- **Cabeçalhos em todas as respostas** (`src/server.ts`): `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` e `frame-ancestors 'none'` (a loja não abre dentro de um iframe de outro site), `Referrer-Policy` e `Permissions-Policy` (sem câmera, microfone e localização).
-- **Ainda a fazer, na hospedagem:** HSTS (só com HTTPS) e uma CSP completa, que precisa de _nonce_ para os scripts que o TanStack Start põe na página.
+- **Cabeçalhos em todas as respostas** (`src/server.ts`): `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` e `frame-ancestors 'none'` (a loja não abre dentro de um iframe de outro site), `Referrer-Policy` e `Permissions-Policy` (sem câmera, microfone e localização). Quando o site é aberto por HTTPS (na Cloudflare, sempre), também o **HSTS** (`Strict-Transport-Security`, por um ano): o navegador passa a entrar só por HTTPS, mesmo num link `http://`.
+- **Ainda a fazer:** uma CSP completa, que precisa de _nonce_ para os scripts que o TanStack Start põe na página.
 
 ## Testes e qualidade
 
 ```bash
-npm test             # 31 testes (Vitest)
+npm test             # 50 testes (Vitest)
 npm run typecheck    # TypeScript estrito, sem variáveis ou parâmetros sem uso
 npm run lint         # ESLint
 ```
+
+No GitHub, o job "Frontend (testes + build)" do [CI/CD](../.github/workflows/README.md) roda os três e o build a cada envio e pull request. O Prettier aceita o final de linha de cada sistema (`"endOfLine": "auto"`): no Windows o git baixa os arquivos com CRLF, e no repositório eles ficam com LF.
 
 Os testes ficam ao lado do código testado (`*.test.ts`):
 
@@ -302,7 +348,6 @@ Os testes ficam ao lado do código testado (`*.test.ts`):
 
 ## Pendências
 
-- **Publicar o site** na Cloudflare, com `PACK_API_URL` e `PACK_BFF_CHAVE` na hospedagem (ver [O IP real do visitante](#o-ip-real-do-visitante)).
 - **Recuperar senha por e-mail:** precisa de um serviço de envio de e-mail na API.
 - **Compra de verdade:**
   - pagamento real (Pix e cartão) e o retorno do pagamento;
