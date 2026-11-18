@@ -1,0 +1,23 @@
+// Configuração do site na Cloudflare Workers (lida pelo wrangler, a ferramenta da Cloudflare).
+// O build (npm run build) junta este arquivo ao que o Nitro gera em .output/server/wrangler.json
+// (entrada do servidor, pasta dos arquivos estáticos), e o deploy usa o resultado.
+// Os segredos NÃO ficam aqui: o PACK_BFF_CHAVE é guardado com `wrangler secret put` (ver FERRAMENTAS.md).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // nome do Worker: o site fica em https://pack-loja.<sua-conta>.workers.dev
+  "name": "pack-loja",
+  // versão do ambiente da Cloudflare em que o site foi testado; mudar só conferindo o site de novo
+  // (e nunca depois da data que o wrangler do package.json suporta, senão o `wrangler dev` não sobe)
+  "compatibility_date": "2026-11-01",
+  // módulos do Node (process.env, Buffer...) que o TanStack Start usa no servidor
+  "compatibility_flags": ["nodejs_compat"],
+  // endereço *.workers.dev ligado (sem domínio próprio por enquanto)
+  "workers_dev": true,
+  "preview_urls": false,
+  // guarda os logs do servidor (erros, console.error) no painel da Cloudflare, dentro do plano grátis
+  "observability": { "enabled": true },
+  "vars": {
+    // endereço da API; o mesmo do .env.production, aqui para dar para trocar sem novo build
+    "PACK_API_URL": "https://pack-api-872578691493.southamerica-east1.run.app",
+  },
+}

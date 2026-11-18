@@ -46,8 +46,10 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
  * - nosniff: o navegador não "adivinha" o tipo de um arquivo (um texto não vira script);
  * - DENY / frame-ancestors: a loja não pode ser aberta dentro de um iframe de outro site (clickjacking);
  * - Referrer-Policy: outros sites recebem só o domínio de onde veio o clique, não a URL inteira;
- * - Permissions-Policy: a página não pede câmera, microfone nem localização.
- * O HSTS (só HTTPS) e a CSP ficam para a hospedagem: ver "Segurança" no README.
+ * - Permissions-Policy: a página não pede câmera, microfone nem localização;
+ * - HSTS, só quando o site é aberto por HTTPS (na Cloudflare, sempre): por um ano, o navegador entra só
+ *   por HTTPS, mesmo que alguém digite ou mande um link http://. No npm run dev (http) ele não vai.
+ * A CSP completa fica para depois: ver "Segurança" no README.
  */
 const CABECALHOS_DE_SEGURANCA: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
@@ -57,12 +59,16 @@ const CABECALHOS_DE_SEGURANCA: Record<string, string> = {
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
 };
 
-function comCabecalhosDeSeguranca(response: Response): Response {
+const HSTS = "max-age=31536000";
+
+function comCabecalhosDeSeguranca(request: Request, response: Response): Response {
   // a resposta pode ter cabeçalhos imutáveis: copia para uma nova, com o mesmo corpo (em stream)
   const segura = new Response(response.body, response);
   for (const [nome, valor] of Object.entries(CABECALHOS_DE_SEGURANCA)) {
     if (!segura.headers.has(nome)) segura.headers.set(nome, valor);
   }
+  if (new URL(request.url).protocol === "https:")
+    segura.headers.set("Strict-Transport-Security", HSTS);
   return segura;
 }
 
@@ -71,10 +77,11 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return comCabecalhosDeSeguranca(await normalizeCatastrophicSsrResponse(response));
+      return comCabecalhosDeSeguranca(request, await normalizeCatastrophicSsrResponse(response));
     } catch (error) {
       console.error(error);
       return comCabecalhosDeSeguranca(
+        request,
         new Response(renderErrorPage(), {
           status: 500,
           headers: { "content-type": "text/html; charset=utf-8" },
