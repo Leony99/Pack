@@ -22,6 +22,8 @@ public class ArmazenamentoNoBucket implements ArmazenamentoDeImagens {
     // a foto de um endereço nunca muda (um envio novo é um nome novo): o navegador guarda por 1 ano
     private static final String CACHE = "public, max-age=31536000, immutable";
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ArmazenamentoNoBucket.class);
+
     private final String bucket;
     private final String prefixo;
     private final RestClient http = RestClient.create();
@@ -58,13 +60,24 @@ public class ArmazenamentoNoBucket implements ArmazenamentoDeImagens {
         String nome = url.substring(prefixo.length());
         if (!NomeDaImagem.valido(nome)) return;
         http.delete()
-                .uri("https://storage.googleapis.com/storage/v1/b/" + bucket + "/o/"
-                        + URLEncoder.encode(nome, StandardCharsets.UTF_8))
+                .uri(enderecoDoObjeto(bucket, nome))
                 .header("Authorization", "Bearer " + token())
                 .retrieve()
-                // já apagado: o resultado é o mesmo
-                .onStatus(HttpStatusCode::is4xxClientError, (pedido, resposta) -> { })
+                .onStatus(HttpStatusCode::is4xxClientError, (pedido, resposta) -> {
+                    // 404: já apagado, o resultado é o mesmo. Outro erro fica no log (a foto sobrou no bucket)
+                    if (resposta.getStatusCode().value() != 404) {
+                        LOG.warn("Não foi possível apagar a foto {} do bucket: {}", nome, resposta.getStatusCode());
+                    }
+                })
                 .toBodilessEntity();
+    }
+
+    // O endereço de um arquivo na API do Cloud Storage. O nome vai codificado ("produto/foto.webp" vira
+    // "produto%2Ffoto.webp") e como URI pronta: passado como texto, o RestClient codificaria o "%" de novo
+    // ("%252F"), o Google responderia 404 e a foto nunca seria apagada
+    static java.net.URI enderecoDoObjeto(String bucket, String nome) {
+        return java.net.URI.create("https://storage.googleapis.com/storage/v1/b/" + bucket + "/o/"
+                + URLEncoder.encode(nome, StandardCharsets.UTF_8));
     }
 
     // O token de acesso da conta de serviço, guardado até 1 minuto antes de vencer
