@@ -48,7 +48,7 @@ public class NewsletterService {
     // O cliente está na lista com o e-mail da conta?
     public boolean doCliente(UUID customerId) {
         String email = emailDoCliente(customerId);
-        return repository.findByEmail(email).map(Inscrito::isAtivo).orElse(false);
+        return repository.findByEmail(email).map(i -> i.isAtivo()).orElse(false);
     }
 
     // O cliente entra ou sai da lista pela área dele (sempre com o e-mail da conta)

@@ -1,6 +1,5 @@
 package com.leonycosta.packapi.product.product_image;
 
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 
@@ -63,7 +62,7 @@ public class ArmazenamentoNoBucket implements ArmazenamentoDeImagens {
                 .uri(enderecoDoObjeto(bucket, nome))
                 .header("Authorization", "Bearer " + token())
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, (pedido, resposta) -> {
+                .onStatus(status -> status.is4xxClientError(), (pedido, resposta) -> {
                     // 404: já apagado, o resultado é o mesmo. Outro erro fica no log (a foto sobrou no bucket)
                     if (resposta.getStatusCode().value() != 404) {
                         LOG.warn("Não foi possível apagar a foto {} do bucket: {}", nome, resposta.getStatusCode());
