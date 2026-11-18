@@ -29,7 +29,7 @@ E-commerce de roupas. O repositório é um monorepo:
 - [CI/CD](#cicd)
 - [Documentação](#documentação)
 - [Próximos passos](#próximos-passos)
-  - [Por que trocar para o Flyway](#por-que-trocar-para-o-flyway)
+  - [Migrações do banco (Flyway)](#migrações-do-banco-flyway)
   - [Por que usar o Cloud Armor](#por-que-usar-o-cloud-armor)
 - [Autor](#autor)
 
@@ -48,7 +48,7 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 | Linguagem | Java 21 |
 | Framework | Spring Boot 4.1 (Web, Data JPA, Validation, Security) |
 | Autenticação | JWT (HS256) com o OAuth2 Resource Server do Spring; senhas em BCrypt |
-| Banco | PostgreSQL 18 |
+| Banco | PostgreSQL 18, com migrações pelo Flyway |
 | Documentação da API | OpenAPI 3 com springdoc (Swagger UI) |
 | Testes | JUnit 6, AssertJ, Mockito, MockMvc e Testcontainers |
 | Containers | Docker e Docker Compose |
@@ -59,7 +59,7 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 ## O que a API faz
 
 - **Catálogo:** produtos com slug automático, variantes com SKU, preço próprio e estoque, imagens, tags, tamanhos e cores. A busca por nome ignora acentos e maiúsculas e exige pelo menos 3 letras (com menos, responde 400). Cada tag guarda em qual filtro da loja aparece (estilo, categoria ou coleção, escolhido na aba Tags do painel), e a própria tag é a opção do filtro. Todo produto nasce com pelo menos uma tag de estilo e exatamente uma de categoria; a de coleção é opcional. Ao subir, a API garante os estilos fixos `casual` e `treino` (não podem ser apagados nem mudar) e, num banco sem categorias, cria `camisa`, `bermuda` e `conjunto`. Produtos e variantes guardam a data de cadastro (a loja usa para o selo NOVO), e `GET /products/mais-vendidos` devolve o ranking de vendas dos pedidos pagos: os dos últimos 90 dias, depois os de sempre e, faltando, os produtos mais novos (o ranking fica guardado na memória por 3 dias). O catálogo é filtrado pelo banco: `GET /products?estilo=&categoria=&colecao=&novidades=&disponiveis=&ordem=` devolve só a página pedida, `GET /products/drop-em-destaque` acha o drop da home em duas consultas pequenas e `GET /tags/colecoes` lista as coleções em ordem de lançamento. As imagens, tags e variantes de uma página saem em lote (`default_batch_fetch_size`), sem uma consulta por produto. Todo produto nasce **inativo** e só aparece na loja depois de ativado (`PATCH /products/{id}/ativar`); desativar tira da loja sem perder pedidos, estoque nem fotos, e a página do produto passa a mostrá-lo como indisponível. Um produto (ou variante) só pode ser apagado se nunca esteve em um pedido; se esteve, o caminho é desativar. Apagando, o histórico de estoque continua, com o SKU. O pedido guarda o SKU, o preço e o nome do produto na compra, e o envio guarda a data da entrega (`entregue_em`).
-- **Busca com índice:** a busca acha o termo em qualquer posição do nome (`LIKE '%termo%'`), e um índice comum não ajuda nisso. Por isso, a API cria na partida um índice trigrama (extensão `pg_trgm`), que guarda os pedaços de 3 letras de cada nome. Quem decide usá-lo é o próprio PostgreSQL: com poucos produtos ele lê a tabela, que é mais barato, e passa a usar o índice sozinho quando ela cresce. A expressão da busca e a do índice vêm da mesma constante, e um teste confere que a busca usa o índice.
+- **Busca com índice:** a busca acha o termo em qualquer posição do nome (`LIKE '%termo%'`), e um índice comum não ajuda nisso. Por isso, o banco tem um índice trigrama (extensão `pg_trgm`, criado pela migração V1), que guarda os pedaços de 3 letras de cada nome. Quem decide usá-lo é o próprio PostgreSQL: com poucos produtos ele lê a tabela, que é mais barato, e passa a usar o índice sozinho quando ela cresce. A expressão da busca e a do índice vêm da mesma constante, e um teste confere que a busca usa o índice.
 - **Estoque:** só muda por movimento (entrada, saída ou ajuste), que fica registrado no histórico; editar a variante não mexe no estoque. Cada movimento vai até 100.000 unidades, o ajuste pode zerar o estoque, e há uma consulta de estoque baixo.
 - **Carrinho e checkout:**
   - o pedido guarda o preço e o endereço do momento da compra, como um *snapshot*;
@@ -84,7 +84,7 @@ Projeto de portfólio, desenvolvido para estudar como uma API de verdade é orga
 - **Contato:** o formulário da loja grava a mensagem (`POST /contato`, com o limite por IP do cadastro), e quem tem `CUSTOMER_READ` lê a caixa de entrada e marca como respondida. Trocas e devoluções chegam por aqui;
 - **Fotos dos produtos:** o painel envia a foto (`POST /products/{id}/images/upload`, até 5 MB). A API confere o tipo pelos primeiros bytes (JPEG, PNG, WebP ou AVIF; um HTML com nome .jpg é recusado), dá um nome novo e guarda no bucket do Cloud Storage (`IMAGENS_BUCKET`), pela API REST dele, com a identidade do Cloud Run (sem chave guardada). Sem o bucket (desenvolvimento e testes), guarda na pasta `IMAGENS_PASTA` e serve em `/imagens/...`. Apagar a foto ou o produto apaga o arquivo;
 - **Newsletter:** qualquer pessoa se inscreve (`POST /newsletter`, com o limite por IP do cadastro, e a mesma resposta para quem já estava na lista). O cliente entra e sai pela área dele, sempre com o e-mail da conta. A lista e as mudanças nela exigem `STAFF_MANAGE`; sair da lista não apaga a inscrição, só a desativa;
-- **Banco:** na partida, a API atualiza as regras do banco que limitam os valores de cada enum. O Hibernate cria essas regras com a tabela, mas não as atualiza depois, então um valor novo seria recusado num banco já existente. Esta solução é provisória: ver [Próximos passos](#próximos-passos).
+- **Banco:** a estrutura muda só por migrações do Flyway (ver [Migrações do banco (Flyway)](#migrações-do-banco-flyway)). O Hibernate só confere (`ddl-auto=validate`), e as regras que limitam os valores de cada enum também vêm das migrações;
 - **Conta do cliente:** sem pedidos, apagar a conta apaga o cadastro. Com pedidos, os dados pessoais são anonimizados e os pedidos ficam como histórico.
 - **Listagens paginadas:** produtos, clientes, funcionários, cupons, pedidos e movimentos de estoque vêm em páginas (`?pagina=0&tamanho=20`, no máximo 100 por página), com os totais para montar a navegação:
 
@@ -316,28 +316,28 @@ Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do pr
 - [ ] Publicar o site (o build já sai para a Cloudflare), com a variável `PACK_BFF_CHAVE` igual ao segredo `pack-bff-chave`
 - [ ] **Frete real por um serviço externo** (Melhor Envio, que junta Correios e transportadoras, ou a API dos Correios): a tabela de hoje é por região do CEP e não olha peso nem medidas, então o preço sai aproximado. O serviço pede conta e chave, e cada produto passa a precisar de peso e dimensões
 - [ ] **Gateway de pagamento** (Mercado Pago, Stripe ou Pagar.me): no lugar da aprovação simulada, o cliente paga de verdade (Pix com QR Code, cartão) e o gateway avisa a API (webhook) quando o pagamento é aprovado
-- [ ] Migrações do banco com Flyway, no lugar do `ddl-auto=update`
+- [x] Migrações do banco com Flyway, no lugar do `ddl-auto=update` (ver [Migrações do banco (Flyway)](#migrações-do-banco-flyway))
 - [ ] Cloud Armor na frente da API, para barrar ataques de volume antes do Cloud Run
 
-### Por que trocar para o Flyway
+### Migrações do banco (Flyway)
 
-Hoje o schema do banco é mantido pelo Hibernate com `spring.jpa.hibernate.ddl-auto=update`. Ele cria o que falta, mas não evolui direito um banco que já existe, como o de produção no Neon:
+A estrutura do banco muda só por **migrações**: arquivos SQL numerados em [`backend/src/main/resources/db/migration`](backend/src/main/resources/db/migration), que ficam no git e passam pelo PR como qualquer código. Na partida, antes do Hibernate, o Flyway roda os que aquele banco ainda não recebeu, em ordem, e registra cada um na tabela `flyway_schema_history` (com data e checksum). O Hibernate só confere (`ddl-auto=validate`): se uma `@Entity` não bater com o banco, a API não sobe e diz o que falta, em vez de mudar o banco sozinha.
 
-- **Não atualiza as regras CHECK dos enums.** Um valor novo, como o método de pagamento `OUTRO` ou o status `DEVOLVIDO`, seria recusado pelo banco de produção. A correção atual (`config/RestricoesDosEnums`) recria essas regras a cada partida. Ela funciona, mas é um remendo: cobre só os enums, roda DDL em toda subida e depende de uma lista mantida à mão.
-- **Não renomeia nem apaga.** Renomear um campo cria uma coluna nova vazia e deixa a antiga com os dados. Mudar o tipo de uma coluna ou preencher dados de uma coluna nova também não acontece.
-- **Não deixa registro.** Uma mudança no banco de produção não aparece no git, então não dá para revisar nem repetir em outro banco.
+- **`V1__estrutura_inicial.sql`:** o banco como ele era quando o projeto deixou o `ddl-auto=update` (tabelas, chaves, as regras dos enums, a extensão `pg_trgm` e o índice da busca por nome). Num banco vazio (os testes, um banco novo), ela cria tudo.
+- **Produção:** o Neon já tinha essa estrutura. Com `spring.flyway.baseline-on-migrate`, a primeira subida marca o banco como "já na versão 1" sem rodar a V1 nem tocar nos dados, e daí em diante ele recebe só as migrações seguintes. O mesmo vale para um banco local antigo.
+- **Testes:** o Testcontainers sobe um PostgreSQL vazio e o Flyway roda todas as migrações. O `RegrasDosEnumsTest` compara cada regra do banco com os valores do enum Java: um valor novo num enum sem a migração correspondente quebra o teste, e não a produção. O `IndiceDaBuscaPorNomeTest` confere que a busca usa o índice da V1.
 
-Com o Flyway, cada mudança vira um arquivo SQL numerado (`V1__inicial.sql`, `V2__...sql`). Esses arquivos ficam no repositório e passam pelo PR como qualquer código. Na partida, o Flyway roda só os que aquele banco ainda não recebeu.
+**Para mudar o banco:**
 
-Plano da troca:
+1. Crie o próximo arquivo, `V2__o_que_muda.sql` (o número é a ordem; o texto depois de `__` é só a descrição), com o SQL da mudança: `ALTER TABLE`, `CREATE INDEX`, um `UPDATE` para preencher uma coluna nova...
+2. Mude a `@Entity` no mesmo commit. Se os dois não baterem, os testes falham (o `validate` roda neles também).
+3. Um valor novo num enum: a migração troca a regra (`ALTER TABLE ... DROP CONSTRAINT ...; ADD CONSTRAINT ... CHECK (... IN (...))`). Uma coluna de enum nova: inclua a regra dela no `RegrasDosEnumsTest`.
 
-1. Gerar o `V1__inicial.sql` a partir do schema atual.
-2. Marcar o banco do Neon como "já está no V1" (`spring.flyway.baseline-on-migrate`), sem recriar nada.
-3. Trocar para `ddl-auto=validate`: a API não sobe se as entidades e o banco não baterem.
-4. Apagar o `RestricoesDosEnums`: um enum novo passa a ser uma migração.
-5. Passar o índice da busca (`IndiceDaBuscaPorNome`, criado hoje na partida) para uma migração.
+**Cuidados:**
 
-Antes de ir para a produção, testar com uma cópia do schema atual no banco local.
+- **Uma migração que já rodou nunca é editada:** o Flyway confere o checksum, e a API não sobe. Um erro se corrige com uma migração nova (a versão grátis do Flyway não desfaz migrações).
+- **Uma migração pesada atrasa a partida:** ela roda antes de a API atender. Numa tabela grande, prefira mudanças que não reescrevem a tabela inteira.
+- **Antes de uma migração que apaga ou reescreve dados:** confira a restauração do Neon a um ponto no tempo, que serve de backup.
 
 ### Por que usar o Cloud Armor
 
