@@ -1,15 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="2040" height="830" viewBox="0 0 2040 830">
+<svg xmlns="http://www.w3.org/2000/svg" width="2040" height="900" viewBox="0 0 2040 900">
 <defs><style>text{font-family:"JetBrains Mono","Fira Code",monospace;}</style></defs>
-<rect width="2040" height="830" fill="#0d1117"/>
-<rect x="20" y="90" width="470" height="715" rx="10" fill="#0d1a2e" stroke="#79c0ff" stroke-opacity="0.35" stroke-width="1"/>
+<rect width="2040" height="900" fill="#0d1117"/>
+<rect x="20" y="90" width="470" height="785" rx="10" fill="#0d1a2e" stroke="#79c0ff" stroke-opacity="0.35" stroke-width="1"/>
 <text x="32" y="110" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#79c0ff" opacity="0.85" letter-spacing="2.5">STAFF</text>
-<rect x="530" y="90" width="230" height="715" rx="10" fill="#0e1f1a" stroke="#3bca6d" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="530" y="90" width="230" height="785" rx="10" fill="#0e1f1a" stroke="#3bca6d" stroke-opacity="0.35" stroke-width="1"/>
 <text x="542" y="110" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#3bca6d" opacity="0.85" letter-spacing="2.5">CUSTOMER</text>
 <rect x="800" y="90" width="470" height="159" rx="10" fill="#1a0f1a" stroke="#d2a8ff" stroke-opacity="0.35" stroke-width="1"/>
 <text x="812" y="110" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#d2a8ff" opacity="0.85" letter-spacing="2.5">CART</text>
-<rect x="800" y="280" width="470" height="546" rx="10" fill="#1a1506" stroke="#ffa657" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="800" y="280" width="470" height="573" rx="10" fill="#1a1506" stroke="#ffa657" stroke-opacity="0.35" stroke-width="1"/>
 <text x="812" y="300" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#ffa657" opacity="0.85" letter-spacing="2.5">ORDER</text>
-<rect x="1310" y="90" width="710" height="715" rx="10" fill="#0d1a0d" stroke="#58a6ff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="1310" y="90" width="710" height="785" rx="10" fill="#0d1a0d" stroke="#58a6ff" stroke-opacity="0.35" stroke-width="1"/>
 <text x="1322" y="110" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#58a6ff" opacity="0.85" letter-spacing="2.5">PRODUCT</text>
 <path d="M240,245 C135,245 135,348 30,348" stroke="#2d5080" stroke-width="1.1" fill="none" opacity="0.75"/>
 <circle cx="240" cy="245" r="2.5" fill="#2d5080" opacity="0.85"/>
@@ -345,8 +345,8 @@
   <text x="68" y="125" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">validade</text>
 </g>
 <g transform="translate(810,476)">
-  <rect x="3" y="3" width="210" height="300" rx="6" fill="rgba(0,0,0,0.3)"/>
-  <rect width="210" height="300" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
+  <rect x="3" y="3" width="210" height="363" rx="6" fill="rgba(0,0,0,0.3)"/>
+  <rect width="210" height="363" rx="6" fill="#0f1925" stroke="#1f3a5f" stroke-width="1.5"/>
   <rect width="210" height="27" rx="6" fill="#1a3358"/>
   <rect y="21" width="210" height="6" fill="#1a3358"/>
   <text x="105" y="21" text-anchor="middle" font-family="JetBrains Mono,Fira Code,monospace" font-size="11" font-weight="700" fill="#58a6ff">ORDER</text>
@@ -376,35 +376,47 @@
   <rect y="132" width="210" height="21" fill="#111e2b"/>
   <line x1="1" y1="132" x2="209" y2="132" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
-  <text x="68" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_cep</text>
+  <text x="68" y="146" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">frete_tipo</text>
   <rect y="153" width="210" height="21" fill="#0f1925"/>
   <line x1="1" y1="153" x2="209" y2="153" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
-  <text x="8" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
-  <text x="68" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_rua</text>
+  <text x="8" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">decimal</text>
+  <text x="68" y="167" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">frete_preco</text>
   <rect y="174" width="210" height="21" fill="#111e2b"/>
   <line x1="1" y1="174" x2="209" y2="174" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
-  <text x="8" y="188" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
-  <text x="68" y="188" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_numero</text>
+  <text x="8" y="188" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">int</text>
+  <text x="68" y="188" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">frete_prazo_dias</text>
   <rect y="195" width="210" height="21" fill="#0f1925"/>
   <line x1="1" y1="195" x2="209" y2="195" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="209" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
-  <text x="68" y="209" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_complemento</text>
+  <text x="68" y="209" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_cep</text>
   <rect y="216" width="210" height="21" fill="#111e2b"/>
   <line x1="1" y1="216" x2="209" y2="216" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="230" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
-  <text x="68" y="230" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_bairro</text>
+  <text x="68" y="230" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_rua</text>
   <rect y="237" width="210" height="21" fill="#0f1925"/>
   <line x1="1" y1="237" x2="209" y2="237" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="251" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
-  <text x="68" y="251" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_cidade</text>
+  <text x="68" y="251" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_numero</text>
   <rect y="258" width="210" height="21" fill="#111e2b"/>
   <line x1="1" y1="258" x2="209" y2="258" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
   <text x="8" y="272" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
-  <text x="68" y="272" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_estado</text>
-  <path d="M0,279 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#0f1925"/>
+  <text x="68" y="272" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_complemento</text>
+  <rect y="279" width="210" height="21" fill="#0f1925"/>
   <line x1="1" y1="279" x2="209" y2="279" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
-  <text x="8" y="293" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
-  <text x="68" y="293" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">criado_em</text>
+  <text x="8" y="293" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="293" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_bairro</text>
+  <rect y="300" width="210" height="21" fill="#111e2b"/>
+  <line x1="1" y1="300" x2="209" y2="300" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="314" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="314" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_cidade</text>
+  <rect y="321" width="210" height="21" fill="#0f1925"/>
+  <line x1="1" y1="321" x2="209" y2="321" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="335" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">string</text>
+  <text x="68" y="335" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">endereco_estado</text>
+  <path d="M0,342 h210 v15 q0,6 -6,6 h-198 q-6,0 -6,-6 z" fill="#111e2b"/>
+  <line x1="1" y1="342" x2="209" y2="342" stroke="#1f3a5f" stroke-width="0.4" opacity="0.5"/>
+  <text x="8" y="356" font-family="JetBrains Mono,Fira Code,monospace" font-size="9" fill="#6e7681">datetime</text>
+  <text x="68" y="356" font-family="JetBrains Mono,Fira Code,monospace" font-size="10" fill="#c9d1d9">criado_em</text>
 </g>
 <g transform="translate(1050,314)">
   <rect x="3" y="3" width="210" height="132" rx="6" fill="rgba(0,0,0,0.3)"/>

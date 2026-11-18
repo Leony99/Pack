@@ -9,6 +9,11 @@ import java.util.UUID;
 public class CartItemResponse {
     private UUID id;
     private ProductVariantResponse variant;
+    // o produto da variante, para a tela mostrar a peça sem outra chamada
+    private UUID produtoId;
+    private String produtoNome;
+    private String imagem;
+    private boolean ativo;
     private Integer quantidade;
     private BigDecimal precoUnitario;
     private BigDecimal subtotal;

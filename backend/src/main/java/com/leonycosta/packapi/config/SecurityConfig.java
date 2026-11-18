@@ -62,9 +62,12 @@ public class SecurityConfig {
 
                         // ── newsletter: qualquer um se inscreve; a lista é de quem gerencia a equipe ──
                         .requestMatchers(HttpMethod.POST, "/api/v1/newsletter").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/frete").permitAll()
                         .requestMatchers("/api/v1/newsletter/**").hasAuthority(STAFF_MANAGE.name())
 
                         // ── cupons, funcionários e papéis ──
+                        // o cliente confere um cupom no carrinho (antes da regra da equipe)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/coupons/validar").hasAuthority("CUSTOMER")
                         .requestMatchers("/api/v1/coupons/**").hasAuthority(COUPON_MANAGE.name())
                         .requestMatchers("/api/v1/staff/**", "/api/v1/roles/**", "/api/v1/permissions/**")
                                 .hasAuthority(STAFF_MANAGE.name())

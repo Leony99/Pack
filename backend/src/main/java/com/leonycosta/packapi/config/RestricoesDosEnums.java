@@ -32,6 +32,7 @@ public class RestricoesDosEnums {
             new ColunaDeEnum("coupons", "tipo", CouponTipo.class),
             new ColunaDeEnum("inventory_movements", "tipo_movimentacao", MovimentoTipo.class),
             new ColunaDeEnum("orders", "status", OrderStatus.class),
+            new ColunaDeEnum("orders", "frete_tipo", com.leonycosta.packapi.order.frete.TipoFrete.class),
             new ColunaDeEnum("payments", "metodo", PaymentMetodo.class),
             new ColunaDeEnum("payments", "status", PaymentStatus.class),
             new ColunaDeEnum("product_tags", "filtro", TagFiltro.class),

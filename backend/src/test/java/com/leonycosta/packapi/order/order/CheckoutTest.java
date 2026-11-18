@@ -229,7 +229,8 @@ class CheckoutTest extends IntegrationTest {
 
     private boolean tentarCheckout(Cliente c, String enderecoId) {
         try {
-            orderService.checkout(UUID.fromString(c.id()), new OrderRequest(UUID.fromString(enderecoId), null));
+            orderService.checkout(UUID.fromString(c.id()), new OrderRequest(UUID.fromString(enderecoId),
+                    com.leonycosta.packapi.order.frete.TipoFrete.PAC, null));
             return true;
         } catch (BusinessException semEstoque) {
             return false;
@@ -245,7 +246,7 @@ class CheckoutTest extends IntegrationTest {
         colocarNoCarrinho(ana, novaVariante(100, 10), 2);
 
         Resposta r = post("/customers/" + ana.id() + "/orders",
-                corpo("addressId", novoEndereco(ana), "codigoCupom", codigo), ana.token()).esperar(201);
+                corpo("frete", "PAC", "addressId", novoEndereco(ana), "codigoCupom", codigo), ana.token()).esperar(201);
 
         assertThat(r.decimal("$.total")).isEqualByComparingTo("180");
     }
@@ -254,11 +255,12 @@ class CheckoutTest extends IntegrationTest {
     void cupomFixoMaiorQueOPedidoDeixaOTotalEmZero() {
         String codigo = novoCupom("500", "FIXO");
         Cliente ana = novoCliente();
-        colocarNoCarrinho(ana, novaVariante(100, 10), 1);
+        // acima de R$ 200 em produtos, o PAC é grátis: o cupom zera o pedido inteiro
+        colocarNoCarrinho(ana, novaVariante(250, 10), 1);
 
         // o código vai em minúsculo: o cupom é encontrado do mesmo jeito
         Resposta r = post("/customers/" + ana.id() + "/orders",
-                corpo("addressId", novoEndereco(ana), "codigoCupom", codigo.toLowerCase()), ana.token()).esperar(201);
+                corpo("frete", "PAC", "addressId", novoEndereco(ana), "codigoCupom", codigo.toLowerCase()), ana.token()).esperar(201);
 
         assertThat(r.decimal("$.total")).isEqualByComparingTo("0");
         // nada a receber: o pedido já nasce pago (um pagamento exige no mínimo R$ 0,01) e pode ser enviado
@@ -272,7 +274,7 @@ class CheckoutTest extends IntegrationTest {
         Variante v = novaVariante(100, 10);
         colocarNoCarrinho(ana, v, 1);
 
-        post("/customers/" + ana.id() + "/orders", corpo("addressId", novoEndereco(ana), "codigoCupom", "NAOEXISTE"),
+        post("/customers/" + ana.id() + "/orders", corpo("frete", "PAC", "addressId", novoEndereco(ana), "codigoCupom", "NAOEXISTE"),
                 ana.token()).esperar(404);
 
         // rollback: o erro aconteceu no meio do checkout, mas nada ficou pela metade
@@ -289,19 +291,19 @@ class CheckoutTest extends IntegrationTest {
         String valido = novoCupom("10", "PERCENTUAL");
 
         for (int i = 0; i < 5; i++) {
-            post("/customers/" + ana.id() + "/orders", corpo("addressId", endereco, "codigoCupom", "CHUTE" + i),
+            post("/customers/" + ana.id() + "/orders", corpo("frete", "PAC", "addressId", endereco, "codigoCupom", "CHUTE" + i),
                     ana.token()).esperar(404);
         }
 
         // nem um código certo passa durante o bloqueio, mas a compra sem cupom continua liberada
-        post("/customers/" + ana.id() + "/orders", corpo("addressId", endereco, "codigoCupom", valido), ana.token())
+        post("/customers/" + ana.id() + "/orders", corpo("frete", "PAC", "addressId", endereco, "codigoCupom", valido), ana.token())
                 .esperar(429);
         checkout(ana, endereco).esperar(201);
 
         // outro cliente não é afetado
         Cliente bia = novoCliente();
         colocarNoCarrinho(bia, novaVariante(100, 10), 1);
-        post("/customers/" + bia.id() + "/orders", corpo("addressId", novoEndereco(bia), "codigoCupom", valido),
+        post("/customers/" + bia.id() + "/orders", corpo("frete", "PAC", "addressId", novoEndereco(bia), "codigoCupom", valido),
                 bia.token()).esperar(201);
     }
 

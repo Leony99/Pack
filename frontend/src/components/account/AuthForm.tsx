@@ -21,7 +21,14 @@ import { useSession } from "@/lib/session";
  * ou para o painel. Na demonstração, "ACESSAR DEMONSTRAÇÃO" entra com o usuário de exemplo, sem
  * senha; com a API, o login é real e esse botão e os avisos de demonstração não aparecem.
  */
-export function AuthForm({ kind }: { kind: "customer" | "staff" }) {
+export function AuthForm({
+  kind,
+  voltar,
+}: {
+  kind: "customer" | "staff";
+  /** Depois de entrar, volta para cá (o checkout) em vez da área do cliente. */
+  voltar?: "/checkout";
+}) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -33,7 +40,7 @@ export function AuthForm({ kind }: { kind: "customer" | "staff" }) {
     try {
       await action();
       await refresh();
-      await navigate({ to: kind === "customer" ? "/conta" : "/admin/painel" });
+      await navigate({ to: kind === "customer" ? (voltar ?? "/conta") : "/admin/painel" });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível entrar.");
     } finally {

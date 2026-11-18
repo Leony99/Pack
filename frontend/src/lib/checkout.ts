@@ -1,4 +1,5 @@
 import type { Coupon } from "@/data/types";
+import type { CartItem } from "./cart";
 
 /** Valor em reais: 1234.5 → "R$ 1.234,50". */
 export const money = (value: number) =>
@@ -18,3 +19,7 @@ export function calculateTotals(subtotal: number, coupon: Coupon | null, shippin
   const discount = Math.min(subtotal, descontoBruto);
   return { subtotal, discount, shipping, total: Math.max(0, subtotal - discount) + shipping };
 }
+
+/** O que identifica uma linha do carrinho: a variante (com a API) ou o produto + tamanho (demonstração). */
+export const chaveDaLinha = (item: Pick<CartItem, "variantId" | "id" | "size">) =>
+  item.variantId ?? `${item.id}:${item.size}`;

@@ -49,6 +49,7 @@ public class OrderService {
     private final CouponService couponService;
     private final InventoryMovementService inventoryService;
     private final LimiteDeTentativas limite;
+    private final com.leonycosta.packapi.order.frete.FreteService freteService;
 
     public Pagina<OrderResponse> findByCustomer(UUID customerId, int pagina, int tamanho) {
         Pageable pedido = Pagina.pedido(pagina, tamanho, Sort.by(Sort.Order.desc("criadoEm"), Sort.Order.asc("id")));
@@ -121,8 +122,16 @@ public class OrderService {
             total = aplicarDesconto(subtotalBruto, coupon);
         }
 
-        // 7. Cria o pedido com snapshot do endereço
+        // 7. Frete pela tabela da API, para o CEP do endereço (PAC grátis pela soma dos produtos, antes do cupom).
+        // O cupom desconta só os produtos: o frete entra depois
+        var frete = freteService.opcao(address.getCep(), subtotalBruto, request.getFrete());
+        total = total.add(frete.preco());
+
+        // 8. Cria o pedido com snapshot do endereço
         Order order = new Order();
+        order.setFreteTipo(frete.tipo());
+        order.setFretePreco(frete.preco());
+        order.setFretePrazoDias(frete.prazoDias());
         order.setCustomer(customerService.findEntityById(customerId));
         order.setCoupon(coupon);
         order.setTotal(total.setScale(2, RoundingMode.HALF_UP));
@@ -300,7 +309,9 @@ public class OrderService {
         );
 
         return new OrderResponse(
-                o.getId(), customerResponse, o.getStatus(), o.getTotal(), o.getCriadoEm(),
+                o.getId(), customerResponse, o.getStatus(), o.getTotal(),
+                o.getFreteTipo() == null ? null : o.getFreteTipo().name(), o.getFretePreco(), o.getFretePrazoDias(),
+                o.getCriadoEm(),
                 o.getEnderecoCep(), o.getEnderecoRua(), o.getEnderecoNumero(),
                 o.getEnderecoComplemento(), o.getEnderecoBairro(),
                 o.getEnderecoCidade(), o.getEnderecoEstado(),

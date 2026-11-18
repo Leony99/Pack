@@ -29,6 +29,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest(properties = {
         // valores só dos testes: não dependem do .env, que não existe no GitHub
         "jwt.secret=" + IntegrationTest.JWT_SECRET,
+        // os testes do pagamento aprovam pelo painel (a aprovação simulada tem a própria classe de teste)
+        "app.pagamento.aprovacao-simulada=false",
         "app.admin.email=" + IntegrationTest.ADMIN_EMAIL,
         "app.admin.senha=" + IntegrationTest.ADMIN_SENHA,
         "spring.datasource.password=definida-pelo-testcontainers",
@@ -238,7 +240,7 @@ public abstract class IntegrationTest {
     }
 
     protected Resposta checkout(Cliente c, String enderecoId) {
-        return post("/customers/" + c.id() + "/orders", corpo("addressId", enderecoId), c.token());
+        return post("/customers/" + c.id() + "/orders", corpo("frete", "PAC", "addressId", enderecoId), c.token());
     }
 
     // Pedido pronto: cliente novo compra `quantidade` da variante

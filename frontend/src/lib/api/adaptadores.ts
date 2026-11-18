@@ -2,7 +2,7 @@
 // as telas usam (src/data/types.ts). As telas não conhecem a API: só esta camada muda se o contrato
 // mudar. Funções puras, testadas em adaptadores.test.ts.
 import type { SavedAddress } from "@/data/dashboard";
-import type { Order, Product } from "@/data/types";
+import type { Coupon, Order, Product } from "@/data/types";
 import { STATUS_DA_API } from "@/lib/dominio";
 import { classificarTags, type TagDaApi } from "./tags";
 
@@ -107,6 +107,16 @@ export function produtoDaApi(p: ProdutoDaApi): Product {
     active: p.ativo ?? true,
     createdAt: p.criadoEm,
     novidadeEm: ultimaData([p.criadoEm, ...variantes.map((v) => v.criadoEm)]),
+    variantes: variantes
+      .filter((v) => v.size && v.color)
+      .map((v) => ({
+        id: v.id,
+        tamanho: v.size!.label,
+        cor: v.color!.nome,
+        corHex: v.color!.hex,
+        estoque: Math.max(0, v.quant),
+        preco: Number(v.precoEfetivo ?? p.preco),
+      })),
   };
 }
 
@@ -181,6 +191,9 @@ export type PedidoDaApi = {
   customer: { nome: string; email: string };
   status: keyof typeof STATUS_DA_API;
   total: number | string;
+  freteTipo: string | null;
+  fretePreco: number | string | null;
+  fretePrazoDias: number | null;
   criadoEm: string;
   enderecoCep: string;
   enderecoRua: string;
@@ -223,8 +236,8 @@ const STATUS_DO_PAGAMENTO: Record<string, string> = {
 };
 
 /**
- * Pedido da API → o das telas. A API não cobra frete (o envio vem depois, com a transportadora e o
- * rastreio): o frete aparece como R$ 0. O desconto é a diferença entre a soma dos itens e o total.
+ * Pedido da API → o das telas. O total da API já inclui o frete (PAC ou SEDEX, da tabela da API); o
+ * desconto é a diferença entre itens + frete e o total.
  */
 export function pedidoDaApi(p: PedidoDaApi): Order {
   const items = p.itens.map((i) => {
@@ -245,6 +258,7 @@ export function pedidoDaApi(p: PedidoDaApi): Order {
   });
   const subtotal = items.reduce((soma, i) => soma + i.price * i.qty, 0);
   const total = Number(p.total);
+  const frete = Number(p.fretePreco ?? 0);
   return {
     id: p.id,
     customer: { name: p.customer.nome, email: p.customer.email },
@@ -260,21 +274,79 @@ export function pedidoDaApi(p: PedidoDaApi): Order {
       city: p.enderecoCidade,
       state: p.enderecoEstado,
     },
-    // sem envio ainda: a loja cria o envio (transportadora e rastreio) depois do pagamento
+    // o frete escolhido no checkout; a transportadora e o rastreio vêm depois, com o envio
     shipping: {
-      label: p.shipment ? `Envio pela ${p.shipment.transportadora}` : "Aguardando envio",
-      days: "",
-      price: 0,
+      label: [p.freteTipo, p.shipment ? `pela ${p.shipment.transportadora}` : "aguardando envio"]
+        .filter(Boolean)
+        .join(" · "),
+      days: p.fretePrazoDias ? `até ${p.fretePrazoDias} dias úteis` : "",
+      price: frete,
     },
     payment: p.payment?.metodo === "PIX" ? "pix" : "card",
     paymentLabel: p.payment
       ? `${METODO_DE_PAGAMENTO[p.payment.metodo] ?? p.payment.metodo} · ${STATUS_DO_PAGAMENTO[p.payment.status] ?? p.payment.status}`
       : "Pagamento ainda não informado",
     subtotal,
-    discount: Math.max(0, Math.round((subtotal - total) * 100) / 100),
+    // o total da API já tem o frete: o desconto é o que falta para fechar a conta
+    discount: Math.max(0, Math.round((subtotal + frete - total) * 100) / 100),
     total,
     status: STATUS_DA_API[p.status] ?? p.status,
     createdAt: p.criadoEm,
     tracking: p.shipment?.codigoRastreio ?? "",
+  };
+}
+
+/* ---------------------------------------------------------------------- compra */
+
+/** CartItemResponse da API. */
+export type ItemDoCarrinhoDaApi = {
+  id: string;
+  variant: VarianteDaApi;
+  produtoId: string;
+  produtoNome: string;
+  imagem: string | null;
+  ativo: boolean;
+  quantidade: number;
+  precoUnitario: number | string;
+};
+
+/**
+ * Item do carrinho da API → a linha das telas: o produto (só o que o carrinho mostra), a variante e o
+ * id do item na API (para mudar a quantidade ou tirar). O estoque do tamanho é o da variante.
+ */
+export function itemDoCarrinhoDaApi(i: ItemDoCarrinhoDaApi) {
+  const foto = i.imagem && urlDeImagemSegura(i.imagem) ? i.imagem : IMAGEM_SEM_FOTO;
+  const tamanho = i.variant.size?.label ?? "";
+  return {
+    id: i.produtoId,
+    name: i.produtoNome,
+    price: Number(i.precoUnitario),
+    image: foto,
+    images: [foto],
+    color: corDoProduto([i.variant]),
+    styles: [],
+    type: "",
+    active: i.ativo,
+    stock: { [tamanho]: Math.max(0, i.variant.quant) },
+    size: tamanho,
+    qty: i.quantidade,
+    variantId: i.variant.id,
+    cor: i.variant.color?.nome,
+    itemId: i.id,
+  };
+}
+
+/** Cupom da API (CouponResponse) → o das telas. */
+export function cupomDaApi(c: {
+  codigo: string;
+  desconto: number | string;
+  tipo: "PERCENTUAL" | "FIXO";
+  validade: string | null;
+}): Coupon {
+  return {
+    code: c.codigo,
+    discount: Number(c.desconto),
+    type: c.tipo === "PERCENTUAL" ? "percent" : "fixed",
+    validUntil: c.validade,
   };
 }

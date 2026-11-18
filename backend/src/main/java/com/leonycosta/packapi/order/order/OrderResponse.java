@@ -18,6 +18,10 @@ public class OrderResponse {
     private CustomerResponse customer;
     private OrderStatus status;
     private BigDecimal total;
+    // o frete já está somado no total
+    private String freteTipo;
+    private BigDecimal fretePreco;
+    private Integer fretePrazoDias;
     private LocalDateTime criadoEm;
 
     // Snapshot do endereço

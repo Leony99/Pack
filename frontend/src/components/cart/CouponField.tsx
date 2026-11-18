@@ -1,17 +1,24 @@
-import { useState, type FormEvent } from "react";
+import { useState, type KeyboardEvent } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { validateCoupon } from "@/lib/api";
 import { useCart } from "@/lib/cart";
 
-/** Campo de cupom. O cupom aplicado fica no carrinho, então a gaveta, o carrinho e o checkout mostram o mesmo. */
+/**
+ * Campo de cupom. O cupom aplicado fica no carrinho, então a gaveta, o carrinho e o checkout mostram o mesmo.
+ * Não é um <form>: no checkout ele fica dentro do formulário do pedido, e um formulário dentro de outro
+ * não vale no HTML (o APLICAR não funcionava). Enter no campo aplica, sem enviar o pedido.
+ */
 export function CouponField() {
   const { coupon, setCoupon } = useCart();
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  async function apply(e: FormEvent) {
-    e.preventDefault();
+  async function apply() {
+    if (!code.trim()) {
+      setError("Informe o código do cupom.");
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -44,19 +51,30 @@ export function CouponField() {
     );
   return (
     <div>
-      <form onSubmit={apply} className="flex gap-2">
+      <div className="flex gap-2">
         <input
           aria-label="Cupom de desconto"
           className="min-w-0 flex-1 border border-input bg-background px-3 py-3 text-xs outline-none focus:border-foreground"
           placeholder="CUPOM DE DESCONTO"
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          required
+          onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              void apply();
+            }
+          }}
         />
-        <Button type="submit" variant="outline" className="h-auto" disabled={busy}>
+        <Button
+          type="button"
+          variant="outline"
+          className="h-auto"
+          disabled={busy}
+          onClick={() => void apply()}
+        >
           {busy ? "VALIDANDO..." : "APLICAR"}
         </Button>
-      </form>
+      </div>
       {error && (
         <p role="alert" className="mt-2 text-xs">
           {error}

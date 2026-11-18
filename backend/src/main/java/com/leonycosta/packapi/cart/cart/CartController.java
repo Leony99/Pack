@@ -30,6 +30,13 @@ public class CartController {
         return cartService.addItem(customerId, request);
     }
 
+    @Operation(summary = "Muda a quantidade de um item (até 99 e até o estoque)")
+    @PatchMapping("/items/{itemId}")
+    public CartResponse mudarQuantidade(@PathVariable UUID customerId, @PathVariable UUID itemId,
+                                        @Valid @RequestBody com.leonycosta.packapi.cart.cart_item.QuantidadeRequest request) {
+        return cartService.mudarQuantidade(customerId, itemId, request.quantidade());
+    }
+
     @Operation(summary = "Remove um item do carrinho")
     @DeleteMapping("/items/{itemId}")
     public CartResponse removeItem(@PathVariable UUID customerId, @PathVariable UUID itemId) {
