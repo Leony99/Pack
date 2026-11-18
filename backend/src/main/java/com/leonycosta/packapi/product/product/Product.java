@@ -1,6 +1,7 @@
 package com.leonycosta.packapi.product.product;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,6 +35,15 @@ public class Product {
 
     @Column(name = "criado_em", nullable = false)
     private LocalDateTime criadoEm;
+
+    // Só os ativos aparecem na loja (catálogo, busca, destaques, drop) e podem ir para o carrinho. Todo produto
+    // nasce inativo: é cadastrado, recebe variantes e fotos, e só aparece quando alguém o ativa.
+    // Desativar tira da loja sem perder nada (pedidos, estoque, fotos); é o jeito de "tirar de linha" uma peça
+    // que já foi vendida, porque ela não pode ser apagada. O DEFAULT true vale para os produtos que já
+    // existiam quando a coluna foi criada: eles continuam na loja
+    @Column(nullable = false)
+    @ColumnDefault("true")
+    private boolean ativo;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductVariant> variantes = new ArrayList<>();

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,4 +16,9 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("delete from CartItem i where i.variant.id = :variantId")
     int deleteByVariantId(@Param("variantId") UUID variantId);
+
+    // O mesmo, para várias variantes (o produto inteiro sendo apagado)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("delete from CartItem i where i.variant.id in :variantes")
+    int deleteByVariantIdIn(@Param("variantes") Collection<UUID> variantes);
 }

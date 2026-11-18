@@ -54,6 +54,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/inventory/**").hasAuthority(INVENTORY_MANAGE.name())
 
                         // ── catálogo: qualquer um vê, só quem tem CATALOG_WRITE altera ──
+                        // (a lista de inativos é do painel: antes da leitura pública)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/products/inativos").hasAuthority(CATALOG_WRITE.name())
                         .requestMatchers(HttpMethod.GET, CATALOGO).permitAll()
                         .requestMatchers(CATALOGO).hasAuthority(CATALOG_WRITE.name())
                         .requestMatchers("/api/v1/images/**").hasAuthority(CATALOG_WRITE.name())

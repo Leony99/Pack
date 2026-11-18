@@ -61,7 +61,28 @@ public class ProductController {
         return productService.maisVendidos(limite);
     }
 
-    @Operation(summary = "Busca um produto")
+    // GET /products/inativos: os produtos fora da loja, para o painel (exige CATALOG_WRITE)
+    @Operation(summary = "Lista os produtos inativos (fora da loja), os mais novos primeiro")
+    @GetMapping("/inativos")
+    public Pagina<ProductResponse> inativos(@RequestParam(defaultValue = "0") int pagina,
+                                            @RequestParam(defaultValue = Pagina.TAMANHO_PADRAO) int tamanho) {
+        return productService.inativos(pagina, tamanho);
+    }
+
+    // Todo produto nasce inativo: aparece na loja só depois de ativado
+    @Operation(summary = "Ativa o produto: ele passa a aparecer na loja")
+    @PatchMapping("/{id}/ativar")
+    public ProductResponse ativar(@PathVariable UUID id) {
+        return productService.mudarAtivo(id, true);
+    }
+
+    @Operation(summary = "Desativa o produto: sai da loja, sem perder pedidos, estoque nem fotos")
+    @PatchMapping("/{id}/desativar")
+    public ProductResponse desativar(@PathVariable UUID id) {
+        return productService.mudarAtivo(id, false);
+    }
+
+    @Operation(summary = "Busca um produto (também os inativos, que a loja mostra como indisponíveis)")
     @GetMapping("/{id}")
     public ProductResponse findById(@PathVariable UUID id) {
         return productService.findById(id);
@@ -86,7 +107,7 @@ public class ProductController {
         return productService.update(id, request);
     }
 
-    @Operation(summary = "Apaga um produto (recusado se já foi vendido)")
+    @Operation(summary = "Apaga um produto que nunca esteve em pedido (se esteve, 409: desative-o)")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {

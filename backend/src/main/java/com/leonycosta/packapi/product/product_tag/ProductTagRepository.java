@@ -12,13 +12,13 @@ public interface ProductTagRepository extends JpaRepository<ProductTag, UUID> {
     boolean existsByTag(String tag);
     boolean existsByFiltro(TagFiltro filtro);
 
-    // As tags de um filtro em ordem de lançamento: primeiro a que tem a peça mais nova; as que ainda
+    // As tags de um filtro em ordem de lançamento: primeiro a que tem a peça ativa mais nova; as que ainda
     // não têm peças na loja vão para o fim, em ordem alfabética. Uma consulta só, agrupada pelo banco
     @Query("""
             SELECT t FROM ProductTag t LEFT JOIN ProductTagLink l ON l.tag = t LEFT JOIN l.product p
             WHERE t.filtro = :filtro
             GROUP BY t
-            ORDER BY MAX(p.criadoEm) DESC NULLS LAST, t.tag
+            ORDER BY MAX(CASE WHEN p.ativo = true THEN p.criadoEm END) DESC NULLS LAST, t.tag
             """)
     List<ProductTag> emOrdemDeLancamento(TagFiltro filtro);
 }

@@ -159,8 +159,8 @@ class CatalogoTest extends IntegrationTest {
         boolean temCategoria = tags.stream().anyMatch(t -> nome(t).startsWith("categoria-"));
         if (!temEstilo) tags.add(tagsObrigatorias().get(0));
         if (!temCategoria) tags.add(tagsObrigatorias().get(1));
-        return post("/products", corpo("nome", "Produto " + unico(), "preco", preco, "tagIds", tags), admin())
-                .esperar(201).str("$.id");
+        return ativar(post("/products", corpo("nome", "Produto " + unico(), "preco", preco, "tagIds", tags), admin())
+                .esperar(201).str("$.id"));
     }
 
     private List<String> ids(String filtros) {

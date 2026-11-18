@@ -82,6 +82,11 @@ public class OrderService {
             if (cartItem.getQuantidade() <= 0) {
                 throw new BusinessException("Quantidade inválida no carrinho para o SKU " + variant.getSku());
             }
+            // desativado depois de ir para o carrinho: não está mais à venda
+            if (!variant.getProduct().isAtivo()) {
+                throw new BusinessException("O produto do SKU " + variant.getSku() + " não está mais disponível. "
+                        + "Tire-o do carrinho para continuar");
+            }
             if (variant.getQuant() < cartItem.getQuantidade()) {
                 throw new BusinessException(
                         "Estoque insuficiente para o SKU " + variant.getSku()
@@ -149,6 +154,7 @@ public class OrderService {
             orderItem.setOrder(order);
             orderItem.setVariant(variant);
             orderItem.setVariantSku(variant.getSku()); // snapshot
+            orderItem.setProdutoNome(variant.getProduct().getNome()); // snapshot
             orderItem.setQuantidade(cartItem.getQuantidade());
             orderItem.setPrecoUnit(precoUnit);           // snapshot
             order.getItens().add(orderItem);
@@ -231,6 +237,11 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido", id));
     }
 
+    // O nome guardado na compra; nos itens antigos, sem ele, o nome atual do produto
+    private static String nomeDoProduto(OrderItem item) {
+        return item.getProdutoNome() != null ? item.getProdutoNome() : item.getVariant().getProduct().getNome();
+    }
+
     private OrderResponse toResponse(Order o) {
         CustomerResponse customerResponse = new CustomerResponse(
                 o.getCustomer().getId(), o.getCustomer().getNome(),
@@ -245,7 +256,8 @@ public class OrderService {
 
         List<OrderItemResponse> itens = o.getItens().stream()
                 .map(item -> new OrderItemResponse(
-                        item.getId(), item.getVariantSku(), item.getQuantidade(),
+                        item.getId(), item.getVariantSku(), nomeDoProduto(item), item.getVariant().getProduct().isAtivo(),
+                        item.getQuantidade(),
                         item.getPrecoUnit(),
                         item.getPrecoUnit().multiply(BigDecimal.valueOf(item.getQuantidade()))
                 ))

@@ -41,6 +41,10 @@ public class CartService {
     public CartResponse addItem(UUID customerId, CartItemRequest request) {
         Cart cart = travarCarrinho(customerId);
         ProductVariant variant = variantService.findEntityById(request.getVariantId());
+        // produto fora da loja (ainda não ativado, ou desativado) não vai para o carrinho
+        if (!variant.getProduct().isAtivo()) {
+            throw new BusinessException("Este produto não está disponível");
+        }
 
         // Se o item já existe no carrinho, soma a quantidade
         CartItem item = cart.getItens().stream()

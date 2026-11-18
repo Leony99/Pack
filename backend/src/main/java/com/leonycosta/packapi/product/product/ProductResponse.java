@@ -20,4 +20,6 @@ public class ProductResponse {
     private List<ProductImageResponse> imagens;
     private List<ProductTagResponse> tags;
     private List<ProductVariantResponse> variantes;
+    // false: fora da loja (só a página do produto e o painel o mostram, como indisponível)
+    private boolean ativo;
 }

@@ -1,6 +1,8 @@
 package com.leonycosta.packapi.product.product_variant;
 
 import com.leonycosta.packapi.cart.cart_item.CartItemRepository;
+import com.leonycosta.packapi.order.order_item.OrderItemRepository;
+import com.leonycosta.packapi.product.inventory.InventoryMovementRepository;
 import com.leonycosta.packapi.product.color.Color;
 import com.leonycosta.packapi.product.color.ColorRepository;
 import com.leonycosta.packapi.product.color.ColorResponse;
@@ -29,6 +31,8 @@ public class ProductVariantService {
     private final SizeRepository sizeRepository;
     private final ColorRepository colorRepository;
     private final CartItemRepository cartItemRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final InventoryMovementRepository movementRepository;
 
     public List<ProductVariantResponse> findByProduct(UUID productId) {
         return variantRepository.findByProductId(productId).stream()
@@ -94,12 +98,17 @@ public class ProductVariantService {
         return toResponse(variantRepository.save(variant));
     }
 
-    // Tira a variante dos carrinhos antes de apagar: senão bastava um cliente deixá-la no carrinho para
-    // ela não poder mais ser apagada. Se já foi vendida, o banco recusa (order_items) → 409, e nada muda.
+    // Apaga a variante, só se ela nunca esteve em um pedido (409 se esteve). Sai dos carrinhos, e o histórico
+    // de estoque continua, com o SKU. Para tirar da loja uma peça já vendida, desativa-se o produto
     @Transactional
     public void delete(UUID id) {
         findOrThrow(id);
+        if (orderItemRepository.existsByVariantIdIn(List.of(id))) {
+            throw new ConflictException("Esta variante já esteve em um pedido e não pode ser apagada. "
+                    + "Para tirá-la da loja, desative o produto");
+        }
         cartItemRepository.deleteByVariantId(id);
+        movementRepository.soltarVariantes(List.of(id));
         variantRepository.deleteById(id);
         variantRepository.flush();
     }

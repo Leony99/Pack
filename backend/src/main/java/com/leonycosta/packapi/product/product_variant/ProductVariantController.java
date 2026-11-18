@@ -51,7 +51,7 @@ public class ProductVariantController {
         return variantService.update(id, request);
     }
 
-    @Operation(summary = "Apaga uma variante (sai também dos carrinhos; se já foi vendida, 409)")
+    @Operation(summary = "Apaga uma variante que nunca esteve em pedido (sai dos carrinhos; se esteve, 409)")
     @DeleteMapping("/variants/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {

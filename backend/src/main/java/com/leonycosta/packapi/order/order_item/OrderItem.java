@@ -21,7 +21,8 @@ public class OrderItem {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    // Nullable — on delete set null
+    // Nullable no banco, mas sempre preenchida: uma variante que já esteve em pedido não pode ser apagada
+    // (o produto é desativado em vez disso)
     @ManyToOne
     @JoinColumn(name = "variant_id", nullable = true)
     private ProductVariant variant;
@@ -29,6 +30,11 @@ public class OrderItem {
     // Snapshot — preserva histórico mesmo se variante for deletada
     @Column(nullable = false)
     private String variantSku;
+
+    // Snapshot do nome do produto na compra: o pedido mostra o nome de quando foi feito, mesmo que o produto
+    // seja renomeado depois. Nulo nos itens antigos, de antes desta coluna: a resposta usa o nome atual
+    @Column(name = "produto_nome")
+    private String produtoNome;
 
     @Column(nullable = false)
     private Integer quantidade;

@@ -93,7 +93,7 @@ class MaisVendidosTest extends IntegrationTest {
 
     @Test
     void rankingFicaGuardadoAteSerRecalculado() {
-        // o produto é criado antes de a lista ser guardada
+        // o produto é criado (e ativado, o que refaz o ranking) antes de a lista ser guardada
         Variante nova = novaVariante(10, 2000);
         List<String> antes = maisVendidos(48);
         pedidoPago(nova, 99);

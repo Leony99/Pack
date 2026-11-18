@@ -21,7 +21,7 @@ import java.util.Locale;
 //     (EXISTS na product_tag_link). Vários valores no mesmo filtro valem como "ou" (treino ou casual);
 //   - novidades: o produto, ou uma variante dele, foi cadastrado nos últimos 3 meses (o selo NOVO da loja);
 //   - disponiveis: alguma variante tem estoque.
-// Filtros diferentes valem juntos ("e"): treino E camisa.
+// Filtros diferentes valem juntos ("e"): treino E camisa. Só os produtos ativos entram (os da loja).
 public record FiltroDoCatalogo(List<String> estilos, List<String> categorias, List<String> colecoes,
                                boolean novidades, boolean disponiveis) {
 
@@ -57,12 +57,17 @@ public record FiltroDoCatalogo(List<String> estilos, List<String> categorias, Li
 
     Specification<Product> paraConsulta() {
         List<Specification<Product>> condicoes = new ArrayList<>();
+        condicoes.add(ativos(true));
         if (!estilos.isEmpty()) condicoes.add(comTag(TagFiltro.ESTILO, estilos));
         if (!categorias.isEmpty()) condicoes.add(comTag(TagFiltro.CATEGORIA, categorias));
         if (!colecoes.isEmpty()) condicoes.add(comTag(TagFiltro.COLECAO, colecoes));
         if (novidades) condicoes.add(novidade(LocalDateTime.now().minusMonths(MESES_DE_NOVIDADE)));
         if (disponiveis) condicoes.add(comEstoque());
         return Specification.allOf(condicoes);
+    }
+
+    static Specification<Product> ativos(boolean ativo) {
+        return (produto, consulta, cb) -> cb.equal(produto.get("ativo"), ativo);
     }
 
     // EXISTS (SELECT 1 FROM product_tag_link l JOIN product_tags t ... WHERE l.product_id = p.id AND t.filtro = ? AND t.tag IN (?))

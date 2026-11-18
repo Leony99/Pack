@@ -195,9 +195,15 @@ public abstract class IntegrationTest {
                 .esperar(201).str("$.id");
     }
 
+    // Produto já ativo (na loja): todo produto nasce inativo, e quase todo teste precisa dele à venda
     protected String novoProduto(Number preco) {
-        return post("/products", corpo("nome", "Produto " + unico(), "preco", preco, "tagIds", tagsObrigatorias()),
-                admin()).esperar(201).str("$.id");
+        return ativar(post("/products", corpo("nome", "Produto " + unico(), "preco", preco, "tagIds", tagsObrigatorias()),
+                admin()).esperar(201).str("$.id"));
+    }
+
+    protected String ativar(String produtoId) {
+        patch("/products/" + produtoId + "/ativar", admin()).esperar(200);
+        return produtoId;
     }
 
     // Produto novo com uma variante: preço do produto e estoque inicial informados

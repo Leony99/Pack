@@ -16,6 +16,8 @@ import com.leonycosta.packapi.product.product_tag.ProductTag;
 import com.leonycosta.packapi.product.product_tag.ProductTagResponse;
 import com.leonycosta.packapi.product.product_tag.ProductTagService;
 import com.leonycosta.packapi.product.product_tag_link.ProductTagLink;
+import com.leonycosta.packapi.cart.cart_item.CartItemRepository;
+import com.leonycosta.packapi.product.inventory.InventoryMovementRepository;
 import com.leonycosta.packapi.product.product_variant.ProductVariantResponse;
 import com.leonycosta.packapi.product.color.ColorResponse;
 import com.leonycosta.packapi.product.size.SizeResponse;
@@ -42,6 +44,8 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductTagService productTagService;
     private final OrderItemRepository orderItemRepository;
+    private final CartItemRepository cartItemRepository;
+    private final InventoryMovementRepository movementRepository;
 
     private static final Sort ORDEM = Sort.by("nome", "id");
 
@@ -129,7 +133,7 @@ public class ProductService {
         // cálculo só sai da lista)
         Map<UUID, Product> porId = productRepository.findAllById(ids).stream()
                 .collect(Collectors.toMap(p -> p.getId(), p -> p));
-        return ids.stream().map(id -> porId.get(id)).filter(p -> p != null)
+        return ids.stream().map(id -> porId.get(id)).filter(p -> p != null && p.isAtivo())
                 .map(p -> toResponse(p)).toList();
     }
 
@@ -157,7 +161,7 @@ public class ProductService {
         completar(ids, orderItemRepository.maisVendidos(VENDIDO, DESDE_SEMPRE, pedido), limite);
         if (ids.size() < limite) {
             Sort recentes = Sort.by(Sort.Order.desc("criadoEm"), Sort.Order.asc("id"));
-            completar(ids, productRepository.findAll(PageRequest.of(0, limite * 2, recentes)).stream()
+            completar(ids, productRepository.findAll(FiltroDoCatalogo.ativos(true), PageRequest.of(0, limite * 2, recentes)).stream()
                     .map(p -> p.getId()).toList(), limite);
         }
         return List.copyOf(ids);
@@ -168,6 +172,23 @@ public class ProductService {
             if (ids.size() >= limite) return;
             ids.add(id);
         }
+    }
+
+    // Coloca o produto na loja (ativo) ou tira dela (inativo). O ranking guardado é refeito: um desativado
+    // sai dos destaques, um ativado pode entrar
+    @Transactional
+    public ProductResponse mudarAtivo(UUID id, boolean ativo) {
+        Product product = findOrThrow(id);
+        product.setAtivo(ativo);
+        ProductResponse resposta = toResponse(productRepository.save(product));
+        esquecerRanking();
+        return resposta;
+    }
+
+    // Os produtos fora da loja, para o painel (GET /products/inativos, com CATALOG_WRITE)
+    public Pagina<ProductResponse> inativos(int pagina, int tamanho) {
+        Pageable pedido = Pagina.pedido(pagina, tamanho, OrdemDoCatalogo.RECENTES.sort());
+        return Pagina.de(productRepository.findAll(FiltroDoCatalogo.ativos(false), pedido).map(this::toResponse));
     }
 
     public ProductResponse findById(UUID id) {
@@ -191,6 +212,8 @@ public class ProductService {
         product.setPreco(request.getPreco());
         product.setSlug(slug);
         product.setCriadoEm(LocalDateTime.now());
+        // nasce fora da loja: aparece só depois de ativado (PATCH /products/{id}/ativar)
+        product.setAtivo(false);
         if (request.getTagIds() == null) {
             throw new ParametroInvalidoException(REGRA_DAS_TAGS);
         }
@@ -243,9 +266,21 @@ public class ProductService {
         }
     }
 
+    // Apaga o produto, só se ele nunca esteve em um pedido (um cadastrado por engano, por exemplo). Se já
+    // esteve, recusa (409): o caminho é desativar, que tira da loja sem mexer nos pedidos.
+    // O histórico de estoque continua, com o SKU, e os carrinhos perdem o item
     @Transactional
     public void delete(UUID id) {
-        findOrThrow(id);
+        Product product = findOrThrow(id);
+        List<UUID> variantes = product.getVariantes().stream().map(v -> v.getId()).toList();
+        if (!variantes.isEmpty()) {
+            if (orderItemRepository.existsByVariantIdIn(variantes)) {
+                throw new ConflictException("Este produto já esteve em um pedido e não pode ser apagado. "
+                        + "Desative-o para tirá-lo da loja");
+            }
+            cartItemRepository.deleteByVariantIdIn(variantes);
+            movementRepository.soltarVariantes(variantes);
+        }
         // CascadeType.ALL remove variantes, imagens e tag links automaticamente
         productRepository.deleteById(id);
         productRepository.flush();
@@ -345,7 +380,8 @@ public class ProductService {
                 product.getCriadoEm(),
                 imagens,
                 tags,
-                variantes
+                variantes,
+                product.isAtivo()
         );
     }
 }
