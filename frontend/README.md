@@ -305,13 +305,14 @@ No `npm run dev`, a chave é a do `.env.development`, a mesma do `backend/docker
 
 ### O que falta na API
 
-Continua simulado até a API ganhar o equivalente:
+Continua simulado ou fixo no site até a API ganhar o equivalente:
 
 - pagamento real (com a API, a aprovação é simulada) e frete com o preço real (com a API, o frete é de uma tabela por região);
-- recuperação de senha (precisa de um serviço de e-mail);
-- contato, trocas (com a API, são pelo atendimento) e coleções com nome e descrição;
-- conteúdo: FAQ, termos e as promoções do topo da home;
-- os números do painel.
+- recuperação de senha e e-mails do pedido (precisam de um serviço de envio de e-mail);
+- coleções com nome e descrição próprios (hoje, cada coleção é uma tag);
+- conteúdo: FAQ, termos, tabela de medidas e as promoções do topo da home (em `src/data`).
+
+Trocas e devoluções são pelo atendimento (a mensagem do Contato), por decisão do projeto: não é algo que falta.
 
 **O IP do visitante:** a API recebe o IP real de cada visitante, com a chave combinada (ver [O IP real do visitante](#o-ip-real-do-visitante)), e os limites por IP valem por pessoa, e não para o site inteiro.
 
@@ -348,13 +349,28 @@ Os testes ficam ao lado do código testado (`*.test.ts`):
 
 ## Pendências
 
-- **Recuperar senha por e-mail:** precisa de um serviço de envio de e-mail na API.
-- **Compra de verdade:**
-  - pagamento real (Pix e cartão) e o retorno do pagamento;
-  - frete com o preço real (por peso e medidas, num serviço externo);
-  - e-mails do pedido.
-- **Conta:** recuperação de senha por e-mail.
-- **Conteúdo:** revisar os textos de demonstração (FAQ e termos, em `src/data/content.ts`).
+O site está no ar e ligado à API de ponta a ponta. O que falta, em ordem de prioridade:
+
+**1. Para a loja fazer sentido (essencial)**
+
+- [ ] **Cadastrar os produtos na produção** pelo painel (`/admin`), com o admin de produção: fotos, tamanhos, cores e estoque. Hoje o banco de produção só tem as tags, então a loja aparece sem roupas.
+- [ ] **Revisar os textos de demonstração:** FAQ, termos, política de privacidade e as promoções do topo da home (`src/data/content.ts`).
+
+**2. Acabamento profissional**
+
+- [ ] **Favicon:** o site não tem ícone na aba do navegador (o `/favicon.ico` dá 404).
+- [ ] **SEO e compartilhamento:** imagem do link compartilhado (`og:image`), `sitemap.xml` e o endereço oficial de cada página (`canonical`). A página de cada produto deveria levar o nome e a foto da peça. Título, descrição e o `noindex` do login, da conta e do painel já existem (`src/lib/metadata.ts`).
+- [ ] **Domínio próprio (opcional):** no lugar de `pack-loja.pack-frontend.workers.dev`. O domínio `.com.br` é pago no Registro.br; ligá-lo à Cloudflare é grátis.
+
+**3. Com serviço externo**
+
+- [ ] **E-mails:** recuperação de senha (a tela "esqueci a senha" fica escondida até lá), confirmação do pedido e mudança de status. Precisa de um serviço de envio (Resend ou Brevo, com plano grátis) na API.
+- [ ] **Pagamento de verdade:** Pix e cartão por um gateway (Mercado Pago, Stripe ou Pagar.me), no lugar da aprovação simulada.
+- [ ] **Frete real:** Melhor Envio ou Correios, no lugar da tabela por região. Cada produto passa a precisar de peso e medidas.
+
+**4. Melhorias técnicas**
+
+- [ ] **CSP completa:** a última peça de [Segurança](#segurança); precisa de _nonce_ para os scripts que o TanStack Start põe na página.
 
 ## Documentação
 

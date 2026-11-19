@@ -316,6 +316,7 @@ Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do pr
 - [x] Frontend (TanStack Start / React 19), com dados de demonstração
 - [x] Ligar o frontend à API: catálogo, login, área do cliente, carrinho, checkout, painel e o IP real do visitante (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
 - [x] Publicar o site na Cloudflare Workers, com deploy automático (ver [Publicação](frontend/README.md#publicação-cloudflare))
+- [ ] **Deixar o site pronto para mostrar:** produtos cadastrados na produção, textos revisados, favicon, SEO e compartilhamento, e-mails (lista completa em [Pendências do site](frontend/README.md#pendências))
 - [ ] **Frete real por um serviço externo** (Melhor Envio, que junta Correios e transportadoras, ou a API dos Correios): a tabela de hoje é por região do CEP e não olha peso nem medidas, então o preço sai aproximado. O serviço pede conta e chave, e cada produto passa a precisar de peso e dimensões
 - [ ] **Gateway de pagamento** (Mercado Pago, Stripe ou Pagar.me): no lugar da aprovação simulada, o cliente paga de verdade (Pix com QR Code, cartão) e o gateway avisa a API (webhook) quando o pagamento é aprovado
 - [x] Migrações do banco com Flyway, no lugar do `ddl-auto=update` (ver [Migrações do banco (Flyway)](#migrações-do-banco-flyway))
