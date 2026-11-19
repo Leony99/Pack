@@ -60,7 +60,9 @@ export function DropHorizontal({ drop }: { drop: DropEmDestaque | null }) {
       className="dark flex flex-col justify-center overflow-hidden bg-background py-20 text-foreground md:py-14 md:motion-reduce:py-24"
     >
       <div className="snap-x snap-mandatory scroll-px-6 overflow-x-auto md:snap-none md:overflow-visible md:motion-reduce:snap-x md:motion-reduce:overflow-x-auto">
-        <div data-trilho className="flex w-max items-end gap-5 px-6 md:gap-10">
+        {/* as peças alinham pelo topo: alinhadas por baixo, um nome de duas linhas subia a foto
+            daquela peça em relação às outras */}
+        <div data-trilho className="flex w-max items-start gap-5 px-6 md:gap-10">
           <div className="flex w-[80vw] shrink-0 snap-start flex-col justify-end self-stretch md:w-[36vw]">
             <p className="text-[10px] font-medium tracking-[0.3em] text-destaque">ÚLTIMO DROP</p>
             <h2

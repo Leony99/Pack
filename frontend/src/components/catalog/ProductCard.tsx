@@ -138,9 +138,11 @@ export function ProductCard({ p }: { p: Product }) {
       <Link
         to="/produto/$id"
         params={{ id: p.id }}
-        className="mt-6 flex flex-wrap items-start justify-between gap-3"
+        className="mt-6 flex items-start justify-between gap-3 @max-[250px]:flex-wrap"
       >
-        <div>
+        {/* o nome quebra linha ao lado do preço, sem empurrar o preço para baixo; só no card
+            estreito (celular pequeno) o preço desce, para o nome não ficar espremido */}
+        <div className="min-w-0 flex-1">
           <h3 className="text-sm font-normal uppercase tracking-[0.12em]">{p.name}</h3>
           <p className="mt-2 text-[10px] font-normal uppercase tracking-[0.2em] text-muted-foreground">
             {p.type} · {cores(p)}
