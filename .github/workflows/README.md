@@ -1,8 +1,9 @@
 # CI/CD
 
-Como cada mudança na Pack é testada (CI), verificada em segurança (CodeQL e Trivy) e publicada (CD) automaticamente pelo **GitHub Actions**.
+Como cada mudança na Pack é testada (CI), verificada em segurança (CodeQL e Trivy) e publicada (CD) automaticamente pelo **GitHub Actions**: a API no Google Cloud Run e o site na Cloudflare.
 - O desenvolvimento local e os testes estão no [README principal](../../README.md).
 - Onde a API roda e como o custo fica em zero está em [`google-cloud/`](../../google-cloud/README.md).
+- Como o site roda na Cloudflare está em [`frontend/README.md`](../../frontend/README.md#publicação-cloudflare).
 
 ## Como está organizado
 
@@ -14,9 +15,11 @@ Tudo o que o GitHub Actions usa fica em `.github/`, dividido em duas pastas, com
 │   ├── ci-cd.yml             ← o workflow: QUANDO rodar e EM QUE ORDEM (o GitHub lê esta pasta sozinho)
 │   └── README.md             ← este arquivo
 └── actions/                  ← os PASSOS de cada etapa (ações locais, ou composite actions)
-    ├── ci-backend/action.yml ← o CI do backend: testes, imagem Docker e Trivy
-    ├── codeql/action.yml     ← a análise de segurança do código (CodeQL)
-    └── deploy/action.yml     ← o CD: publicação no Google Cloud Run
+    ├── ci-backend/action.yml  ← o CI do backend: testes, imagem Docker e Trivy
+    ├── ci-frontend/action.yml ← o CI do site: ESLint, tipos, testes e build
+    ├── codeql/action.yml      ← a análise de segurança do código (CodeQL)
+    ├── deploy/action.yml      ← o CD da API: publicação no Google Cloud Run
+    └── deploy-site/action.yml ← o CD do site: publicação na Cloudflare
 ```
 
 - **`workflows/`:** o GitHub roda **todo** arquivo `.yml` desta pasta como workflow. Por isso aqui fica só o `ci-cd.yml`, e os passos ficam em `actions/`. Este README não atrapalha, porque o GitHub só considera os arquivos `.yml`.
@@ -30,7 +33,7 @@ O workflow só baixa o código e chama as ações:
 - uses: ./.github/actions/ci-backend          # roda os passos do CI
 ```
 
-Quando o frontend chegar, ele ganha a sua ação (`.github/actions/ci-frontend/`) e um job a mais no workflow.
+O frontend tem as suas ações (`ci-frontend` e `deploy-site`) e os seus jobs, que rodam ao lado dos da API sem depender deles.
 
 ### Quem faz o quê
 
@@ -44,6 +47,8 @@ O CI/CD roda **no GitHub**, mas usa ferramentas de vários donos:
 | **Aqua Security** (Trivy) e **GitHub** (CodeQL) | Procuram vulnerabilidades na imagem e no código |
 | **Google** (ações `google-github-actions/...`) | Entram no Google Cloud com o token, instalam o `gcloud` na máquina e publicam no Cloud Run |
 | **Google Cloud** | Recebe a imagem (Artifact Registry) e a roda (Cloud Run). Fica fora do GitHub, em [`google-cloud/`](../../google-cloud/README.md). |
+| **Node.js** e **npm** | Instalam as dependências do site e rodam o ESLint, o TypeScript, o Vitest e o build |
+| **Cloudflare** (`wrangler`) | Recebe o build do site e o publica no Worker `pack-loja` |
 
 O login sem senha usa o **OIDC (OpenID Connect)**, um padrão aberto. O GitHub emite o token, e quem aceita é a nuvem. No Google Cloud o recurso que aceita se chama Workload Identity Federation; a AWS e a Azure têm o equivalente.
 
@@ -75,6 +80,21 @@ GitHub lê .github/workflows/ci-cd.yml
 │ 2. monta e envia a imagem                │──► Artifact Registry (São Paulo)
 │ 3. publica no Cloud Run                  │──► nova revisão da API
 └──────────────────────────────────────────┘
+
+ao mesmo tempo, o site, em outras máquinas:
+
+┌─ job "frontend" (CI) ── ci-frontend ─────┐   falhou → ✗ o site não é publicado
+│ 1. instala o Node 24 (com cache do npm)  │
+│ 2. npm ci                                │
+│ 3. ESLint, TypeScript e Vitest           │
+│ 4. npm run build (servidor + página)     │
+└────────────────┬─────────────────────────┘
+                 │ passou, e é push na main?
+                 ▼
+┌─ job "deploy-site" (CD) ─────────────────┐
+│ 1. ci-frontend de novo (máquina limpa)   │
+│ 2. wrangler deploy                       │──► nova versão do Worker pack-loja
+└──────────────────────────────────────────┘
 ```
 
 O resultado aparece:
@@ -102,6 +122,16 @@ O resultado aparece:
 - o GitHub avisa por e-mail.
 
 Pull requests passam pelo CI, mas nunca seguem para o CD.
+
+### CI do site
+
+**Passos** ([`actions/ci-frontend/action.yml`](../actions/ci-frontend/action.yml)), num job próprio (`frontend`), ao mesmo tempo que o da API:
+
+1. **Instala o Node 24**, com os pacotes do npm em cache entre execuções.
+2. **`npm ci`:** instala exatamente as versões do `package-lock.json`, e falha se ele estiver desatualizado.
+3. **Confere o código:** ESLint (com o Prettier) e o TypeScript estrito.
+4. **Roda os testes** do Vitest.
+5. **Monta o build** da Cloudflare (`npm run build`), o mesmo que é publicado. Não precisa de segredo: o endereço da API é público.
 
 ## Segurança no CI: CodeQL e Trivy
 
@@ -182,9 +212,23 @@ O risco vem do repositório **da ação**, e não do Pack: mesmo que só uma pes
 - **O deploy só troca a imagem:** memória, limites, variáveis, segredos e acesso público continuam como estão. Por isso um deploy nunca religa a API se o [disjuntor de custos](../../google-cloud/README.md#disjuntor-de-custos) a tiver desligado.
 - **Um deploy por vez** (`concurrency`): dois envios seguidos não publicam ao mesmo tempo.
 
+### CD do site (Cloudflare)
+
+**Quando:** só num envio para a `main` e só depois que o CI do site passou (`needs: frontend`). Não depende dos jobs da API: uma mudança só no site é publicada mesmo que a API não mude, e vice-versa.
+
+**Passos** (job `deploy-site`):
+
+1. **Monta o build de novo**, com a mesma ação do CI (`ci-frontend`), porque cada job começa numa máquina limpa.
+2. **Publica** com `npx wrangler deploy` ([`actions/deploy-site/action.yml`](../actions/deploy-site/action.yml)), usando o `wrangler` com a versão fixa no `package.json`. A Cloudflare cria uma versão nova do Worker `pack-loja` e passa todo o tráfego para ela. Dá para voltar à anterior com `npx wrangler rollback`.
+
+**Garantias:**
+- **O token só publica Workers:** o segredo `CLOUDFLARE_API_TOKEN` é criado com o modelo *Edit Cloudflare Workers* e não mexe no resto da conta.
+- **O segredo do site não passa pelo GitHub:** o `PACK_BFF_CHAVE` fica guardado na Cloudflare e continua lá a cada deploy (ver [Publicação](../../frontend/README.md#publicação-cloudflare)).
+- **Um deploy do site por vez** (`concurrency: deploy-site`).
+
 ### Variáveis do GitHub
 
-O workflow lê 4 **variáveis** do repositório (*Settings → Secrets and variables → Actions → Variables*) e as passa para a ação de deploy. Nenhuma é secreta: sozinhas, elas não dão acesso a nada.
+O workflow lê 5 **variáveis** do repositório (*Settings → Secrets and variables → Actions → Variables*) e as passa para as ações de deploy. Nenhuma é secreta: sozinhas, elas não dão acesso a nada.
 
 | Variável | O que é |
 |---|---|
@@ -192,6 +236,13 @@ O workflow lê 4 **variáveis** do repositório (*Settings → Secrets and varia
 | `GCP_REGION` | `southamerica-east1` (São Paulo) |
 | `GCP_WIF_PROVIDER` | O provedor que aceita os tokens do GitHub |
 | `GCP_DEPLOY_SA` | A conta de serviço que o deploy assume |
+| `CLOUDFLARE_ACCOUNT_ID` | O ID da conta na Cloudflare, para o deploy do site |
+
+E um **segredo** (*Settings → Secrets and variables → Actions → Secrets*), que o GitHub esconde nos logs:
+
+| Segredo | O que é |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Token da Cloudflare que só publica Workers, usado pelo deploy do site |
 
 ## Ações usadas
 
@@ -199,6 +250,7 @@ O workflow lê 4 **variáveis** do repositório (*Settings → Secrets and varia
 |---|---|---|---|
 | `actions/checkout` | v7.0.1 | workflow | Baixa o código, incluindo as ações locais de `.github/actions/` |
 | `actions/setup-java` | v6.1.0 | CI e CodeQL | Instala o Java 21 e guarda o cache do Maven |
+| `actions/setup-node` | v7.1.0 | CI e CD do site | Instala o Node 24 e guarda o cache do npm |
 | `actions/upload-artifact` | v7.0.2 | CI | Guarda os relatórios dos testes quando algo falha |
 | `aquasecurity/trivy-action` | v0.36.0 | CI | Instala o Trivy v0.76.1 na máquina do GitHub, só durante a execução, e varre a imagem |
 | `github/codeql-action/init` e `/analyze` | v4.39.1 | CodeQL | Prepara o CodeQL, analisa o código e envia os alertas para a aba Security |

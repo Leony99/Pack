@@ -1,0 +1,43 @@
+# CI do frontend: confere o código do site (ESLint e TypeScript), roda os testes e monta o build da Cloudflare.
+# Chamado pelo .github/workflows/ci-cd.yml (o código já precisa estar baixado com actions/checkout).
+# Não precisa de segredos: o build usa o endereço público da API (frontend/.env.production).
+
+name: CI do frontend
+description: Instala o Node 24, confere o código do site, roda os testes e monta o build
+
+runs:
+  using: composite
+  steps:
+    - name: Instalar o Node 24
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: 24
+        cache: npm                  # guarda os pacotes baixados entre execuções (fica mais rápido)
+        cache-dependency-path: frontend/package-lock.json
+
+    # npm ci: instala exatamente as versões do package-lock.json (e falha se ele estiver desatualizado)
+    - name: Instalar as dependências
+      shell: bash
+      working-directory: frontend
+      run: npm ci
+
+    - name: Conferir o código (ESLint)
+      shell: bash
+      working-directory: frontend
+      run: npm run lint
+
+    - name: Conferir os tipos (TypeScript)
+      shell: bash
+      working-directory: frontend
+      run: npm run typecheck
+
+    - name: Rodar os testes
+      shell: bash
+      working-directory: frontend
+      run: npm test
+
+    # gera .output/ (o servidor e os arquivos do site) e a configuração que o wrangler usa no deploy
+    - name: Montar o build
+      shell: bash
+      working-directory: frontend
+      run: npm run build

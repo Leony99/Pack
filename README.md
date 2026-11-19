@@ -278,14 +278,16 @@ cd frontend
 npm install
 npm run dev        # http://localhost:3000, com a API local (suba antes, em backend/: docker compose up -d)
 npm run dev:demo   # só com os dados de demonstração
-npm test         # 18 testes (Vitest)
+npm test           # 50 testes (Vitest)
 ```
 
-Tudo sobre o frontend (páginas, visual, organização, como o código funciona e o que falta para ligar à API) está em **[`frontend/README.md`](frontend/README.md)**.
+O site é publicado na **Cloudflare Workers** (Worker `pack-loja`), automaticamente a cada envio para a `main` (ver [Publicação](frontend/README.md#publicação-cloudflare)).
+
+Tudo sobre o frontend (páginas, visual, organização, como o código funciona e a publicação) está em **[`frontend/README.md`](frontend/README.md)**.
 
 ## CI/CD
 
-A cada envio ao GitHub, o **GitHub Actions** roda os testes, monta a imagem Docker e procura falhas de segurança no código (CodeQL) e na imagem (Trivy). Se tudo passa e o envio é para a `main`, ele publica a versão nova no Google Cloud Run (CD). Se um teste falha, nada é publicado.
+A cada envio ao GitHub, o **GitHub Actions** roda os testes da API e do site, monta a imagem Docker e procura falhas de segurança no código (CodeQL) e na imagem (Trivy). Se tudo passa e o envio é para a `main`, ele publica a API nova no Google Cloud Run e o site novo na Cloudflare (CD). Se um teste falha, aquela parte não é publicada.
 
 Como o pipeline funciona, passo a passo, está em **[`.github/workflows/README.md`](.github/workflows/README.md)**.
 
@@ -313,7 +315,7 @@ Diagramas do backend em [`backend/docs/`](backend/docs/), gerados a partir do pr
 - [x] Produção no Google Cloud Run + Neon, com limitadores de custo e disjuntor
 - [x] Frontend (TanStack Start / React 19), com dados de demonstração
 - [x] Ligar o frontend à API: catálogo, login, área do cliente, carrinho, checkout, painel e o IP real do visitante (ver [Ligação com a Pack API](frontend/README.md#ligação-com-a-pack-api))
-- [ ] Publicar o site (o build já sai para a Cloudflare), com a variável `PACK_BFF_CHAVE` igual ao segredo `pack-bff-chave`
+- [x] Publicar o site na Cloudflare Workers, com deploy automático (ver [Publicação](frontend/README.md#publicação-cloudflare))
 - [ ] **Frete real por um serviço externo** (Melhor Envio, que junta Correios e transportadoras, ou a API dos Correios): a tabela de hoje é por região do CEP e não olha peso nem medidas, então o preço sai aproximado. O serviço pede conta e chave, e cada produto passa a precisar de peso e dimensões
 - [ ] **Gateway de pagamento** (Mercado Pago, Stripe ou Pagar.me): no lugar da aprovação simulada, o cliente paga de verdade (Pix com QR Code, cartão) e o gateway avisa a API (webhook) quando o pagamento é aprovado
 - [x] Migrações do banco com Flyway, no lugar do `ddl-auto=update` (ver [Migrações do banco (Flyway)](#migrações-do-banco-flyway))

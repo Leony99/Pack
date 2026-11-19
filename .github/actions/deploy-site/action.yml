@@ -1,0 +1,27 @@
+# CD do site: publica o build do frontend na Cloudflare Workers.
+# Chamado pelo .github/workflows/ci-cd.yml depois do CI do frontend, que já instalou as dependências
+# e montou o build em frontend/.output (o deploy roda no mesmo job, sobre o mesmo build).
+# Os segredos do site (PACK_BFF_CHAVE) ficam guardados na Cloudflare e continuam lá a cada deploy.
+
+name: Deploy na Cloudflare
+description: Publica o site (frontend/.output) na Cloudflare Workers com o wrangler do projeto
+
+inputs:
+  token:
+    description: Token da API da Cloudflare com permissão de editar Workers (segredo CLOUDFLARE_API_TOKEN)
+    required: true
+  conta:
+    description: ID da conta na Cloudflare (variável CLOUDFLARE_ACCOUNT_ID)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # o wrangler acha a configuração gerada pelo build (.wrangler/deploy/config.json → .output/server/wrangler.json)
+    - name: Publicar na Cloudflare
+      shell: bash
+      working-directory: frontend
+      env:
+        CLOUDFLARE_API_TOKEN: ${{ inputs.token }}
+        CLOUDFLARE_ACCOUNT_ID: ${{ inputs.conta }}
+      run: npx wrangler deploy

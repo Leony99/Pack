@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1823" height="1166" viewBox="0 0 1823 1166">
+<svg xmlns="http://www.w3.org/2000/svg" width="1823" height="1188" viewBox="0 0 1823 1188">
 <defs><style>text{font-family:JetBrains Mono, Fira Code, monospace;font-variant-ligatures:none;}</style></defs>
-<rect width="1823" height="1166" fill="#0d1117"/>
+<rect width="1823" height="1188" fill="#0d1117"/>
 <rect width="1823" height="48" fill="rgba(255,255,255,0.02)"/>
 <line x1="0" y1="48" x2="1823" y2="48" stroke="#1e2736" stroke-width="1"/>
 <text x="28" y="34" font-size="11" font-weight="700" fill="#58a6ff" letter-spacing="1">PACK FRONTEND — ESTRUTURA DE PASTAS</text>
@@ -173,27 +173,31 @@
 <text x="903.8" y="998" font-size="13" fill="#3d5c3d">#</text>
 <text x="919.5" y="998" font-size="13" fill="#6e8b6e">build e servidor de desenvolvimento</text>
 <text x="28" y="1020" font-size="13" fill="#2e4a2e" xml:space="preserve">├── </text>
-<text x="59.3" y="1020" font-size="13" fill="#c9d1d9" xml:space="preserve">.env.development  .env.production  .env.demo</text>
+<text x="59.3" y="1020" font-size="13" fill="#c9d1d9" xml:space="preserve">wrangler.jsonc</text>
 <text x="903.8" y="1020" font-size="13" fill="#3d5c3d">#</text>
-<text x="919.5" y="1020" font-size="13" fill="#6e8b6e">endereço da API de cada modo (dev, build, demo)</text>
+<text x="919.5" y="1020" font-size="13" fill="#6e8b6e">o site na Cloudflare: nome do Worker, compatibilidade, PACK_API_URL</text>
 <text x="28" y="1042" font-size="13" fill="#2e4a2e" xml:space="preserve">├── </text>
-<text x="59.3" y="1042" font-size="13" fill="#c9d1d9" xml:space="preserve">vitest.config.ts</text>
+<text x="59.3" y="1042" font-size="13" fill="#c9d1d9" xml:space="preserve">.env.development  .env.production  .env.demo</text>
 <text x="903.8" y="1042" font-size="13" fill="#3d5c3d">#</text>
-<text x="919.5" y="1042" font-size="13" fill="#6e8b6e">configuração dos testes</text>
+<text x="919.5" y="1042" font-size="13" fill="#6e8b6e">endereço da API de cada modo (dev, build, demo)</text>
 <text x="28" y="1064" font-size="13" fill="#2e4a2e" xml:space="preserve">├── </text>
-<text x="59.3" y="1064" font-size="13" fill="#c9d1d9" xml:space="preserve">eslint.config.js</text>
+<text x="59.3" y="1064" font-size="13" fill="#c9d1d9" xml:space="preserve">vitest.config.ts</text>
 <text x="903.8" y="1064" font-size="13" fill="#3d5c3d">#</text>
-<text x="919.5" y="1064" font-size="13" fill="#6e8b6e">regras de qualidade do código (npm run lint)</text>
+<text x="919.5" y="1064" font-size="13" fill="#6e8b6e">configuração dos testes</text>
 <text x="28" y="1086" font-size="13" fill="#2e4a2e" xml:space="preserve">├── </text>
-<text x="59.3" y="1086" font-size="13" fill="#c9d1d9" xml:space="preserve">.prettierrc  .prettierignore</text>
+<text x="59.3" y="1086" font-size="13" fill="#c9d1d9" xml:space="preserve">eslint.config.js</text>
 <text x="903.8" y="1086" font-size="13" fill="#3d5c3d">#</text>
-<text x="919.5" y="1086" font-size="13" fill="#6e8b6e">formatação e o que ela não toca</text>
+<text x="919.5" y="1086" font-size="13" fill="#6e8b6e">regras de qualidade do código (npm run lint)</text>
 <text x="28" y="1108" font-size="13" fill="#2e4a2e" xml:space="preserve">├── </text>
-<text x="59.3" y="1108" font-size="13" fill="#c9d1d9" xml:space="preserve">components.json</text>
+<text x="59.3" y="1108" font-size="13" fill="#c9d1d9" xml:space="preserve">.prettierrc  .prettierignore</text>
 <text x="903.8" y="1108" font-size="13" fill="#3d5c3d">#</text>
-<text x="919.5" y="1108" font-size="13" fill="#6e8b6e">config do instalador do shadcn/ui</text>
-<text x="28" y="1130" font-size="13" fill="#2e4a2e" xml:space="preserve">└── </text>
-<text x="59.3" y="1130" font-size="13" fill="#c9d1d9" xml:space="preserve">README.md</text>
+<text x="919.5" y="1108" font-size="13" fill="#6e8b6e">formatação e o que ela não toca</text>
+<text x="28" y="1130" font-size="13" fill="#2e4a2e" xml:space="preserve">├── </text>
+<text x="59.3" y="1130" font-size="13" fill="#c9d1d9" xml:space="preserve">components.json</text>
 <text x="903.8" y="1130" font-size="13" fill="#3d5c3d">#</text>
-<text x="919.5" y="1130" font-size="13" fill="#6e8b6e">como rodar e como o frontend funciona</text>
+<text x="919.5" y="1130" font-size="13" fill="#6e8b6e">config do instalador do shadcn/ui</text>
+<text x="28" y="1152" font-size="13" fill="#2e4a2e" xml:space="preserve">└── </text>
+<text x="59.3" y="1152" font-size="13" fill="#c9d1d9" xml:space="preserve">README.md</text>
+<text x="903.8" y="1152" font-size="13" fill="#3d5c3d">#</text>
+<text x="919.5" y="1152" font-size="13" fill="#6e8b6e">como rodar e como o frontend funciona</text>
 </svg>

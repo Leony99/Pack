@@ -39,3 +39,4 @@ Todos seguiram os passos acima e terminaram com a remoção do passo 5.
 | Montagem da produção | Todas as etapas do `setup.sh`. Testes: um aviso falso de gasto alto tirou a API do ar (403) e o `religar-api.sh` a devolveu (200) |
 | Medidor da cota grátis | Etapas `agendador` e `orcamento`, e a função do disjuntor republicada. Testes: medição disparada à mão e corte com o `LIMITE` baixado por um instante |
 | Revisão de segurança | O provedor do Workload Identity passou a aceitar só a `main` (`assertion.ref == 'refs/heads/main'`) |
+| Publicação do site na Cloudflare | A chave `pack-bff-chave` copiada para o segredo `PACK_BFF_CHAVE` do site, sem passar pela tela (`gcloud secrets versions access ... \| npx wrangler secret put PACK_BFF_CHAVE`, ver [Publicação](../frontend/README.md#publicação-cloudflare)) |
