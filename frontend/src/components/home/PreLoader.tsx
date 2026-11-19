@@ -30,7 +30,7 @@ const TECLAS_DE_ROLAGEM = new Set([
  * Dura cerca de 2,5 s. Enquanto roda, a rolagem fica travada. Só roda quando a visita começa pela home, e uma vez:
  * não volta ao navegar pelo site, só ao recarregar. Para quem pediu menos movimento no sistema, ela nem aparece (motion-reduce).
  */
-export function PreLoader({ imagem, retrato }: { imagem: string; retrato: string }) {
+export function PreLoader({ imagem }: { imagem: string }) {
   const [ativo, setAtivo] = useState(() => !abertura.feita());
 
   const ref = useGsap<HTMLDivElement>((el) => {
@@ -111,18 +111,15 @@ export function PreLoader({ imagem, retrato }: { imagem: string; retrato: string
     >
       <div data-moldura className="absolute inset-0 [clip-path:inset(50%_50%_50%_50%)]">
         <div data-foto className="absolute inset-0 scale-125">
-          {/* no celular (tela em pé), a foto vertical de corpo inteiro; no computador, a da academia */}
-          <picture>
-            <source media="(max-width: 767px)" srcSet={retrato} />
-            <img
-              src={imagem}
-              alt=""
-              fetchPriority="high"
-              width={1376}
-              height={768}
-              className="h-full w-full object-cover object-top grayscale contrast-125"
-            />
-          </picture>
+          {/* a foto da academia, a mesma no celular e no computador */}
+          <img
+            src={imagem}
+            alt=""
+            fetchPriority="high"
+            width={1376}
+            height={768}
+            className="h-full w-full object-cover object-top grayscale contrast-125"
+          />
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/30" />
       </div>

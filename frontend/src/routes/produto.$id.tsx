@@ -55,7 +55,9 @@ function ProductPage() {
           {product.name.toUpperCase()}
         </p>
 
-        <div className="grid gap-8 md:grid-cols-[80px_1fr_1fr] md:gap-10">
+        {/* grid-cols-1 e minmax(0,1fr): as colunas não crescem com o conteúdo (a faixa de miniaturas
+            passava da tela no celular e empurrava a página para o lado) */}
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-[80px_minmax(0,1fr)_minmax(0,1fr)] md:gap-10">
           <ProductGallery key={`galeria-${product.id}`} product={product} />
           <ProductInfo key={`compra-${product.id}`} product={product} />
         </div>

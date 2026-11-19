@@ -1,6 +1,6 @@
 import { useState, type MouseEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ehNovo } from "@/lib/api";
 import { useCart } from "@/lib/cart";
@@ -37,6 +37,8 @@ const SETA =
 /**
  * Card de produto das listagens: galeria com setas, botões de adicionar e comprar (que aparecem
  * ao passar o mouse no computador) e nome, tipo, cor e preço.
+ * Card estreito (menos de 250 px, como dois lado a lado num celular pequeno): o "ADICIONAR" vira só
+ * o ícone da sacola (o texto continua para leitores de tela), para o "COMPRAR" caber inteiro.
  */
 export function ProductCard({ p }: { p: Product }) {
   const { addToCart } = useCart();
@@ -55,7 +57,7 @@ export function ProductCard({ p }: { p: Product }) {
   };
 
   return (
-    <article className="group">
+    <article className="group @container">
       <div className="relative aspect-[3/4] overflow-hidden bg-secondary">
         <Link to="/produto/$id" params={{ id: p.id }} className="block h-full w-full">
           {imgs.map((src, i) => (
@@ -115,9 +117,10 @@ export function ProductCard({ p }: { p: Product }) {
               e.preventDefault();
               if (tamanho) void addToCart(p, tamanho, variante);
             }}
-            className="h-11 min-w-0 flex-1 rounded-none px-2 cursor-pointer border border-foreground bg-background py-3 text-xs font-medium tracking-wider text-foreground transition hover:bg-secondary"
+            className="h-11 min-w-0 flex-1 rounded-none px-2 cursor-pointer border border-foreground bg-background py-3 text-xs font-medium tracking-wider text-foreground transition hover:bg-secondary @max-[250px]:w-11 @max-[250px]:flex-none @max-[250px]:px-0"
           >
-            {tamanho ? "ADICIONAR" : "ESGOTADO"}
+            <ShoppingBag aria-hidden className="hidden h-4 w-4 @max-[250px]:block" />
+            <span className="@max-[250px]:sr-only">{tamanho ? "ADICIONAR" : "ESGOTADO"}</span>
           </Button>
           <Button
             type="button"

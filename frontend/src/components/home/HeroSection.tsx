@@ -28,15 +28,7 @@ const CARD = "shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]";
  * (voltando pelo site ou com "reduzir movimento"), tudo já aparece pronto.
  * No celular, ficam só o PACK, o texto e os dois cards, embaixo.
  */
-export function HeroSection({
-  imagem,
-  retrato,
-  drop,
-}: {
-  imagem: string;
-  retrato: string;
-  drop: DropEmDestaque | null;
-}) {
+export function HeroSection({ imagem, drop }: { imagem: string; drop: DropEmDestaque | null }) {
   const ref = useGsap<HTMLElement>((el) => {
     const mm = gsap.matchMedia();
     mm.add("(prefers-reduced-motion: no-preference)", () => {
@@ -66,18 +58,16 @@ export function HeroSection({
       ref={ref}
       className="relative -mt-[74px] h-[100svh] min-h-[600px] overflow-hidden bg-ink text-paper md:-mt-[98px]"
     >
-      {/* a foto: a mesma do pré-loader, no mesmo lugar (no celular, a vertical) */}
-      <picture>
-        <source media="(max-width: 767px)" srcSet={retrato} />
-        <img
-          src={imagem}
-          alt="Atleta de costas, de camisa de compressão preta, numa academia escura"
-          fetchPriority="high"
-          width={1376}
-          height={768}
-          className="absolute inset-0 h-full w-full object-cover object-top grayscale contrast-125"
-        />
-      </picture>
+      {/* a foto: a mesma do pré-loader, no mesmo lugar, e a mesma no celular (o recorte mantém o
+          atleta, que está no meio da foto) */}
+      <img
+        src={imagem}
+        alt="Atleta de costas, de camisa de compressão preta, numa academia escura"
+        fetchPriority="high"
+        width={1376}
+        height={768}
+        className="absolute inset-0 h-full w-full object-cover object-top grayscale contrast-125"
+      />
       <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/30" />
       {/* as laterais um pouco mais escuras, para o texto se destacar da foto */}
       <div className="absolute inset-0 hidden bg-gradient-to-r from-ink/80 via-transparent to-ink/80 md:block" />

@@ -42,12 +42,13 @@ export function ShippingCalc({ price }: { price: number }) {
           value={formatted}
           onChange={(e) => setCep(onlyDigits(e.target.value))}
           placeholder="00000-000"
-          className="flex-1 border border-border bg-background px-4 py-3 text-sm outline-none focus:border-foreground"
+          // min-w-0: sem ele, o campo não encolhe abaixo da largura padrão e empurra o botão para fora da tela no celular
+          className="min-w-0 flex-1 border border-border bg-background px-4 py-3 text-sm outline-none focus:border-foreground"
         />
         <button
           type="submit"
           disabled={loading}
-          className="cursor-pointer border border-foreground bg-foreground px-5 text-xs font-medium tracking-[0.2em] text-background transition hover:bg-foreground/90 disabled:opacity-50"
+          className="shrink-0 cursor-pointer border border-foreground bg-foreground px-5 text-xs font-medium tracking-[0.2em] text-background transition hover:bg-foreground/90 disabled:opacity-50"
         >
           {loading ? "..." : "CALCULAR"}
         </button>

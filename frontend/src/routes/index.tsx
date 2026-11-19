@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import heroRetrato from "@/assets/hero.avif";
 import hero from "@/assets/pack-hero-athlete.avif";
 import heroCompartilhado from "@/assets/pack-hero-athlete.jpg";
 import { SectionRow } from "@/components/catalog/SectionRow";
@@ -58,8 +57,8 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <PreLoader imagem={hero} retrato={heroRetrato} />
-      <HeroSection imagem={hero} retrato={heroRetrato} drop={drop} />
+      <PreLoader imagem={hero} />
+      <HeroSection imagem={hero} drop={drop} />
       <StyleCards />
 
       <SectionRow

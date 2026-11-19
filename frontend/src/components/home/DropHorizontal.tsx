@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/components/catalog/ProductCard";
@@ -44,6 +45,14 @@ export function DropHorizontal({ drop }: { drop: DropEmDestaque | null }) {
   const total = String(produtos.length).padStart(2, "0");
   // o título é o nome do drop ("drop-natal" → DROP NATAL), com a segunda parte vazada
   const [palavra, ...resto] = colecao.name.split(" ");
+  // a maior palavra precisa caber na coluna do título (80vw no celular, 36vw no computador): cada letra
+  // da Anton ocupa cerca de 0,4 do tamanho da fonte, então a fonte diminui para nomes longos
+  // (ESSENTIALS), sem passar do tamanho normal (22vw e 10vw)
+  const letras = Math.max(...colecao.name.split(" ").map((p) => p.length));
+  const tamanhoDoTitulo = {
+    "--titulo": `min(22vw, ${(190 / letras).toFixed(2)}vw)`,
+    "--titulo-md": `min(10vw, ${(85 / letras).toFixed(2)}vw)`,
+  } as CSSProperties;
 
   return (
     <section
@@ -54,7 +63,10 @@ export function DropHorizontal({ drop }: { drop: DropEmDestaque | null }) {
         <div data-trilho className="flex w-max items-end gap-5 px-6 md:gap-10">
           <div className="flex w-[80vw] shrink-0 snap-start flex-col justify-end self-stretch md:w-[36vw]">
             <p className="text-[10px] font-medium tracking-[0.3em] text-destaque">ÚLTIMO DROP</p>
-            <h2 className="mt-4 font-display text-[22vw] leading-[0.85] md:text-[10vw]">
+            <h2
+              style={tamanhoDoTitulo}
+              className="mt-4 font-display text-[length:var(--titulo)] leading-[0.85] md:text-[length:var(--titulo-md)]"
+            >
               {palavra} <span className="text-outline-light">{resto.join(" ")}</span>
             </h2>
             <p className="mt-6 max-w-sm text-sm text-muted-foreground">

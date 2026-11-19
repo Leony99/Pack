@@ -11,8 +11,10 @@ import { MENU_SUPORTE } from "./navegacao";
 /** Barras do menu: pontas quadradas, em branco e preto, soltas da tela por uma sombra. */
 const BARRA =
   "flex items-stretch border border-ink/10 bg-paper text-ink shadow-[0_10px_30px_-12px_rgba(0,0,0,0.45)]";
+// abaixo de 380 px (celular pequeno), menos espaço entre as letras e nas laterais, para a barra e os
+// três botões caberem na tela
 const ITEM_MENU =
-  "flex cursor-pointer items-center gap-1 px-2 py-3 text-[10px] font-medium tracking-[0.15em] transition-colors md:px-5 md:py-[15px] md:text-[12px] md:tracking-[0.2em]";
+  "flex cursor-pointer items-center gap-1 px-1.5 py-3 text-[10px] font-medium tracking-[0.1em] transition-colors min-[380px]:px-2 min-[380px]:tracking-[0.15em] md:px-5 md:py-[15px] md:text-[12px] md:tracking-[0.2em]";
 const ITEM_ATIVO = "bg-ink text-paper";
 const ITEM_NORMAL = "hover:bg-ink/5";
 const ICONE =
